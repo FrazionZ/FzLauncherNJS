@@ -1,0 +1,42 @@
+<div class="modal fade" id="login" tabindex="-1">
+    <div class="vertical-alignment-helper">
+      <div class="modal-dialog vertical-align-center">
+        <div class="modal-content">
+          <div class="modal-body flex align-center gap-10  w-100">
+            <div class="column wp-bck">
+              <img src="../img/icons/icon.png" alt="fzlogo">
+            </div>
+            <div id="addAccountForm" class="flex direct-column gap-20 mt-20  pd-20">
+              <div class="column mb-20 mt-10">
+                <h3>Ajouter un nouveau compte</h3>
+              </div>
+              <div class="form-group w-100">
+                  <label>Adresse Mail</label>
+                  <input type="email" class="form-control" name="email" id="email">
+              </div>
+              <div class="form-group w-100">
+                  <label>Mot de passe</label>
+                  <input type="password" class="form-control" name="password" id="password">
+              </div>
+              <div class="form-group w-100">
+                  <button class="btn addAccountContinune btn-primary w-100">Continuner</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+    var modal = new bootstrap.Modal(document.getElementById('login'))
+    modal.show();
+    const Login = require('../js/login.js')
+    var login = new Login();
+    $('.addAccountContinune').on('click', async function() {
+        $(this).attr('disabled', 'disabled')
+        var form = $('#addAccountForm');
+        var userEmail = form.find('#email');
+        var userPassword = form.find('#password');
+        await login.addAccount(userEmail.val(), userPassword.val());
+    })
+</script>

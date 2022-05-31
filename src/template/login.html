@@ -1,0 +1,83 @@
+<div class="login w-100">
+    <div class="container flex direct-column justif-between" style="height: calc(100vh - 8em) !important;"">
+        <div class="head">
+            <h2 class="font-pacifico">Compte</h2>
+            <h3>Prêt à jouer ?</h3>
+        </div>
+        <div class="card" style="width: 70%;margin: 0 auto;">
+            <div class="card-body">
+                <div class="profilesList">
+                    <div class="flex w-100 justif-center gap-30">
+                        <template id="profileCard" style="display: block;width:100%;">
+                            <div class="column w-100">
+                                <div class="card sub profileCardSub" target_user="">
+                                    <div class="card-body flex gap-20">
+                                        <div id="avatar"><img style="border-radius: 10px;"></div>
+                                        <div class="flex direct-column w-100 justif-center">
+                                            <h3 id="username_label" class="text-white" style="margin: 0;"></h3>
+                                            <span id="lasstLog" class="text-gray" style="font-size: 10px;">LAST_LOG</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <a class="btn btn-add-account href="#">Ajouter un compte</a>
+    </div>   
+</div>
+<script>
+    const { BrowserWindow } = require('electron');
+    const Login = require('../js/login.js')
+    const FZUtils = require('../js/utils.js')
+    const login = new Login();
+    const profiles = login.loadProfiles();
+    if(profiles.length == 0)
+        $('#loaderProfiles').remove();
+    
+    var loadProfiles = new Promise((resolve, reject) => {
+
+        profiles.forEach((element, k, array) => {
+
+            let clones = [];
+            if ("content" in document.createElement("template")) {
+                // On prépare une ligne pour le tableau
+                var template = document.querySelector("#profileCard");
+
+                // On clone la ligne et on l'insère dans le tableau
+                var tbody = document.querySelector("#profileCard");
+                var clone = document.importNode(template.content, true);
+                clone.querySelector(".card").setAttribute("target_user", k);
+                var avatar = clone.querySelector("#avatar");
+                var username = clone.querySelector('#username_label')
+                avatar.querySelector('img').setAttribute('src', 'https://auth.frazionz.net/skins/face.php?u='+element.id)
+                username.textContent = element.username
+                tbody.appendChild(clone);
+                clones.push(clone)
+            }
+
+            if (k === array.length -1) resolve(clones);
+        })
+    })
+
+    loadProfiles.then((clones) => {
+        $('.profileCardSub').on('click', function() {
+            login.auth($(this).attr('target_user'));
+        })
+    })
+
+    
+    const body = document.querySelector("body");
+    body.querySelector('#copyversion').innerHTML = body.querySelector('#copyversion').innerHTML.replace('{VERSION_PROD}', require('../../package.json').version);
+
+    $('.btn-add-account').on('click', function() {
+        var LoginDialog = require('../js/modals/login.js');
+        new LoginDialog();
+    })
+    
+    $('.showChangelog').on('click', function() {
+        login.showModal(false, 'changelog')
+    })
+</script>

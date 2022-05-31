@@ -1,0 +1,21 @@
+[
+    {
+        "name": "Faction",
+        "version": "1.12.2",
+        "assetIndex": "1.12",
+        "jarFileMain": "minecraft.jar",
+        "github": [
+            {
+                "branch": "mcp",
+                "url": "https://api.frazionz.net/github/latest/mcp"
+            },
+            {
+                "branch": "depend",
+                "url": "https://api.frazionz.net/github/latest/depend"
+            }
+        ],
+        "urlLogo": "../img/icons/icon.png",
+        "updateFileList": "https://download.frazionz.net/Site",
+        "expl_server": "FrazionZ Faction est un serveur Faction avec quelques nouveautés ! \nDécouvrez-le dès maintenant en rejoignant la communautée via Discord \nou directement sur le serveur ! Nous vous attendons avec impatiente !"
+    }
+]
