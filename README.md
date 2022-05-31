@@ -1,1 +1,1 @@
-# FzLauncherNJS
+# FrazionZ Launcher - Electron App
