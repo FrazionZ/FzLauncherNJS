@@ -1,0 +1,28 @@
+<div class="content-child pl-60 pr-60 pb-30">
+    <h2 class="pt-30 pb-10 underline">États de nos services</h2>
+    <span class="loader-26"></span>
+    <template id="monitors" style="overflow: auto;display: block;">
+        <div class="card ml-20 mr-20 mb-30" style="border: none;padding: 0px;background: transparent;">
+            <div class="card-header">
+                <div id="categorie_name"></div>
+            </div>
+            <div class="card-body" style="border: none;border-radius: 30px;padding: 15px;background: var(--black-3);border-radius: 0 0 calc(0.25rem - 1px) calc(0.25rem - 1px);">
+                <template id="monitor" style="display: block;overflow: auto;">
+                    <div class="flex justif-between">
+                        <div class="column">
+                            <i class='bx icon'></i>
+                            <span id="name"></span>
+                        </div>
+                        <div class="column">
+                           <div id="available"></div>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </template>
+</div>
+<script>
+    var State = require('../js/connected/state.js');
+    var state = new State();
+</script>

@@ -1,17 +1,23 @@
 var Notyf = require('notyf');
 const Store = require('electron-store');
-const FZUtils = require('./utils.js')
+const FZUtils = require('./utils.js');
+const { v4: uuidv4 } = require('uuid');
+//const Language = require('./language.js');
+
 class FzPage {
 
     constructor(webDocs, page) {
         this.fs = require('fs')
         this.path = require('path');
         this.store = new Store({accessPropertiesByDotNotation: false});
+        this.session = ((this.store.has('session')) ? this.store.get('session') : undefined)
+        this.ipcRenderer = require("electron").ipcRenderer;
         this.dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
         this.dirFzLauncherDatas = this.dirFzLauncherRoot + "\\Launcher";
         this.dirFzLauncherServer = this.dirFzLauncherRoot + "\\Servers";
         this.page = page;
         this.webDocs = webDocs;
+        //this.lang = new Language().lang;
         FZUtils.initCustomTlBar();
     }
 
@@ -20,7 +26,7 @@ class FzPage {
     }
 
     notyf(type, message){
-        this.bwExecJS(false, 'notyf.'+type+'("'+message+'");')
+        this.bwExecJS(false, 'notyf.dismissAll(); notyf.'+type+'("'+message+'");')
     }
 
     dataPackage(){
@@ -75,12 +81,6 @@ class FzPage {
     }
 
     initSessionSpan(className){
-        if(this.store.get("session") != undefined){
-            this.bwExecJS(false, 
-                '$("body").find(".profile__data").each(function(item) {'+
-                    '$(this).html('+this.constructor.name.toLowerCase()+'.getDataSession(""+$(this).attr("data-target")+""))'+
-                '});;0')
-        }
     }
 
     utf8_to_b64( str ) {

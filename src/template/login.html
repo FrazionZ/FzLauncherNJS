@@ -1,39 +1,33 @@
 <div class="login w-100">
-    <div class="container flex direct-column justif-between" style="height: calc(100vh - 8em) !important;"">
-        <div class="head">
-            <h2 class="font-pacifico">Compte</h2>
-            <h3>Prêt à jouer ?</h3>
-        </div>
-        <div class="card" style="width: 70%;margin: 0 auto;">
-            <div class="card-body">
-                <div class="profilesList">
-                    <div class="flex w-100 justif-center gap-30">
-                        <template id="profileCard" style="display: block;width:100%;">
-                            <div class="column w-100">
-                                <div class="card sub profileCardSub" target_user="">
-                                    <div class="card-body flex gap-20">
-                                        <div id="avatar"><img style="border-radius: 10px;"></div>
-                                        <div class="flex direct-column w-100 justif-center">
-                                            <h3 id="username_label" class="text-white" style="margin: 0;"></h3>
-                                            <span id="lasstLog" class="text-gray" style="font-size: 10px;">LAST_LOG</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </div>
-                </div>
+    <div class="login-flex" style="height: calc(100vh - 8em) !important;"">
+        <div class="form" id="addAccountForm">
+            <div class="form-group">
+                <h2 class="pt-30 pb-10 underline">Adresse Mail</h2>
+                <input type="text" placeholder="Adresse mail" name="email" id="email">
             </div>
+            <div class="form-group pb-20">
+                <h2 class="pt-30 pb-10 underline">Mot de passe</h2>
+                <input type="password" placeholder="Mot de passe" name="password"  id="password">
+            </div>
+            <button class="btn addAccountContinue btn-primary w-100">Continuer</button>
         </div>
-        <a class="btn btn-add-account href="#">Ajouter un compte</a>
+        <div class="infos w-100">
+        </div>
     </div>   
 </div>
 <script>
-    const { BrowserWindow } = require('electron');
     const Login = require('../js/login.js')
     const FZUtils = require('../js/utils.js')
-    const login = new Login();
-    const profiles = login.loadProfiles();
+    const login = new Login(document);
+    var btn = document.querySelector('addAccountContinue')
+    $('.addAccountContinue').on('click', async() => {
+        $(this).attr('disabled', 'disabled')
+        var form = $('#addAccountForm');
+        var userEmail = form.find('#email');
+        var userPassword = form.find('#password');
+        await login.addAccount(userEmail.val(), userPassword.val());
+    });
+    /*const profiles = login.loadProfiles();
     if(profiles.length == 0)
         $('#loaderProfiles').remove();
     
@@ -52,7 +46,9 @@
                 clone.querySelector(".card").setAttribute("target_user", k);
                 var avatar = clone.querySelector("#avatar");
                 var username = clone.querySelector('#username_label')
-                avatar.querySelector('img').setAttribute('src', 'https://auth.frazionz.net/skins/face.php?u='+element.id)
+                setTimeout(() => {
+                    avatar.querySelector('img').setAttribute('src', 'https://auth.frazionz.net/skins/face.php?u='+element.id)
+                }, 1200);
                 username.textContent = element.username
                 tbody.appendChild(clone);
                 clones.push(clone)
@@ -72,10 +68,10 @@
     const body = document.querySelector("body");
     body.querySelector('#copyversion').innerHTML = body.querySelector('#copyversion').innerHTML.replace('{VERSION_PROD}', require('../../package.json').version);
 
-    $('.btn-add-account').on('click', function() {
-        var LoginDialog = require('../js/modals/login.js');
+    $('.profileCardAddSub').on('click', function() {
+        var LoginDialog = new require('../js/modals/login.js');
         new LoginDialog();
-    })
+    })*/
     
     $('.showChangelog').on('click', function() {
         login.showModal(false, 'changelog')

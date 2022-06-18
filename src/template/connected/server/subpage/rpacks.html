@@ -1,0 +1,30 @@
+<div class="rpack" id="pnotes_last">
+    <h2 class="underline">Resources Packs</h2>
+    <span style="color: var(--text-inactive);">Les packs de cette liste sont approuvés par le staff avant publication.</span><br /><br />
+    <span class="loader-26"></span>
+    <div class="flex direct-column gap-15">
+        <template id="rpacks_list" style="overflow: auto;display: block;">
+            <div class="card rpack gap-15 black-4 ml-20 mr-20 mb-30" style="border: none;">
+                <div class="card-body">
+                    <div class="flex gap-30">
+                        <div class="column">
+                            <img src="" id="rpack__icon" class="icon" alt="rpack">
+                        </div>
+                        <div class="column flex direct-column justif-between w-100">
+                            <div id="rpack__name"></div>
+                            <div id="rpack__description"></div>
+                            <div id="rpack__author"></div>
+                        </div>
+                        <div class="column flex align-end">
+                            <a id="rpack__action" class="btn"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </template>
+    </div>
+  </div>
+  <script>
+    const Rpacks = require('../js/connected/server/subpage/rpacks.js');
+    new Rpacks();
+</script>

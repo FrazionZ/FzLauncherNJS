@@ -1,0 +1,7 @@
+{
+    "login": {
+        "result": {
+            "logged": "Connecté en tant que %session__name%"
+        }
+    }
+}

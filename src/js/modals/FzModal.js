@@ -1,3 +1,4 @@
+
 class FzModal {
 
     constructor(showAndLoad, file, idDom){

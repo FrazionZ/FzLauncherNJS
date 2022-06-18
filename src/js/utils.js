@@ -10,6 +10,14 @@ function UrlExists(url) {
         return false;
 }
 
+function showOpenFileDialog(){
+    const { ipcRenderer } = require("electron");
+    if(ipcRenderer !== undefined){
+        ipcRenderer.send('openFile')
+    }
+}
+
+
 function initCustomTlBar() {
     const { ipcRenderer } = require("electron");
     if(ipcRenderer !== undefined)
@@ -34,10 +42,16 @@ function ExecuteCodeJS(code) {
         })
 }
 
-async function download(instance, installerfileURL, installerfilename, dialog, dlDialog, branch) {
-    var instance = this
+async function download(instance, installerfileURL, installerfilename, dialog, branch) {
     const fs = require('fs')
     const path = require('path')
+    const Store = require('electron-store')
+    const { v4: uuidv4 } = require('uuid');
+    var uuidDl = uuidv4();
+    if(dialog){
+        downloads.addDownload(uuidDl)
+        downloadsList.push({uuidDl: uuidDl, title: "Téléchargement des fichiers", subtitle: " - ", percentage: 0, finish: false});
+    }
     return new Promise((resolve, reject) => {
         // Save variable to know progress
         var received_bytes = 0;
@@ -65,15 +79,22 @@ async function download(instance, installerfileURL, installerfilename, dialog, d
             received_bytes += chunk.length;
             var percentage = (received_bytes * 100) / total_bytes;
             if(dialog){
-                dlDialog.setTitlelabel("Téléchargement des fichiers");
-                dlDialog.setSublabel(path.basename(installerfilename));
-                dlDialog.setPercentBar(percentage)
+                downloads.updateDownload(uuidDl, "Téléchargement des fichiers", installerfilename, parseInt(percentage, 10).toString())
+                //$('#downloads').find('#'+uuidDl).find('.title').text("Téléchargement des fichiers");
+                //$('#downloads').find('#'+uuidDl).find('.subtitle').text(path.basename(installerfilename));
+                //document.querySelector('.download').querySelector('#progress').style.width = ""+parseInt(percentage, 10).toString()+"%";
+                //uuidv4();
+
+                //dlDialog.setPercentBar(percentage)
             }else{
                 document.getElementById('downloadbar').value = percentage
             }
         });
 
         req.on('end', function() {
+            if(dialog){
+                downloads.finishDownload(uuidDl)
+            }
             resolve(true)
         });
     });
@@ -122,4 +143,4 @@ function javaversion(dirLaucher, callback) {
     });
 }
 
-module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, listRamAllocate, download, javaversion }
+module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, showOpenFileDialog, listRamAllocate, download, javaversion }

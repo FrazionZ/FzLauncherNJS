@@ -5,7 +5,8 @@ const { ipcRenderer } = require('electron');
 const os = require('os');
 const onezip = require('onezip');
 const DownloadDialog = require('../../../modals/download.js')
-
+const CrashGameDialog = require('../../../modals/crashgame.js')
+const { v4: uuidv4 } = require('uuid');
 class Play extends FzPage {
 
     constructor(){
@@ -26,8 +27,8 @@ class Play extends FzPage {
         $('.profile__timegame').text($('.profile__timegame').text().replace('{SESSION_TIME_GAME_FZ}', this.timeConvert(this.store.get('session')._timegame)))
         $('.server-expl').text(this.store.get('serverCurrent').server.expl_server) 
         var instance = this;
-        setTimeout(() => {
-            instance.checkIfJavaHomeExist().then(async (result) => {
+        setTimeout(async () => {
+            await instance.checkIfJavaHomeExist().then(async (result) => {
                 instance.buttonActionPlay.find('.label').text('Vérification des fichiers..')
                 var dirsFilesObligate = [{name: 'assets', isInstalled: false}, {name: 'libs', isInstalled: false}, {name: 'natives', isInstalled: false}, {name: instance.store.get('serverCurrent').server.jarFileMain, isInstalled: false}];
                 console.log(instance.dirServer)
@@ -54,31 +55,29 @@ class Play extends FzPage {
                         }
                     })
                 }
-                var checkUpdateAvailable = new Promise((resolve, reject) => {
+                var checkUpdateAvailable = new Promise(async (resolve, reject) => {
                     var repos = instance.server.github;
                     let reposUpdateAvailable = [];
-                    repos.forEach(async (repo, index, array) => {
-                        instance.checkUpdate(repo).then((response) => {
-                            if(response.result){
-                                reposUpdateAvailable.push({ github: response, repos: repo });
-                                if (index === array.length -1) 
-                                    if(reposUpdateAvailable.length > 0)
-                                        resolve({repos: reposUpdateAvailable, result: true});
-                                    else
-                                        resolve({repos: reposUpdateAvailable, result: false});
-                            }else{
-                                resolve({repos: reposUpdateAvailable, result: false});
-                            }
-                        }).catch((err) => {
-                            console.log(err)
+                    var loopCheckRepos = new Promise(async (resolve, reject) => {
+                        await repos.forEach(async (repo, index, array) => {
+                            await instance.checkUpdate(repo).then(async (response) => {
+                                if(response.result)
+                                    reposUpdateAvailable.push({ github: response, repos: repo });
+                                if (index === array.length -1) resolve();
+                            }).catch((err) => {
+                                console.log(err)
+                                if (index === array.length -1) resolve();
+                            })
+
                         })
-                    })
+                    });
+                    await loopCheckRepos.then(() => { resolve({repos: reposUpdateAvailable}); });
                 });
                 if(!needsToBeRepare && !needsToBeInstall){
                     canPlay = true;
-                    checkUpdateAvailable.then(async (resultCUP) => {
-                        console.log(resultCUP)
-                        if(resultCUP.result){
+                    await checkUpdateAvailable.then(async (resultCUP) => {
+                        console.log(resultCUP.repos[0])
+                        if(resultCUP.repos.length > 0){
                             canPlay = false;
                             needsToBeUpdate = true;
                         }else{
@@ -92,8 +91,6 @@ class Play extends FzPage {
                 }else{
                     await this.init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, undefined)
                 }
-                    
-                    
                 
             }).catch((err) => {
                 console.log(err)
@@ -115,28 +112,31 @@ class Play extends FzPage {
             //INSTALL ACTION
             instance.buttonActionPlay.find('.label').text('Installer');
             instance.buttonActionPlay.removeAttr('disabled')
+            $('.config__repare_dir').addClass('disabled');
+            $('.config__clear_dir').addClass('disabled');
             instance.buttonActionPlay.on('click', () => {
                 instance.buttonActionPlay.attr('disabled', 'disabled')
-                var dlDialog = new DownloadDialog(true);
-                instance.prepareInstallOrUpdate(dlDialog);
+                instance.prepareInstallOrUpdate();
             })
         }else if(needsToBeRepare){
             //REPARE ACTION
             instance.buttonActionPlay.find('.label').text('Réparer');
             instance.buttonActionPlay.removeAttr('disabled')
+            $('.config__repare_dir').addClass('disabled');
+            $('.config__clear_dir').addClass('disabled');
             instance.buttonActionPlay.on('click', () => {
                 instance.buttonActionPlay.attr('disabled', 'disabled')
-                var dlDialog = new DownloadDialog(true);
-                instance.prepareInstallOrUpdate(dlDialog);
+                instance.prepareInstallOrUpdate();
             })
         }else if(needsToBeUpdate){
             //UPDATE ACTION
             instance.buttonActionPlay.find('.label').text('Mettre à jour');
             instance.buttonActionPlay.removeAttr('disabled')
+            $('.config__repare_dir').addClass('disabled');
+            $('.config__clear_dir').addClass('disabled');
             instance.buttonActionPlay.on('click', () => {
                 instance.buttonActionPlay.attr('disabled', 'disabled')
-                var dlDialog = new DownloadDialog(true);
-                instance.update(resultCUP.repos, dlDialog);
+                instance.update(resultCUP.repos);
             })
         }
     }
@@ -150,8 +150,8 @@ class Play extends FzPage {
         return rhours + "h, " + rminutes + "m";
     }
 
-    checkIfJavaHomeExist(){
-        return new Promise((resolve, reject) => {
+    async checkIfJavaHomeExist(){
+        return await new Promise(async (resolve, reject) => {
             require('find-java-home')(function(err, home) {
                 if (!err) {
                     resolve(home)
@@ -184,7 +184,7 @@ class Play extends FzPage {
         
     }
 
-    async prepareInstallOrUpdate(dlDialog){
+    async prepareInstallOrUpdate(){
         var instance = this;
         var dirExists = this.fs.existsSync(this.dirServer)
         if(!dirExists)
@@ -210,14 +210,14 @@ class Play extends FzPage {
         });
         await getLinksRepos.then((links) => {
             console.log(links)
-            this.installOrRepareOrUpdate(links, dlDialog);
+            this.installOrRepareOrUpdate(links);
         });
     }
 
-    async installOrRepareOrUpdate(links, dlDialog){
+    async installOrRepareOrUpdate(links){
         var instance = this;
         var startLinkDL = function (index) {
-            FZUtils.download(instance, links[index].dlink, instance.path.join(instance.dirServer, links[index].name), true, dlDialog, links[index].branch).then((result) => {
+            FZUtils.download(instance, links[index].dlink, instance.path.join(instance.dirServer, links[index].name), true, links[index].branch).then((result) => {
                 if(!((index + 1) == links.length))
                     startLinkDL((index + 1))
                 else{
@@ -233,9 +233,13 @@ class Play extends FzPage {
 
                     if(fileZipDepend !== undefined) {
                         const pack = onezip.extract(fileZipDepend, instance.dirServer);
-                    
-                        pack.on('file', (name) => {
-                            dlDialog.setSublabel(path.basename(name));
+                        var uuidDl = uuidv4();
+                        downloadsList.push({uuidDl: uuidDl, title: "Extraction des dépendances", subtitle: " - ", percentage: 0, finish: false});
+
+                        var nameCurrent = "";
+
+                        pack.on('file', (name) => {                     
+                            nameCurrent = name;
                         });
                         
                         pack.on('start', () => {
@@ -243,8 +247,7 @@ class Play extends FzPage {
                         });
                         
                         pack.on('progress', (percent) => {
-                            dlDialog.setTitlelabel("Extraction des dépendances");
-                            dlDialog.setPercentBar(percent)
+                            downloads.updateDownload(uuidDl, "Extraction des dépendances", nameCurrent, parseInt(percent, 10).toString())
                         });
                         
                         pack.on('error', (error) => {
@@ -252,10 +255,11 @@ class Play extends FzPage {
                         });
                         
                         pack.on('end', () => {
-                            instance.prepareToLaunch(links[index].branch, links[index].version, fileZipDepend, dlDialog);
+                            downloads.finishDownload(uuidDl)
+                            instance.prepareToLaunch(links, fileZipDepend);
                         });
                     }else
-                        instance.prepareToLaunch(links[index].branch, links[index].version, undefined, dlDialog);
+                        instance.prepareToLaunch(links, undefined);
                 }
             }).catch((err) => console.log(err));
         }
@@ -266,7 +270,7 @@ class Play extends FzPage {
         }
     }
 
-    async update(repos, dlDialog){
+    async update(repos){
         let links = [];
         var updatePromise = new Promise((resolve, reject) => {
             repos.forEach(async (repo, index, array) => {
@@ -276,18 +280,22 @@ class Play extends FzPage {
             });
         })
         updatePromise.then(async() => {
-            await this.installOrRepareOrUpdate(links, dlDialog);
+            await this.installOrRepareOrUpdate(links);
         })
     }
 
 
-    async prepareToLaunch(branch, version, fileZipDepend, dlDialog){
-        this.store.set(this.keyStoreBranch(branch), version)
+    async prepareToLaunch(links, fileZipDepend){
+        links.forEach((link) => {
+            this.store.set(this.keyStoreBranch(link.branch), link.version)
+        })
         if(fileZipDepend !== undefined)
             this.fs.unlinkSync(fileZipDepend)
-        dlDialog.hide();
+        $('.server__version').text("Version MCP "+this.store.get(this.keyStoreBranch("mcp")))
         this.buttonActionPlay.find(".label").text("Jouer")
         this.buttonActionPlay.removeAttr("disabled")
+        $('.config__repare_dir').removeClass('disabled');
+        $('.config__clear_dir').removeClass('disabled');
         this.buttonActionPlay.off()
         this.buttonActionPlay.on("click", () => { this.launchGame(); })
     }
@@ -307,6 +315,19 @@ class Play extends FzPage {
             var dirServerAssets = `${this.dirServer}\\assets`;
             var dirServerNatives = `${this.dirServer}\\natives`;
             var dirServerLibs = `${this.dirServer}\\libs`;
+
+            //config__server_discord_rpc Discord RPC - OK
+            //config__server_minimise_app Close App - OK
+            //config__server_console_game Console Game
+            //config__server_runtime_launch Runtime FzLauncher - OK
+            //config__server_clean_autosc Clear Auto Cache Skin and Cape - OK
+
+
+            if(this.store.get(this.keyStoreServerOptions('config__server_clean_autosc'))){
+                instance.fs.rm(instance.path.join(dirServerAssets, "frazionz/skins"), { recursive: true, force: true }, (err => {
+                    if (err) return console.log(err);
+                }));
+            }
         
             const StringBuilder = require("string-builder");
             const sbLibs = new StringBuilder();
@@ -319,7 +340,9 @@ class Play extends FzPage {
         
             var javaRuntime = 'java';
             if(process.platform == "win32"){
-                javaRuntime = '"'+this.path.join(this.dirFzLauncherDatas, "runtime/bin/java.exe")+'"';
+                if(this.store.get(this.keyStoreServerOptions('config__server_runtime_launch'))){
+                    javaRuntime = '"'+this.path.join(this.dirFzLauncherDatas, "runtime/bin/java.exe")+'"';
+                }
             }
 
             console.log("JavaRuntime "+javaRuntime)
@@ -332,28 +355,53 @@ class Play extends FzPage {
                     ramMemoryMax = "-Xms1g -Xmx" + FZUtils.listRamAllocate().list[ramAllocateIndexProperties].gb + "G";
                 }
             }
+
+            //DISCORD
+            var discordRPC = "--discordRPC="+(this.store.get(this.keyStoreServerOptions('config__server_discord_rpc')))
         
-            var profile = this.store.get('session');
-            var stringCMD = javaRuntime + ' -XX:-UseAdaptiveSizePolicy -Djava.library.path="' + dirServerNatives + '" -Dfml.ignorePatchDiscrepancies=true ' + ramMemoryMax + ' -Dlog4j2.formatMsgNoLookups=true -cp ' + sbLibs.toString() + ' net.minecraft.client.main.Main --username ' + profile.username + ' --accessToken ' + profile.access_token + ' --version ' + this.server.version + ' --gameDir "' + this.dirServer + '" --assetsDir "' + dirServerAssets + '" --assetIndex "' + this.server.assetIndex + '" --userProperties {} --uuid ' + profile.uuid + ' --userType legacy --discordRPC=false ';
+            var stringCMD = javaRuntime + ' -XX:-UseAdaptiveSizePolicy -Djava.library.path="' + dirServerNatives + '" -Dfml.ignorePatchDiscrepancies=true ' + ramMemoryMax + ' -Dlog4j2.formatMsgNoLookups=true -cp ' + sbLibs.toString() + ' net.minecraft.client.main.Main --username ' + this.session.username + ' --accessToken ' + this.session.access_token + ' --version ' + this.server.version + ' --gameDir "' + this.dirServer + '" --assetsDir "' + dirServerAssets + '" --assetIndex "' + this.server.assetIndex + '" '+discordRPC+' --userProperties {} --uuid ' + this.session.uuid + ' --userType legacy ';
             instance.store.set('gameLaunched', true);
-            console.log(stringCMD)
             this.notyf("success", "Lancement du jeu..")
 
-            const child = require('child_process').exec(stringCMD);
-            child.stdout.pipe(process.stdout)
-            child.stderr.pipe(process.stderr)
-            child.on('error', function(err) {
-                console.log(err)
-            })
-            child.on('spawn', function() {
-                setTimeout(() => {
+            setTimeout(() => {
+                if(!instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')))
                     ipcRenderer.send('closeApp')
-                }, 1500)
-            })
-            child.on('exit', function() {
+                else
+                    ipcRenderer.send('hideApp')
+            }, 1500)
+
+            var crashGame = new CrashGameDialog(false);
+            var finishGame = (crash) => {
+                if(instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app'))){
+                    ipcRenderer.send('showApp')
+                    if(crash){
+                        setTimeout(() => {
+                            crashGame.show();
+                        }, 800)
+                    }
+                }
                 instance.store.delete('gameLaunched')
                 instance.store.set('gameLaunched', false);
-            })
+            }
+
+            const { exec } = require('child_process');
+            exec(stringCMD, (error, stdout, stderr) => {
+                if (error) {
+                    console.error(`error: ${error.message}`);
+                    finishGame(true);
+                    return;
+                }
+
+                if (stderr) {
+                    console.error(`stderr: ${stderr}`);
+                    finishGame(true);
+                    return;
+                }
+
+                finishGame();
+
+            });
+            
             /*exec.execCommand = function(stringCMD, callback) {
                 console.log("LAUNCH")
                 exec(stringCMD, (error, stdout, stderr) => {
@@ -615,7 +663,7 @@ function launchGame(dirServer, profile, btnDlLaunch, ramAllocateIndexProperties,
         ramMemoryMax = "-Xms1g -Xmx" + utilsFZ.listRamAllocate().list[ramAllocateIndexProperties].gb + "G";
     }
 
-    var stringCMD = javaRuntime + ' -XX:-UseAdaptiveSizePolicy -Djava.library.path=' + dirServerNatives + ' -Dfml.ignorePatchDiscrepancies=true ' + ramMemoryMax + ' -Dlog4j2.formatMsgNoLookups=true -cp ' + sbLibs.toString() + ' net.minecraft.client.main.Main --username ' + profile._username + ' --accessToken ' + profile._token + ' --version ' + serverCurrent.server.version + ' --gameDir ' + dirServer + ' --assetsDir ' + dirServerAssets + ' --assetIndex ' + serverCurrent.server.assetIndex + ' --userProperties {} --uuid ' + profile._uuid + ' --userType legacy --discordRPC=false ';
+    var stringCMD = javaRuntime + ' -XX:-UseAdaptiveSizePolicy -Djava.library.path=' + dirServerNatives + ' -Dfml.ignorePatchDiscrepancies=true ' + ramMemoryMax + ' -Dlog4j2.formatMsgNoLookups=true -cp ' + sbLibs.toString() + ' net.minecraft.client.main.Main --username ' + this.session._username + ' --accessToken ' + this.session._token + ' --version ' + serverCurrent.server.version + ' --gameDir ' + dirServer + ' --assetsDir ' + dirServerAssets + ' --assetIndex ' + serverCurrent.server.assetIndex + ' --userProperties {} --uuid ' + this.session._uuid + ' --userType legacy --discordRPC=false ';
 
     var os = new utilsFZ.os_func();
     gameLaunched = true;

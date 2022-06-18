@@ -1,9 +1,12 @@
-const { app, BrowserWindow,  ipcMain, ipcRenderer } = require('electron')
+const { app, BrowserWindow, dialog, ipcMain, Notification } = require('electron')
 const path = require('path')
 const fs = require('fs')
 const Login = require('./src/js/login.js')
 const remoteMain = require('@electron/remote/main')
 const FZUtils = require('./src/js/utils.js');
+require('log-timestamp');
+
+app.commandLine.appendSwitch ("disable-http-cache");
 
 async function createWindow() {
 
@@ -12,6 +15,8 @@ async function createWindow() {
     const mainWindow = new BrowserWindow({
         width: 1280, 
         height: 720,
+        maximizable: false,
+        resizable: false,
         devTools: true,
         autoHideMenuBar: true,
         frame: process.platform === 'darwin',
@@ -69,21 +74,11 @@ async function createWindow() {
             await open(url);
         }
     })
-
-    mainWindow.webContents.on('DOMContentLoaded', () => {
-        if (process.platform !== 'darwin') {
-            require('@treverix/remote/main').initialize();
-            const customTitlebar = require('custom-electron-titlebar');
-            new customTitlebar.Titlebar({
-                backgroundColor: customTitlebar.Color.fromHex('#ECECEC')
-            });
-        }
-    })
-
     var afterUpdateAndRuntime = function() {
-        mainWindow.loadURL(__dirname+'/src/template/layouts.html')
+        mainWindow.loadURL(__dirname+'/src/template/layouts.html',  {"extraHeaders" : "pragma: no-cache\n"})
         const login = new Login(mainWindow.webContents);
         login.store.set('gameLaunched', false)
+        login.store.delete('downloads')
         login.showPage(true);
     };
 
@@ -101,8 +96,37 @@ async function createWindow() {
         
     })
 
+    ipcMain.on('openFile', async (event, data) => {
+        dialog.showOpenDialog({properties: ['openFile'] }).then(function (response) {
+            if (!response.canceled) {
+                event.sender.send("responseOpenFile", response);
+            }
+        });
+    })
+
+    ipcMain.on('logout', async (event, data) => {
+        afterUpdateAndRuntime()
+    })
+
+    ipcMain.on('reduceWindow', async (event, data) => {
+        mainWindow.minimize();
+    })
+
+    ipcMain.on('openUrlExternal', async (event, data) => {
+        const open = require('open');
+        await open(data);
+    })
+
     ipcMain.handle('executeCode', async  (event, data) => {
         mainWindow.webContents.executeJavaScript(data+";0")
+    })
+
+    ipcMain.on('showApp', (event, data) => {
+        mainWindow.show();
+    })
+
+    ipcMain.on('hideApp', (event, data) => {
+        mainWindow.hide();
     })
 
     ipcMain.on('closeApp', (event, data) => {

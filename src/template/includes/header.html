@@ -1,80 +1,8 @@
-<nav class="sidebar">
-    <div class="menu-bar">
-        <div class="menu">
-            <header>
-                <div class="image-text">
-                    <span class="image">
-                        <img src="../img/icons/icon.png" alt="icon">
-                    </span>
-                </div>
-            </header>
-            <i class='bx bx-chevron-left toggle'></i>
-            <ul class="menu-link">
-                <li class="nav" id="nav_home" data-bs-toggle="tooltip" data-bs-placement="right" title="Accueil">
-                    <a href="#home" data-bs-toggle="tooltip" class="active">
-                        <i class='bx bx-home icon' ></i>
-                        <span class="text nav-text">
-                            Accueil
-                        </span>
-                    </a>
-                </li>
-                <li class="nav" id="nav_profil" data-bs-toggle="tooltip" data-bs-placement="right" title="Profil">
-                    <a href="#profil">
-                        <i class='bx bx-user icon' ></i>
-                        <span class="text nav-text">
-                            Profil
-                        </span>
-                    </a>
-                </li>
-                <li class="nav" id="nav_settings" data-bs-toggle="tooltip" data-bs-placement="right" title="Paramètres">
-                    <a href="#settings">
-                        <i class='bx bxs-cog icon' ></i>
-                        <span class="text nav-text">
-                            Paramètres
-                        </span>
-                    </a>
-                </li>
-                <li class="nav" id="nav_state" data-bs-toggle="tooltip" data-bs-placement="right" title="États">
-                    <a href="#state">
-                        <i class='bx bx-stats icon' ></i>
-                        <span class="text nav-text">
-                            États
-                        </span>
-                    </a>
-                </li>
-            </ul>
-            <div class="divider"></div>
-                <li class="title-box">
-                    <i class='bx bx-server icon' ></i>
-                    <span class="text nav-text">
-                        Serveurs
-                    </span>
-                </li>
-                <ul class="menu-link servers"></ul>
-            </div>
-            <div class="bottom-content">
-                <ul class="menu-link">
-                    <li style="margin: 0;" class="nav" data-bs-toggle="tooltip" data-bs-placement="right" title="Déconnexion">
-                        <a href="#profileDialog">
-                            <div>
-                                <img id="nav_menu_avatar" class="avatar" src="../img/face.png">
-                            </div>
-                            <div class="userFields">
-                                <span class="text nav-text profile__data" data-target="username"></span>
-                                <span class="text badge nav-text sessionProfilRank profile__data" data-target="rank"></span>
-                            </div>
-                        </a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </div>
-</nav>
 <script>
 
     var Messageging = require('../js/modals/messaging.js')
     var Header = require('../js/header.js')
-    var header = new Header();
+    var header = new Header(true);
     header.initSessionSpan("header");
     var servers = header.getServersList();
 
@@ -84,26 +12,13 @@
         top = body.querySelector("#top"),
         content = body.querySelector(".main"),
         footer = body.querySelector("#footer");
-    
-        
-    top.classList.add("connected")
-    content.classList.add("connected")
-    footer.classList.add("homePadding")
-    sidebar.classList.remove("close");
-    content.classList.remove("closeSidebar");
-    footer.classList.remove("closeSidebar");
 
-    toggle.addEventListener("click", () => {
-        sidebar.classList.toggle("close");
-        top.classList.toggle("closeSidebar");
-        content.classList.toggle("closeSidebar");
-        footer.classList.toggle("closeSidebar");
-    })
+    $(footer).hide()
 
     var profile = header.store.get('session');
     var linkCurrent = "#home";
 
-    body.querySelector('.avatar').src="https://auth.frazionz.net/skins/face.php?u="+profile.id;
+    /*body.querySelector('.avatar').src="https://auth.frazionz.net/skins/face.php?u="+profile.id;
     body.querySelector('.sessionProfilRank').style.backgroundColor = profile.role.color;
 
     servers.forEach((item, key) => {
@@ -115,70 +30,13 @@
                 '</a>'
             '</li>';
         $('.menu-link.servers').append(serverNav);
-    })
+    })*/
 
-
-    $('.menu-bar').find('a').on('click', function() {
-        toggleChangelog = false;
-        var contentLink = $(this).attr('href');
-        $('[data-bs-toggle="tooltip"]').tooltip('dispose');
-        if(linkCurrent !== contentLink){
-            var messLoadPage = new Messageging(true, "Veuillez patienter");
-            setTimeout(() => {
-                switch (contentLink) {
-                    case "#profileDialog":
-                        break;
-                    case "#server":
-                        header.store.set('serverCurrent', {
-                            idServer: $(this).attr('data-server-id'),
-                            server: servers[$(this).attr('data-server-id')]
-                        })
-                        loadContent(false, $(this), contentLink, messLoadPage);
-                        break;
-                    default:
-                        loadContent(false, $(this), contentLink, messLoadPage);
-                        break;
-                }
-            }, 800)
-        }
+    $('.logout').on('click', function() {
+        $('.sidebar').addClass('hide');
+        $('.main').removeClass('connected');
+        header.logout()
     });
-
-    loadContent(true, $("#nav_home"), 'home')
-
-    function loadContent(afterLogin, linkNav, urlContent, messLoadPage) {
-        var urlFinal = urlContent.replace('#', '')
-        if ($(urlContent).length == 0) {
-            var urlContent = "connected/" + urlFinal;
-            var backupTop = $("#top").find('#title').text();
-            $('#top').load("connected/top.html", function(response, status, xhr) {
-                var data_title = $(this).attr('data-title')
-                if (urlFinal == "server")
-                    data_title = header.store.get('serverCurrent').server.name
-                $('#top').find('#title').text(data_title);
-                $('#top').fadeIn()
-                $('.main').load(urlContent + "/index.html", function(response, status, xhr) {
-                    if(messLoadPage !== undefined) messLoadPage.hide();
-                    if (status == "error") {
-                        messLoadPage.hide()
-                        header.notyf('error', 'Impossible de charger la page (' + urlContent + ')')
-                        setTitleTop(backupTop)
-                    } else {
-                        linkCurrent = "#"+urlFinal;
-                        if(!afterLogin)
-                            if ($('.menu-bar').find('a').hasClass('active')) $('.menu-bar').find('a').removeClass('active');
-                                linkNav.addClass('active');
-                    }
-                });
-            });
-            
-        } else {
-            $('#' + urlFinal).fadeIn();
-        }
-    }
-
-    function setTitleTop(title){
-        $('#top').find('#title').text(title);
-    }
 
 
 </script>

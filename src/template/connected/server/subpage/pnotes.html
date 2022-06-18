@@ -1,0 +1,41 @@
+<div class="pnotes" id="pnotes_last">
+  <h2 class="underline">Patch Notes - <span id="tag"></span></h2>
+  <div class="flex direct-column gap-15">
+    <div class="card black-4">
+      <div class="card-body ">
+        <h2 class="type">Ajouts</h2>
+        <ul class="fields 1"></ul>
+      </div>
+    </div>
+    <div class="card black-4">
+      <div class="card-body">
+        <h2 class="type">Améliorations</h2>
+        <ul class="fields 2"></ul>
+      </div>
+    </div>
+    <div class="card black-4">
+      <div class="card-body">
+        <h2 class="type">Modifications</h2>
+        <ul class="fields 3"></ul>
+      </div>
+    </div>
+    <div class="card black-4">
+      <div class="card-body">
+        <h2 class="type">Suppressions</h2>
+        <ul class="fields 4"></ul>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    $.get('https://api.frazionz.net/faction/pnotes/last', function(response) {
+      var version = response;
+      $('#pnotes_last').find('#tag').append(version.tag)
+      version.fields.forEach((field) => {
+        $('#pnotes_last').find('.fields.'+field.type).append('<li>'+field.description+'</li>')
+      })
+    })
+    .fail(function (error) {
+      this.notyf('error', 'Impossile de récupérer les articles')
+    });
+</script>

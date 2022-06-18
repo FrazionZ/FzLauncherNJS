@@ -1,5 +1,6 @@
 node_modules/*
 !node_modules/electron-asar-hot-updater/
+!node_modules/azuriom-auth/
 build
 hud
 logs

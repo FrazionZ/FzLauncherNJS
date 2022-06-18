@@ -2,13 +2,17 @@ const { Notyf } = require('notyf');
 const FzPage = require('../js/FzPage.js')
 const Authenticator = require('azuriom-auth').Authenticator;
 const Messaging = require(__dirname+'/modals/messaging.js')
-var LoginDialog = require('../js/modals/login.js');
 class Login extends FzPage {
 
     constructor(document) {
         super(document, "login.html");
+        var instance = this;
         this.urlApi = "https://auth.frazionz.net";
         this.authenticator = new Authenticator(this.urlApi);
+        if(this.store.has('session')){
+            //AUTO LOG
+            this.auth(this.store.get('session').access_token);
+        }
     }
 
     async finishAuth(user){
@@ -34,12 +38,10 @@ class Login extends FzPage {
                 }
             }
             user = user.data;
-            this.notyf("success", 'Connecté en tant que '+user.username)
-            var profiles = this.loadProfiles();
+            this.notyf("success", "Connecté en tant que "+user.username)
+            /*var profiles = this.loadProfiles();
             profiles.push({ id: user.id, uuid: user.uuid, access_token: user.access_token, username: user.username })
-            this.store.set('profiles', profiles);
-            var loginDialog = new LoginDialog(false);
-            loginDialog.hide()
+            this.store.set('profiles', profiles);*/
             this.finishAuth(user);
         } catch (e) {
             btnAddAcount.removeAttr('disabled')
@@ -47,25 +49,30 @@ class Login extends FzPage {
         }
     }
 
-    async auth(target_profile){
+    async auth(atoken){
         var mess = new Messaging(true, "Chargement de votre profil..");
         try {
-            var profileTarget = this.loadProfiles()[target_profile];
-            var user = await this.authenticator.verify(profileTarget.access_token);
+            //var profileTarget = this.loadProfiles()[target_profile];
+            var user = await this.authenticator.verify(atoken);
+            console.log(user)
             if(user.status !== undefined)
                 if(user.status == "error")
                     return this.notyf("error", user.message)
             user = user.data;
-            this.notyf("success", 'Connecté en tant que '+user.username)
+            this.notyf("success", "Connecté en tant que "+user.username)
             setTimeout(() => {
                 mess.hide();
-                var profiles = this.loadProfiles();
-                profiles[target_profile].access_token = user.access_token;
-                this.store.set('profiles', profiles);
                 this.finishAuth(user);
             }, 1000)
         } catch (e) {
-            console.log(e);
+            console.log(e)
+            if(e.message.includes('401')){
+                setTimeout(() => {
+                    mess.hide();
+                    this.store.delete('session')
+                }, 1000)
+                this.notyf('error', 'Votre token d\'accès n\'est plus valide. Veuillez vous reconnecter.')
+            }
         }
     }
 

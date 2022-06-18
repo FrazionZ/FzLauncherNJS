@@ -17,7 +17,7 @@ class Runtime {
         if(process.arch === "x64")
             FZUtils.download(null, url+"/64/jre1.8.0_291.zip", fileZipRuntime, false, undefined).then((result) => { if(result) this.finalizeUnzip(fileZipRuntime, dirRuntime) });
         else if(process.arch === "x32")
-            FZUtils.download(null, url+"/32/jre1.8.0_301.zip", fileZipRuntime, dialog, undefined).then((result) => { if(result) this.finalizeUnzip(fileZipRuntime, dirRuntime) });
+            FZUtils.download(null, url+"/32/jre1.8.0_301.zip", fileZipRuntime, false, undefined).then((result) => { if(result) this.finalizeUnzip(fileZipRuntime, dirRuntime) });
     }
 
     finalizeUnzip(fileZipDepend, dirRuntime){

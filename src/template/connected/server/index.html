@@ -1,33 +1,80 @@
-<ul class="nav nav-pills tabsFZ" id="pills-tab" role="tablist">
-    <li class="nav-item" role="presentation">
-      <button class="nav-link active" id="pills-play-tab" data-bs-toggle="pill" aload="true" data-bs-target="#play" type="button" role="tab" aria-controls="pills-play" aria-selected="true">Accueil</button>
-    </li>
-    <li class="nav-item" role="presentation">
-      <button class="nav-link" id="pills-setttings-tab" data-bs-toggle="pill" data-bs-target="#settings" type="button" role="tab" aria-controls="pills-setttings" aria-selected="false">Configuration</button>
-    </li>
-  </ul>
-  <div class="tab-content" style="width: 100%;" id="pills-tabContent">
-    <div class="tab-pane fade show active" id="play" role="tabpanel" aria-labelledby="pills-play-tab"></div>
-    <div class="tab-pane fade" id="settings" role="tabpanel" aria-labelledby="pills-setttings-tab"></div>
+<div class="server index reset-mp">
+        <div class="head pl-40 pr-40 pt-40">
+          <div class="flex pd-30 gap-30">
+            <div class="server__logo">
+              <img src="" width="160" height="160" alt="logo_server">
+            </div>
+            <div class="infos">
+              <h2 class="reset-mp underline server__title">{SERVER NAME}</h2>
+              <h4 class="server__version mt-10">{SERVER VERSION}</h4>
+              <h4 class="server__description mt-10">{SERVER DESCRIPTION}</h4>
+            </div>
+          </div>
+          <button class="btn btn-primary btn-download-launch-game btn-progress" disabled>
+            <div class="content"><span class="label">Veuillez patienter..</span></div>
+            <div class="progress">
+                <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+            </div>
+          </button>
+          <ul class="nav nav-pills mb-3 menu" id="pills-tab" role="tablist">
+            <li class="nav-item" role="presentation">
+              <a class="active" id="pills-news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab" aria-controls="pills-news" aria-selected="true">News</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="" id="pills-pnotes-tab" data-bs-toggle="tab" data-bs-target="#pnotes" type="button" role="tab" aria-controls="pills-pnotes" aria-selected="false">Patch Notes</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="" id="pills-rpacks-tab" data-bs-toggle="tab" data-bs-target="#rpacks" type="button" role="tab" aria-controls="pills-rpacks" aria-selected="false">Resources Packs</a>
+            </li>
+            <li class="nav-item" role="presentation">
+              <a class="" id="pills-config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab" aria-controls="pills-config" aria-selected="false">Configuration</a>
+            </li>
+          </ul>
+        </div>
+        <div class="tab-content pl-40 pr-40 pb-40" id="tab-server">
+          <div class="tab-pane fade show active" id="news" role="tabpanel" aria-labelledby="pills-news-tab">
+            <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+          </div>
+          <div class="tab-pane fade" id="pnotes" role="tabpanel" aria-labelledby="pills-pnotes-tab">
+            <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+          </div>
+          <div class="tab-pane fade" id="rpacks" role="tabpanel" aria-labelledby="pills-rpacks-tab">
+            <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+          </div>
+          <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="pills-config-tab">
+            <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+          </div>
+        </div>
 </div>
-<script src="../assets/js/connected/server/serverpage.js"></script>
 <script>
-    var triggerTabList = [].slice.call(document.querySelectorAll('#pills-tab button'))
+  var Server = require('../js/connected/server.js');
+  const Play = require('../js/connected/server/subpage/play.js');
+  var server = new Server();
+  var play = new Play();
+
+  function loadTab(tab, data_bs_target){
+    var link = data_bs_target;
+    $('.tab-content').find(link).find('.server').load('./connected/server/subpage/'+link.replaceAll('#', '')+'.html');
+    tab.setAttribute("aload", "true");
+  }
+
+  //INIT CONFIG
+  loadTab(document.querySelector('#pills-config-tab'), "#config");
+
+  var triggerTabList = [].slice.call(document.querySelectorAll('#pills-tab a'))
     triggerTabList.forEach(function (triggerEl) {
         var tabTrigger = new bootstrap.Tab(triggerEl)
 
         //LOAD FIRST SUBPAGE ACTIVE DEFAULT
         if(triggerEl.getAttribute('class').includes('active')){
             var link = triggerEl.getAttribute('data-bs-target');
-            $('.tab-content').find(link).load('./connected/server/subpage/'+link.replaceAll('#', '')+'.html');
+            $('.tab-content').find(link).find('.server').load('./connected/server/subpage/'+link.replaceAll('#', '')+'.html');
         }
 
         triggerEl.addEventListener('click', function (event) {
             event.preventDefault()
             if(!triggerEl.hasAttribute("aload")) {
-                var link = triggerEl.getAttribute('data-bs-target');
-                $('.tab-content').find(link).load('./connected/server/subpage/'+link.replaceAll('#', '')+'.html');
-                triggerEl.setAttribute("aload", "true");
+                loadTab(triggerEl, triggerEl.getAttribute('data-bs-target'))
             }
             tabTrigger.show()
         })
