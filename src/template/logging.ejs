@@ -1,0 +1,20 @@
+<%- include("./includes/head.ejs") %>
+<%- include('./includes/top.ejs') %>
+<div class="logging" style="-webkit-app-region: drag">
+    <img width="120" src="asset://img/icons/icon.png">
+    <div class="flex gap-20 align-center">
+        <span class="loader-3"></span>
+        <h4><%= FZUtils.getLangKey("logging.work") %></h4>
+    </div>
+</div>
+<script src="asset://js/logging.js"></script>
+<script>
+    const srcDir = '<%= srcDir %>'
+    const logging = new Logging(document);
+    var btn = document.querySelector('addAccountContinue')
+</script>
+<% if (type == "form") { %>
+    <script>logging.addAccount('<%= form.username %>', '<%= form.password %>', '<%= form.user2FA %>')</script>
+<% }else if(type == "autolog") { %>
+    <script>logging.auth('<%= form.accessToken %>')</script>
+<% } %>

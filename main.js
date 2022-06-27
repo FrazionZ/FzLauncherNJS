@@ -1,33 +1,55 @@
-const { app, BrowserWindow, dialog, ipcMain, Notification } = require('electron')
+const { app, electron, BrowserWindow, dialog, ipcMain, Notification } = require('electron')
+const Store = require('electron-store');
 const path = require('path')
+var appRoot = require('app-root-path');
 const fs = require('fs')
-const Login = require('./src/js/login.js')
+const Login = require('./src/assets/js/login.js')
+const Sentry = require('@sentry/electron');
 const remoteMain = require('@electron/remote/main')
-const FZUtils = require('./src/js/utils.js');
+const FZUtils = require('./src/assets/js/utils.js');
+const JSONUtils = require('./src/assets/js/JSONUtils.js');
+const Fr = require('./src/languages/fr.json');
+const servers = require('./server_config.json');
 require('log-timestamp');
 
+const renderer = require('@futurelucas4502/light-electron-renderer')
+const ejs = require('ejs');
+const { get } = require('request');
+
 app.commandLine.appendSwitch ("disable-http-cache");
+
+let mainWindow;
+let store;
+
+renderer.use(ejs, true, __dirname+ '/src/assets', __dirname+ '/src/template', ejs.renderFile, undefined, false)
+
+Sentry.init({ dsn: "https://22c32b0ec90c4a56924fd5d6e485e698@o1296996.ingest.sentry.io/6524957" });
 
 async function createWindow() {
 
     remoteMain.initialize();
 
-    const mainWindow = new BrowserWindow({
+    store = new Store({accessPropertiesByDotNotation: false});
+
+    var cantOpenDevTools = (((store.has('session')) ? store.get('session').role.is_admin : false));
+
+    mainWindow = new BrowserWindow({
         width: 1280, 
         height: 720,
         maximizable: false,
         resizable: false,
-        devTools: true,
         autoHideMenuBar: true,
-        frame: process.platform === 'darwin',
+        frame: false,
         title: "FrazionZ Launcher",
         app: "production",
-        icon: path.join(__dirname, "src/img/icons/icon.png"),
+        titleBarStyle: 'hidden',
+        icon: path.join(__dirname, "src/assets/img/icons/icon.png"),
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
             webviewTag: true,
+            devTools: true,
             enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }
@@ -35,10 +57,7 @@ async function createWindow() {
 
     remoteMain.BrowserWindow = mainWindow;
 
-    remoteMain.enable(mainWindow.webContents)
-
-    mainWindow.setMinimumSize(1280, 720);
-    mainWindow.setMaximumSize(1920, 1080);
+    remoteMain.enable(mainWindow.webContents);
 
     mainWindow.center();
 
@@ -63,9 +82,26 @@ async function createWindow() {
         })
     }
 
-    process.noAsar = true
+    process.noAsar = false
 
-    mainWindow.loadURL(__dirname+'/src/template/updater/index.html')
+    if(!store.has('lang')) store.set('lang', 'fr')
+
+    var lang = ((store.has('lang')) ? require('./src/languages/'+store.get('lang')+'.json') : Fr)
+
+    var loadURL = (url, data) => {
+        var datas = FZUtils.initVariableEJS(data)
+        datas.then((dataFind) => {
+            try {
+                renderer.load(mainWindow, url, dataFind)
+            }catch(e){
+                console.log(e)
+            }
+        })
+    }
+    
+
+
+    loadURL('/updater/index', [])
 
     mainWindow.webContents.on('will-navigate', async function(e, url) {
         const open = require('open');
@@ -75,20 +111,25 @@ async function createWindow() {
         }
     })
     var afterUpdateAndRuntime = function() {
-        mainWindow.loadURL(__dirname+'/src/template/layouts.html',  {"extraHeaders" : "pragma: no-cache\n"})
-        const login = new Login(mainWindow.webContents);
+        store.set('gameLaunched', false);
+        if(store.has('session'))
+            loadURL('/logging', [{form: {accessToken: store.get('session').access_token}}, {type: "autolog"}])
+        else
+            loadURL('/login', [])
+        /*const login = new Login(mainWindow.webContents);
         login.store.set('gameLaunched', false)
         login.store.delete('downloads')
-        login.showPage(true);
+        login.showPage(true);*/
     };
 
     ipcMain.on('loadAppAfterUpdate', () => {
         if(process.platform === "win32"){
             FZUtils.javaversion(dirFzLauncherDatas, function(err,version){
-                if(err)
-                    mainWindow.loadURL(__dirname+'/src/template/runtime/index.html')
-                else
+                if(err){
+                    loadURL('/runtime/index', [])
+                }else{
                     afterUpdateAndRuntime()
+                }
             })
         }else{
             afterUpdateAndRuntime()
@@ -117,8 +158,21 @@ async function createWindow() {
         await open(data);
     })
 
+    ipcMain.on('loadURL', async (event, data) => {
+        loadURL(data.url, data.datas);
+    })
+
+    ipcMain.on('ejseData', async (event, data) => {
+    })
+
     ipcMain.handle('executeCode', async  (event, data) => {
         mainWindow.webContents.executeJavaScript(data+";0")
+    })
+
+    ipcMain.on('showDevTools', (event, data) => {
+        var cantOpenDevTools = (((store.has('session')) ? store.get('session').role.is_admin : false));
+        if(cantOpenDevTools)
+            mainWindow.webContents.openDevTools();
     })
 
     ipcMain.on('showApp', (event, data) => {

@@ -1,0 +1,38 @@
+<%- include('../includes/head.ejs') %>
+<%- include('../includes/top.ejs') %>
+
+<div class="body">
+    <%- include('../includes/sidebar.ejs') %>
+    <div class="main connected w-100">
+        <div class="content-child">
+            <div class="server page hide"></div>
+            <div class="downloads page hide"></div>
+            <div class="settings page hide"></div>
+            <div class="profile page hide"></div>
+        </div>
+    </div>
+</div>
+<%- include('../includes/script.ejs') %>
+<script src="asset://js/connected/layout.js"></script>
+<% if(typeof openPage == 'string') { %>
+    <script>
+        var linkPage = $('.parent-menu-link[href=<%= linkPage %>]');
+        var openPage = '<%= openPage %>';
+    </script>
+<% }else{ %>
+    <script>
+        var linkPage = 'nav_server_0';
+        var openPage = 'server';
+    </script>
+<% } %>
+<script>
+    new Layout(linkPage, openPage);
+</script>
+<% if(typeof notyf == 'object') { %>
+    <% if(notyf.type == "success") { %>
+        <script>notyf.success('<%= notyf.value %>');</script>
+    <% } %>
+    <% if(notyf.type == "error") { %>
+        <script>notyf.error('<%= notyf.value %>');</script>
+    <% } %>
+<% } %>

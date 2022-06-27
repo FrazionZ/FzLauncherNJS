@@ -1,0 +1,105 @@
+<div class="server index reset-mp">
+  <div class="head pl-40 pr-40 pt-40">
+    <div class="flex pd-30 gap-30">
+      <div class="server__logo">
+        <img src="asset://<%= server_current.server.urlLogo %>" width="160" height="160" alt="logo_server">
+      </div>
+      <div class="infos">
+        <h2 class="reset-mp underline server__title"><%= server_current.server.name %></h2>
+        <h4 class="server__description mt-10"><%= server_current.server.expl_server %></h4>
+      </div>
+    </div>
+    <button class="btn btn-primary btn-download-launch-game btn-progress" disabled>
+      <div class="content"><span class="label"><%= FZUtils.getLangKey("general.pwait") %></span></div>
+      <div class="progress">
+          <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
+      </div>
+    </button>
+    <ul class="nav nav-pills mb-3 menu" id="pills-tab" role="tablist">
+      <li class="nav-item" role="presentation">
+        <a class="active" id="pills-news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab" aria-controls="pills-news" aria-selected="true">
+          <%= FZUtils.getLangKey("server.tabs.news") %>
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="" id="pills-pnotes-tab" data-bs-toggle="tab" data-bs-target="#pnotes" type="button" role="tab" aria-controls="pills-pnotes" aria-selected="false">
+          <%= FZUtils.getLangKey("server.tabs.pnotes") %>
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="" id="pills-rpacks-tab" data-bs-toggle="tab" data-bs-target="#rpacks" type="button" role="tab" aria-controls="pills-rpacks" aria-selected="false">
+          <%= FZUtils.getLangKey("server.tabs.rpacks") %>
+        </a>
+      </li>
+      <li class="nav-item" role="presentation">
+        <a class="" id="pills-config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab" aria-controls="pills-config" aria-selected="false">
+          <%= FZUtils.getLangKey("server.tabs.settings") %>
+        </a>
+      </li>
+    </ul>
+  </div>
+  <div class="tab-content pl-40 pr-40 pb-40" id="tab-server">
+    <div class="tab-pane fade show active" id="news" role="tabpanel" aria-labelledby="pills-news-tab">
+      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+    </div>
+    <div class="tab-pane fade" id="pnotes" role="tabpanel" aria-labelledby="pills-pnotes-tab">
+      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+    </div>
+    <div class="tab-pane fade" id="rpacks" role="tabpanel" aria-labelledby="pills-rpacks-tab">
+      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+    </div>
+    <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="pills-config-tab">
+      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+    </div>
+  </div>
+</div>
+<script src="asset://js/utils.js"></script>
+<script>
+  const path = require('path');
+  const Server = require(path.join('<%= srcDir %>', 'assets/js/connected/server.js'))
+  const Play = require(path.join('<%= srcDir %>', 'assets/js/connected/server/subpage/play.js'))
+  var server = new Server('<%= server_current.idServer %>');
+  var rootDir = require('electron-root-path').rootPath;
+
+  var play = new Play('<%= server_current.idServer %>');
+  setTimeout(async() => {
+    await play.preInit();
+  }, 800);
+
+  function loadTab(tab, data_bs_target){
+    var link = data_bs_target;
+
+    
+    var data = [{session: play.store.get('session')}]
+    FZUtils.initVariableEJS(data).then((datar) => {
+      ejs.renderFile(appRoot.path+"/src/template/connected/server/subpage/"+link.replaceAll('#', '')+".ejs", datar, {}, (err, str) => {
+        if (err) return console.log(err)
+        $('.tab-content').find(link).find('.server').html(str)
+      })
+    })
+    tab.setAttribute("aload", "true");
+  }
+
+  //INIT CONFIG
+  loadTab(document.querySelector('#pills-config-tab'), "#config");
+
+  var triggerTabList = [].slice.call(document.querySelectorAll('#pills-tab a'))
+    triggerTabList.forEach(function (triggerEl) {
+        var tabTrigger = new bootstrap.Tab(triggerEl)
+
+        //LOAD FIRST SUBPAGE ACTIVE DEFAULT
+        if(triggerEl.getAttribute('class').includes('active')){
+            var link = triggerEl.getAttribute('data-bs-target');
+            loadTab(triggerEl, "#news")
+            tabTrigger.show()
+        }
+
+        triggerEl.addEventListener('click', function (event) {
+            event.preventDefault()
+            if(!triggerEl.hasAttribute("aload")) {
+                loadTab(triggerEl, triggerEl.getAttribute('data-bs-target'))
+            }
+            tabTrigger.show()
+        })
+    })
+</script>

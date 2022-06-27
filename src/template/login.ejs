@@ -1,0 +1,54 @@
+<%- include('./includes/head.ejs') %>
+<%- include('./includes/top.ejs') %>
+<div class="login w-100">
+    <div class="login-flex" style="height: calc(100vh - 8em) !important;"">
+        <% if(typeof twofa !== 'boolean') { %>
+            <div class="form" id="addAccountForm">
+                <div class="form-group">
+                    <h2 class="pt-30 pb-10 underline"><%= FZUtils.getLangKey("login.form.email") %></h2>
+                    <input type="text" placeholder="<%= FZUtils.getLangKey("login.form.email") %>" name="email" id="email">
+                </div>
+                <div class="form-group pb-20">
+                    <h2 class="pt-30 pb-10 underline"><%= FZUtils.getLangKey("login.form.pword") %></h2>
+                    <input type="password" placeholder="<%= FZUtils.getLangKey("login.form.pword") %>" name="password"  id="password">
+                </div>
+                <button class="btn addAccountContinue btn-primary w-100">
+                    Continuer
+                </button>
+            </div>
+        <% } else { %>
+            <div class="form" id="2FAForm">
+                <input type="text" class="hide" value="<%= loginForm.userMail %>" placeholder="<%= FZUtils.getLangKey("login.form.email") %>" name="email" id="email">
+                <input type="password" class="hide" value="<%= loginForm.userPassword %>" placeholder="<%= FZUtils.getLangKey("login.form.pword") %>" name="password"  id="password">
+                <div class="form-group pb-20">
+                    <h2 class="pt-30 pb-10 underline"><%= FZUtils.getLangKey("login.form.2fa") %></h2>
+                    <div class="flex gap-15">
+                        <input type="number" min="1" maxlength="1" placeholder="0" name="code"  id="code_1">
+                        <input type="number" min="1" maxlength="1" placeholder="0" name="code"  id="code_2">
+                        <input type="number" min="1" maxlength="1" placeholder="0" name="code"  id="code_3">
+                        <input type="number" min="1" maxlength="1" placeholder="0" name="code"  id="code_4">
+                        <input type="number" min="1" maxlength="1" placeholder="0" name="code"  id="code_5">
+                        <input type="number" min="1" maxlength="1" placeholder="0" name="code"  id="code_6">
+                    </div>
+                </div>
+                <button class="btn 2FAAccountContinue btn-primary w-100">
+                    Continuer
+                </button>
+            </div>
+        <% } %>
+        <div class="infos w-100">
+        </div>
+    </div>   
+</div>
+<script src="asset://js/notyf.min.js"></script>
+<%- include('./includes/footer.ejs') %>
+<script src="asset://js/login.js"></script>
+<script>
+    const login = new Login(document);
+    var btn = document.querySelector('addAccountContinue')
+</script>
+<% if(typeof notyf == 'object') { %>
+    <% if(notyf.type == "error") { %>
+        <script>notyf.error('<%= notyf.value %>');</script>
+    <% } %>
+<% } %>

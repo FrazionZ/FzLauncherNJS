@@ -1,0 +1,38 @@
+<div class="config pl-60 pr-60 pb-30">
+    <h2 class="pt-30 pb-10 underline">Paramètres</h2>
+    <div class="card pd-30">
+        <div class="card-body flex gap-15 justif-between direct-column">
+            <div class="config-item">
+                <div class="column flex direct-column justif-center">
+                    <h2 class="label__config reset-mp">Language</h2>
+                    <h2 class="expl__config reset-mp">Changer la langue du launcher</h2>
+                </div>
+                <div class="flex align-center gap-20">
+                    <div class="dropdown">
+                        <button class="btn btn-secondary black-2 settings__lang_dmenu dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <%= FZUtils.getLangInfos().display %>
+                        </button>
+                        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                            <% langsLocale.forEach(function(lang) { %>
+                                <li><a class="dropdown-item settings__lang_item" data-lang="<%= lang.keycode %>"><%= lang.display %></a></li>
+                            <% }); %>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="config-item devTools">
+                <div class="column flex direct-column justif-center">
+                    <h2 class="label__config reset-mp">DevTools</h2>
+                    <h2 class="expl__config reset-mp">Ouvrir la fenêtre DevTools Electron (Pour les experts uniquement)</h2>
+                </div>
+                <div class="flex align-center gap-20">
+                    <a class="btn btn-primary settings__open_devTools">Ouvrir</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    var Settings = require('<%= srcDir %>assets/js/connected/settings.js');
+    var settings = new Settings();
+</script>

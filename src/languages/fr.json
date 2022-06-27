@@ -1,7 +1,53 @@
 {
-    "login": {
-        "result": {
-            "logged": "Connecté en tant que %session__name%"
-        }
+    "infos": {
+        "display": "Français",
+        "keycode": "fr"
+    },
+    "keys": {
+        "general.pwait": "Veuillez patienter..",
+        "login.form.email": "Adresse Mail",
+        "login.form.pword": "Mot de passe",
+        "login.form.2fa": "2FA",
+        "logging.work": "Authentification en cours..",
+        "logging.result.logged": "Connecté en tant que %session__name%",
+        "logging.result.form_empty": "Vous devez remplir le formulaire !",
+        "logging.result.credentials": "Identifiants invalides.",
+        "logging.result.internal_error": "Une erreur interne est survenue :'(",
+        "logging.result.token_expired": "Votre token d'accès n'est plus valide. Veuillez vous reconnecter.",
+        "logging.result.2fa.require": "Vous devez saisir votre code 2FA pour continuer",
+        "updater.in_progress": "Mise à jour",
+        "runtime.download": "Téléchargement de Java",
+        "runtime.extract": "Extraction de Java",
+        "runtime.expl": "Afin de garantir une meilleur prise en charge de Minecraft et de FrazionZ sur Windows, Nous installons notre moteur Java.",
+        "sidebar.navs.downloads": "Téléchargements",
+        "sidebar.navs.settings": "Paramètres",
+        "downloads.title": "Téléchargements",
+        "downloads.pending": "En cours",
+        "downloads.end": "Terminés",
+        "downloads.noth_pending": "Aucun téléchargements en cours",
+        "downloads.noth_end": "Aucun téléchargements en terminés",
+        "server.tabs.news": "Actualités",
+        "server.tabs.pnotes": "Patch Notes",
+        "server.tabs.rpacks": "Ressources Packs",
+        "server.tabs.settings": "Configuration",
+        "server.play.java_nf": "Java non trouvée",
+        "server.play.btn.play": "Jouer",
+        "server.play.btn.install": "Installer",
+        "server.play.btn.repare": "Réparer",
+        "server.play.btn.update": "Mettre à jour",
+        "server.pnotes.title": "Patch Notes",
+        "server.pnotes.categorie.add": "Ajouts",
+        "server.pnotes.categorie.improve": "Améliorations",
+        "server.pnotes.categorie.update": "Modifications",
+        "server.pnotes.categorie.remove": "Suppressions",
+        "server.pnotes.msg.error": "Impossile de récupérer le patch notes",
+        "server.rpacks.title": "Ressources Packs",
+        "server.rpacks.staff": "Les packs de cette liste sont approuvés par le staff avant publication.",
+        "server.rpacks.author": "Par %author__name%",
+        "server.config.title": "Configuration",
+        "server.config.ram.title": "Allouage de la ram",
+        "server.config.ram.subtitle": "Vous permet d’allouer plus ou moins de mémoire pour le processus Java du client MC",
+        "server.config.drpc.title": "Discord RPC",
+        "server.config.drpc.subtitle": "Utiliser Discord RPC via le jeu"
     }
 }

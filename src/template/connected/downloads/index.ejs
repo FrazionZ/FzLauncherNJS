@@ -1,0 +1,25 @@
+<div class="pl-60 pr-60 pb-30">
+    <h2 class="pt-30 pb-10 underline"><%= FZUtils.getLangKey("downloads.title") %></h2>
+    <div class="flex gap-10 direct-column">
+        <div class="column">
+            <h5><%= FZUtils.getLangKey("downloads.pending") %></h5>
+            <div class="listDls flex gap-10 direct-column">
+                <span class="nothing text-center pt-30 pb-30 text-gray">
+                    <%= FZUtils.getLangKey("downloads.noth_pending") %>
+                </span>
+            </div>
+        </div>
+        <div class="column">
+            <h5><%= FZUtils.getLangKey("downloads.end") %></h5>
+            <div class="endListDls flex gap-10 direct-column">
+                <span class="nothing text-center pt-30 pb-30 text-gray">
+                    <%= FZUtils.getLangKey("downloads.noth_end") %>
+                </span>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    const Downloads = require(path.join('<%= srcDir %>', 'assets/js/connected/downloads.js'))
+    var downloads = new Downloads();
+</script>

@@ -1,0 +1,109 @@
+var Notyf = require('notyf');
+const path = require('path');
+const rootPath = require('electron-root-path').rootPath;
+const Store = require('electron-store');
+const FZUtils = require('./utils.js');
+const server_config = require(path.join(__dirname, '../../../server_config.json'));
+const { v4: uuidv4 } = require('uuid');
+
+class FzPage {
+
+    constructor(webDocs, page) {
+        this.fs = require('fs')
+        this.path = path;
+        this.rootPath = rootPath;
+        this.store = new Store({accessPropertiesByDotNotation: false});
+        this.session = ((this.store.has('session')) ? this.store.get('session') : undefined)
+        this.ipcRenderer = require("electron").ipcRenderer;
+        this.dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
+        this.dirFzLauncherDatas = this.dirFzLauncherRoot + "\\Launcher";
+        this.dirFzLauncherServer = this.dirFzLauncherRoot + "\\Servers";
+        this.page = page;
+        this.webDocs = webDocs;
+        FZUtils.initCustomTlBar();
+    }
+
+    getPage(){
+        return this.page;
+    }
+
+    notyf(type, message){
+        this.bwExecJS(false, 'notyf.dismissAll(); notyf.'+type+'("'+message+'");')
+    }
+
+    dataPackage(){
+        const appRoot = require('app-root-path');
+        let rawdata = this.fs.readFileSync(appRoot.path+'\\package.json')
+        let json = JSON.parse(rawdata);
+        return json;
+    }
+
+    setWebContent(webContents){
+        this.webDocs = webContents;
+    }
+
+    bwExecJS(isInit, code){
+        return FZUtils.ExecuteCodeJS(code)
+        /*const BrowserWindow = require('@electron/remote/main').BrowserWindow;
+        if(BrowserWindow !== undefined)
+            return BrowserWindow.webContents.executeJavaScript(code+';0')
+        else
+            return require('@electron/remote').BrowserWindow.getFocusedWindow().webContents.executeJavaScript(code+';0')*/
+    }
+
+    showPage(isInit){
+        //main
+        this.bwExecJS(isInit, '$("body").find(".main").load("./'+this.page+'");')
+        this.bwExecJS(isInit, '$("body").find("#script").load("./script.html");');
+    }
+
+    checkFileExists(file) {
+        return this.fs.promises.access(file, this.fs.constants.F_OK)
+                 .then(() => true)
+                 .catch(() => false)
+    }
+
+    getDataSession(key){
+        var profile = this.store.get("session");
+        var dataSend = "not_define";
+        switch (key) {
+            case 'username':
+                dataSend = profile.username;
+                break;
+            case 'email':
+                dataSend = profile.email;
+                break;
+            case 'rank':
+                dataSend = profile.role.name;
+                break;
+            default:
+                dataSend = "not_define";
+        }              
+        return dataSend;
+    }
+
+    initSessionSpan(className){
+    }
+
+    utf8_to_b64( str ) {
+        return window.btoa(unescape(encodeURIComponent( str )));
+    }
+
+    hideModal(){
+        var modal = bootstrap.Modal.getInstance(document.querySelector("body").querySelector("#modal").querySelector(".modal"));
+        modal.hide()
+    }
+
+    showModal(isInit, id, promise) {
+        $("body").find("#modal").load("./modals/"+id+".html", () => {
+            var modal = bootstrap.Modal.getInstance(document.querySelector("body").querySelector("#modal").querySelector(".modal"));
+            modal.show()
+        });
+    }
+    
+
+    
+
+}
+
+module.exports = FzPage;

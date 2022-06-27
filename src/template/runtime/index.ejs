@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="asset://css/bootstrap.min.css">
+        <link rel="stylesheet" href="asset://css/style.css">
+        <link rel="stylesheet" type="text/css" href="asset://css/notyf.min.css">
+    </head>
+    <body>
+        <br><br><br><br>
+        <img src="asset://img/icons/icon.png" style="display:block;margin:0 auto;width:100px;">
+        <div class="text-center"><br><br>
+            <h3 for="download" class="text-white" id="download-label"></h3>
+            <h6 for="download" class="text-gray" id="download-sublabel"><%= FZUtils.getLangKey("runtime.expl") %></h6><br>
+            <progress id="downloadbar"  max="100" value="-1"></progress>
+        </div>
+        <script src="asset://js/notyf.min.js"></script>
+        <script>
+            var notyf = new Notyf();
+        </script>
+        <script>
+            dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
+            dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";
+            
+            var path = require('path');
+            var appRoot = require('app-root-path');
+            const Runtime = require(path.join(appRoot.path, "/src/assets/js/runtime.js"))
+            const runtime = new Runtime(dirFzLauncherDatas+"\\runtime");
+        </script>
+    </body>
+</html>

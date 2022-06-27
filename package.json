@@ -1,6 +1,6 @@
 {
   "name": "fzlauncher",
-  "version": "1.1.4",
+  "version": "1.2.0",
   "description": "",
   "email": "florent.cala@gmail.com",
   "main": "main.js",
@@ -21,7 +21,7 @@
       "target": [
         "nsis"
       ],
-      "icon": "src/img/icons/frazionz-logo.ico"
+      "icon": "src/assets/img/icons/frazionz-logo.ico"
     },
     "dmg": {
       "contents": [
@@ -50,8 +50,8 @@
       "!build/*"
     ],
     "nsis": {
-      "installerIcon": "src/img/icons/frazionz-logo.ico",
-      "uninstallerIcon": "src/img/icons/frazionz-logo.ico",
+      "installerIcon": "src/assets/img/icons/frazionz-logo.ico",
+      "uninstallerIcon": "src/assets/img/icons/frazionz-logo.ico",
       "uninstallDisplayName": "FrazionZ Launcher",
       "oneClick": true,
       "allowToChangeInstallationDirectory": false
@@ -61,27 +61,29 @@
   "author": "FrazionnZ_Dev <florent.cala@gmail.com> ",
   "license": "ISC",
   "devDependencies": {
+    "cross-env": "^7.0.3",
     "electron": "^19.0.4",
     "electron-builder": "^23.0.3"
   },
   "dependencies": {
     "@electron/remote": "^2.0.8",
-    "@treverix/custom-electron-titlebar": "^4.2.0",
-    "@trixcms/nauth": "^1.0.21",
+    "@futurelucas4502/light-electron-renderer": "^1.0.3",
+    "@sentry/electron": "^3.0.7",
     "app-root-path": "^3.0.0",
-    "asar-updater": "^0.3.2",
     "axios": "^0.27.2",
     "azuriom-auth": "^0.1.2",
     "child_process": "^1.0.2",
     "crypto": "^1.0.1",
-    "download": "^8.0.0",
+    "ejs": "^3.1.8",
     "electron-asar-hot-updater": "^0.1.3",
     "electron-better-ipc": "^2.0.1",
+    "electron-is-packaged": "^1.0.2",
+    "electron-root-path": "^1.0.16",
     "electron-store": "^8.0.1",
+    "fetch": "^1.1.0",
     "find-java-home": "^1.2.2",
     "follow-redirects": "^1.15.0",
     "fs": "^0.0.1-security",
-    "getmac": "^5.20.0",
     "got": "^12.1.0",
     "handlebars": "^4.7.7",
     "http": "^0.0.1-security",
@@ -91,6 +93,7 @@
     "jsdom": "^19.0.0",
     "log-timestamp": "^0.3.0",
     "md5-file": "^5.0.0",
+    "node-fetch": "^2.6.7",
     "notyf": "^3.10.0",
     "onezip": "^5.0.0",
     "open": "^8.4.0",
