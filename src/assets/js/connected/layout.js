@@ -13,12 +13,12 @@ class Layout {
         this.fs = require('fs');
         server_config.forEach((item, key) => {
             var serverNav =
-            '<li class="parent-menu-link" class="nav" id="nav_server_'+key+'" data-bs-toggle="tooltip" data-bs-placement="right" title="'+item.name+'">' +
-                '<a class="menu-link" href="#server" data-server-id="' + key + '">' +
-                    '<img width="36" height="36" src="asset://' + item.urlLogo + '">' + item.name
-                '</a>'
-            '</li>';
-            $('.sidebar').find('#servers').append(serverNav);
+                '<li class="parent-menu-link" class="nav" id="nav_server_'+key+'" data-bs-toggle="tooltip" data-bs-placement="right" title="'+item.name+'">' +
+                    '<a class="menu-link" href="#server" data-server-id="' + key + '">' +
+                        '<img width="36" height="36" src="asset://' + item.urlLogo + '">' + item.name
+                    '</a>'
+                '</li>';
+                $('.sidebar').find('#servers').append(serverNav);
         });
 
 

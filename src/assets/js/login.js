@@ -17,7 +17,7 @@ class Login extends FzPage {
         $('.addAccountContinue').on('click', async() => {
             instance.initAddAccount(twofaInstance);
         });
-        $('.2FAAccountContinue').on('click', async() => {
+        $('.TWOFAAccountContinue').on('click', async() => {
             instance.initAddAccount(twofaInstance);
         })
         if(twofaInstance){

@@ -12,9 +12,9 @@
             </div>
         </div>
     </div>
-    <div class="card pd-30">
+    <div class="card pd-15">
         <div class="card-body flex gap-15 justif-between direct-column">
-            <div class="config-item">
+            <div class="config-item pd-15 ">
                 <div class="column flex direct-column justif-center">
                     <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.drpc.title") %></h2>
                     <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.drpc.subtitle") %></h2></h2>
@@ -26,10 +26,10 @@
                     </div>
                 </div>
             </div>
-            <div class="config-item">
+            <div class="config-item pd-15 ">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Minimiser le launcher au lancement</h2>
-                    <h2 class="expl__config reset-mp">Cacher la fenêtre du launcher et le relancer une fois la session terminée</h2>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.miniseapp.title") %></h2>
+                    <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.miniseapp.subtitle") %></h2>
                 </div>
                 <div class="flex align-center gap-20">
                     <div class="ui toggle checkbox mb-10">
@@ -38,10 +38,10 @@
                     </div>
                 </div>
             </div>
-            <div class="config-item">
+            <div class="config-item pd-15 ">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Moteur d'exécution Java - FzLauncher</h2>
-                    <h2 class="expl__config reset-mp">Utiliser ou non le moteur Java installé par FrazionZ Launcher</h2>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.runtime.title") %></h2>
+                    <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.runtime.subtitle") %></h2>
                 </div>
                 <div class="flex align-center gap-20">
                     <div class="ui toggle checkbox mb-10">
@@ -50,10 +50,10 @@
                     </div>
                 </div>
             </div>
-            <div class="config-item">
+            <div class="config-item pd-15">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Nettoyage automatique du cache des skins et des capes</h2>
-                    <h2 class="expl__config reset-mp">Supprime automatiquement le cache au lancement</h2>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.autosc.title") %></h2>
+                    <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.autosc.subtitle") %></h2>
                 </div>
                 <div class="flex align-center gap-20">
                     <div class="ui toggle checkbox mb-10">
@@ -62,10 +62,10 @@
                     </div>
                 </div>
             </div>
-            <div class="config-item">
+            <div class="config-item pd-15">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Jeu en plein écran</h2>
-                    <h4 class="expl__config reset-mp">Affiche le jeu automatiquement en pleine écran</h4>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.fullscreen.title") %></h2>
+                    <h4 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.fullscreen.subtitle") %></h4>
                 </div>
                 <div class="flex align-center gap-20">
                     <div class="ui toggle checkbox mb-10">
@@ -74,48 +74,48 @@
                     </div>
                 </div>
             </div>
-            <div class="config-item">
+            <div class="config-item pd-15">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Taille de la fenêtre</h2>
-                    <h2 class="expl__config reset-mp">Modifie la taille de la fenêtre de jeu</h2>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.display.title") %></h2>
+                    <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.display.subtitle") %></h2>
                 </div>
                 <div class="flex align-center gap-20">
                     <div class="flex gap-15">
                         <input type="number" class="format settings_number" id="config__display_width" value="1280" min="800">
                         <input type="number" class="format settings_number" id="config__display_height" value="720" min="600">
-                        <a class="btn btn-primary config__server_display_size">Valider</a>
+                        <a class="btn btn-primary config__server_display_size"><%= FZUtils.getLangKey("general.done") %></a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-    <div class="card pd-30">
+    <div class="card pd-15">
         <div class="card-body flex gap-15 justif-between direct-column">
-            <div class="config-item">
+            <div class="pd-15 config-item">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Nettoyer les fichiers</h2>
-                    <h2 class="expl__config reset-mp">Ceci est une description</h2>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.cleandir.title") %></h2>
+                    <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.cleandir.subtitle") %></h2>
                 </div>
                 <div class="flex align-center gap-20">
-                    <a class="btn btn-primary config__clear_dir">Nettoyer</a>
+                    <a class="btn btn-primary config__clear_dir"><%= FZUtils.getLangKey("server.config.cleandir.action") %></a>
                 </div>
             </div>
-            <div class="config-item">
+            <div class="config-item pd-15">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Réparer le jeu</h2>
-                    <h2 class="expl__config reset-mp">Ceci est une description</h2>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.repare.title") %></h2>
+                    <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.repare.subtitle") %></h2>
                 </div>
                 <div class="flex align-center gap-20">
-                    <a class="btn btn-primary config__repare_dir">Réparer</a>
+                    <a class="btn btn-primary config__repare_dir"><%= FZUtils.getLangKey("server.config.repare.action") %></a>
                 </div>
             </div>
-            <div class="config-item">
+            <div class="config-item pd-15">
                 <div class="column flex direct-column justif-center">
-                    <h2 class="label__config reset-mp">Cache des skins et capes</h2>
-                    <h2 class="expl__config reset-mp">Ceci est une description</h2>
+                    <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("server.config.cleansc.title") %></h2>
+                    <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("server.config.cleansc.subtitle") %></h2>
                 </div>
                 <div class="flex align-center gap-20">
-                    <a class="btn btn-primary config__clear_cachesc_dir">Vider</a>
+                    <a class="btn btn-primary config__clear_cachesc_dir"><%= FZUtils.getLangKey("server.config.cleansc.action") %></a>
                 </div>
             </div>
       
@@ -124,7 +124,7 @@
 </div>
 <script>
     var Settings = require(path.join('<%= srcDir %>', '/assets/js/connected/server/subpage/settings.js'));
-    new Settings('<%= server_current.idServer %>');
+    var settingsServer = new Settings('<%= server_current.idServer %>');
 
     
 </script>

@@ -1,6 +1,6 @@
 {
   "name": "fzlauncher",
-  "version": "1.2.0",
+  "version": "1.2.4",
   "description": "",
   "email": "florent.cala@gmail.com",
   "main": "main.js",
@@ -12,8 +12,8 @@
     "build-installer": "electron-builder"
   },
   "build": {
-    "productName": "FrazionZLauncher",
-    "appId": "FrazionZLauncher",
+    "productName": "FrazionZ Launcher",
+    "appId": "FrazionZ Launcher",
     "directories": {
       "output": "build"
     },
@@ -92,6 +92,7 @@
     "jQuery": "^1.7.4",
     "jsdom": "^19.0.0",
     "log-timestamp": "^0.3.0",
+    "markdown-it": "^13.0.1",
     "md5-file": "^5.0.0",
     "node-fetch": "^2.6.7",
     "notyf": "^3.10.0",

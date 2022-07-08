@@ -16,5 +16,5 @@
 <% if (type == "form") { %>
     <script>logging.addAccount('<%= form.username %>', '<%= form.password %>', '<%= form.user2FA %>')</script>
 <% }else if(type == "autolog") { %>
-    <script>logging.auth('<%= form.accessToken %>')</script>
+    <script>logging.auth()</script>
 <% } %>

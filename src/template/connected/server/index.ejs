@@ -9,7 +9,7 @@
         <h4 class="server__description mt-10"><%= server_current.server.expl_server %></h4>
       </div>
     </div>
-    <button class="btn btn-primary btn-download-launch-game btn-progress" disabled>
+    <button class="btn btn-primary btn-download-launch-game btn-progress" id="btnDLGFirst" disabled>
       <div class="content"><span class="label"><%= FZUtils.getLangKey("general.pwait") %></span></div>
       <div class="progress">
           <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
@@ -68,8 +68,6 @@
 
   function loadTab(tab, data_bs_target){
     var link = data_bs_target;
-
-    
     var data = [{session: play.store.get('session')}]
     FZUtils.initVariableEJS(data).then((datar) => {
       ejs.renderFile(appRoot.path+"/src/template/connected/server/subpage/"+link.replaceAll('#', '')+".ejs", datar, {}, (err, str) => {
@@ -96,6 +94,8 @@
 
         triggerEl.addEventListener('click', function (event) {
             event.preventDefault()
+            $('.tab-pane.show.active').removeClass('show')
+            $('.tab-pane.active').removeClass('active')
             if(!triggerEl.hasAttribute("aload")) {
                 loadTab(triggerEl, triggerEl.getAttribute('data-bs-target'))
             }

@@ -16,9 +16,10 @@ class Settings extends FzPage {
             return 'server_'+this.server.name.toLowerCase()+'_'+key;
         }
 
-        this.ramAllocateIndexProperties = ((this.store.has(this.keyStoreServerOptions('ramIndex')) ? (this.store.get(this.keyStoreServerOptions('ramIndex')) + 1) : undefined));
+        this.ramAllocateIndexProperties = ((this.store.has(this.keyStoreServerOptions('ramIndex')) ? (this.store.get(this.keyStoreServerOptions('ramIndex'))) : undefined));
         this.listRamAllocate = FZUtils.listRamAllocate();
         var instance = this;
+
         /*$('#inputRamSelector').change(function() {
             var indexRam = 0;
             $( "#inputRamSelector option:selected" ).each(function() {
@@ -28,9 +29,10 @@ class Settings extends FzPage {
             instance.ramAllocateIndexProperties = indexRam;
             instance.notyf("success", "La ram alloué a bien été changé.")
         })*/
-
         if(this.ramAllocateIndexProperties == undefined)
-            this.ramAllocateIndexProperties = 1;
+            this.ramAllocateIndexProperties = 0;
+
+        var gb = this.listRamAllocate.list[this.ramAllocateIndexProperties].gb;
 
         var setRangeSliderRam = function(value, max) {
             var percent = (((value / max * 100)) - 5);
@@ -41,16 +43,16 @@ class Settings extends FzPage {
 
         
         $('#range_ram_allocate').attr('max', this.listRamAllocate.total_memory)
-        document.getElementById('range_ram_allocate').setAttribute('value', this.ramAllocateIndexProperties);
-        $('.range_ram_indicator').text(this.listRamAllocate.list[this.ramAllocateIndexProperties].gb+" Go")
-        setRangeSliderRam(this.ramAllocateIndexProperties, this.listRamAllocate.total_memory)
+        document.getElementById('range_ram_allocate').setAttribute('value', gb);
+        $('.range_ram_indicator').text(gb+" Go")
+        setRangeSliderRam(gb, this.listRamAllocate.total_memory)
 
         document.getElementById('range_ram_allocate').addEventListener('change',function() {
             //SAVE RAM
             var indexRam = ((document.getElementById('range_ram_allocate').value) - 1);
             instance.store.set(instance.keyStoreServerOptions('ramIndex'), parseInt(indexRam));
             instance.ramAllocateIndexProperties = indexRam;
-            instance.notyf("success", "La ram alloué a bien été changé.")
+            instance.notyf("success", "La ram allouée a bien été changé.")
         });
         $( '#range_ram_allocate' ).on( 'input', function( ) {
             setRangeSliderRam(this.value, this.max)

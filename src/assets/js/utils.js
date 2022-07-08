@@ -63,6 +63,7 @@ async function initVariableEJS(data){
             "language": ((store.has('lang')) ? require('../../languages/'+store.get('lang')+'.json') : Fr),
             "rootDirPath": path.join(rootPath).replaceAll('\\', '\\\\'),
             "rootDirPathNF": path.join(rootPath),
+            "processVersions": process.versions,
             "version": require('../../../package.json').version
         }
     ];
@@ -77,12 +78,17 @@ async function loadURL(url, data){
     ipcRenderer.send('loadURL', {url: url, datas: data});
 }
 
+async function openURLExternal(url) {
+    const { ipcRenderer } = require('electron');
+    ipcRenderer.send('openUrlExternal', {url: url});
+}
+
 async function storeDataEJS(key, data){
     const { ipcRenderer } = require('electron');
     ipcRenderer.send('ejseData', {key: data, data: data});
 }
 
-async function download(instance, installerfileURL, installerfilename, dialog, branch) {
+async function download(instance, installerfileURL, installerfilename, dialog, type, branch) {
     const fs = require('fs')
     const path = require('path')
     const Store = require('electron-store')
@@ -90,7 +96,7 @@ async function download(instance, installerfileURL, installerfilename, dialog, b
     var uuidDl = uuidv4();
     if(dialog){
         downloads.addDownload(uuidDl)
-        downloadsList.push({uuidDl: uuidDl, title: "Téléchargement des fichiers", subtitle: " - ", percentage: 0, finish: false});
+        downloadsList.push({uuidDl: uuidDl, title: type+" - Téléchargement des fichiers", subtitle: " - ", percentage: 0, finish: false});
     }
     return new Promise((resolve, reject) => {
         // Save variable to know progress
@@ -119,7 +125,7 @@ async function download(instance, installerfileURL, installerfilename, dialog, b
             received_bytes += chunk.length;
             var percentage = (received_bytes * 100) / total_bytes;
             if(dialog){
-                downloads.updateDownload(uuidDl, "Téléchargement des fichiers", installerfilename, parseInt(percentage, 10).toString())
+                downloads.updateDownload(uuidDl, type+" - Téléchargement des fichiers", installerfilename, parseInt(percentage, 10).toString())
                 //$('#downloads').find('#'+uuidDl).find('.title').text("Téléchargement des fichiers");
                 //$('#downloads').find('#'+uuidDl).find('.subtitle').text(path.basename(installerfilename));
                 //document.querySelector('.download').querySelector('#progress').style.width = ""+parseInt(percentage, 10).toString()+"%";
@@ -127,7 +133,8 @@ async function download(instance, installerfileURL, installerfilename, dialog, b
 
                 //dlDialog.setPercentBar(percentage)
             }else{
-                document.getElementById('downloadbar').value = percentage
+                document.getElementById('downloadpercent').innerHTML = parseInt(percentage)+'%';
+                document.getElementById('downloadbar').style.width = percentage+'%';
             }
         });
 
@@ -233,4 +240,4 @@ function javaversion(dirLaucher, callback) {
     });
 }
 
-module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }
+module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }

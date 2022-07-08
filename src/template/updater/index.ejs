@@ -2,28 +2,35 @@
 <html lang="en">
     <head>
         <meta charset="UTF-8">
-        <meta http-equiv="Content-Security-Policy" content="script-src 'sha256-CD/2/LK8MFVAaGicz1s0yGOQTesn7M/bUZMVjEgBmGo=' 'self' asset: ">
-        <meta http-equiv="X-Content-Security-Policy" content="script-src 'sha256-CD/2/LK8MFVAaGicz1s0yGOQTesn7M/bUZMVjEgBmGo=' 'self' asset: ">
+        <meta http-equiv="Content-Security-Policy" content="script-src 'sha256-hgFOB7MlKIxGHBnyjI1eK6ao8+8btv5sI95t6DPZWBk=' 'self' asset: ">
+        <meta http-equiv="X-Content-Security-Policy" content="script-src 'sha256-hgFOB7MlKIxGHBnyjI1eK6ao8+8btv5sI95t6DPZWBk=' 'self' asset: ">
         <meta http-equiv="X-UA-Compatible" content="IE=edge">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <link rel="stylesheet" type="text/css" href="asset://css/bootstrap.min.css">
         <link rel="stylesheet" type="text/css" href="asset://css/style.css">
         <link rel="stylesheet" type="text/css" href="asset://css/notyf.min.css">
+        <script src="asset://js/jquery.min.js"></script>
+        <script>
+            window.$ = window.jQuery = require('jQuery');
+        </script>
     </head>
     <body>
-        <br><br><br><br>
-        <img src="asset://img/icons/icon.png" style="display:block;margin:0 auto;width:100px;">
-        <div class="text-center"><br><br>
+        <%- include('../includes/top.ejs') %>
+        <div class="flex align-center gap-30 pt-20 pl-60 pr-60">
+            <div style="width: 30px;height: 28px;" class="loader-3"></div>
+            <div class="flex direct-column w-100">
+                <div class="flex gap-10 align-end">
+                    <h5 id="downloadpercent"></h5><h6 id="downloadhtml"><%= FZUtils.getLangKey("updater.research") %></h6>
+                </div>
+                <div class="progress">
+                    <div class="indicator" id="downloadbar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+        <!--<div class="text-center">
             <label for="download" class="text-white" id="download-label"><%= FZUtils.getLangKey("updater.in_progress") %></label><br>
             <progress id="downloadbar"  max="100" value="-1"></progress>
-        </div>
-        <div id="footer">
-            <p class="text-center copyversion" id="copyversion">© 2021 FrazionZ - Version <%= version %></p>
-        </div>
-        <script src="asset://js/notyf.min.js"></script>
-        <script>
-            var notyf = new Notyf();
-        </script>
+        </div>-->
         <script src="asset://js/updater.js"></script>
     </body>
 </html>

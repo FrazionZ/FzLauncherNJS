@@ -218,7 +218,7 @@ class Play  extends FzPage {
     async installOrRepareOrUpdate(links){
         var instance = this;
         var startLinkDL = function (index) {
-            FZUtils.download(instance, links[index].dlink, instance.path.join(instance.dirServer, links[index].name), true, links[index].branch).then((result) => {
+            FZUtils.download(instance, links[index].dlink, instance.path.join(instance.dirServer, links[index].name), true, instance.server.name, links[index].branch).then((result) => {
                 if(!((index + 1) == links.length))
                     startLinkDL((index + 1))
                 else{
@@ -235,7 +235,7 @@ class Play  extends FzPage {
                     if(fileZipDepend !== undefined) {
                         const pack = onezip.extract(fileZipDepend, instance.dirServer);
                         var uuidDl = uuidv4();
-                        downloadsList.push({uuidDl: uuidDl, title: "Extraction des dépendances", subtitle: " - ", percentage: 0, finish: false});
+                        downloadsList.push({uuidDl: uuidDl, title: instance.server.name+" - Extraction des dépendances", subtitle: " - ", percentage: 0, finish: false});
 
                         var nameCurrent = "";
 
@@ -248,7 +248,7 @@ class Play  extends FzPage {
                         });
                         
                         pack.on('progress', (percent) => {
-                            downloads.updateDownload(uuidDl, "Extraction des dépendances", nameCurrent, parseInt(percent, 10).toString())
+                            downloads.updateDownload(uuidDl, instance.server.name+" - Extraction des dépendances", nameCurrent, parseInt(percent, 10).toString())
                         });
                         
                         pack.on('error', (error) => {

@@ -10,17 +10,19 @@ class Downloads extends FzPage {
 
         this.htmlAppend = function(uuidDl) {
             return '<div class="card dl-items black-4" id="'+uuidDl+'">'+
-                '<div class="card-body flex gap-15 justif-between align-center">'+
-                    '<div class="left flex gap-15">'+
+                '<div class="card-body flex gap-15 direct-column justif-between">'+
+                    '<div class="left flex gap-30 align-center">'+
                         '<div class="icon">'+
-                            //'<img src="../img/icons/icon.png" alt="icon" width="58" height="58">'+
+                            '<span class="percent"></span>'+
                         '</div>'+
-                        '<div class="infos flex direct-column">'+
-                            '<div class="title"></div>'+
-                            '<div class="subtitle"></div>'+
+                        '<div class="infos flex direct-column w-100">'+
+                            '<div class="title  w-100"></div>'+
+                            '<div class="subtitle  w-100"></div>'+
                         '</div>'+
                     '</div>'+
-                    '<div class="percent"></div>'+
+                    '<div class="progress  w-100">'+
+                        '<div class="indicator" id="downloadbar" style="width: 0%;"></div>'+
+                    '</div>'+
                 '</div>'+
             '</div>';
         };
@@ -53,14 +55,16 @@ class Downloads extends FzPage {
         this.addDownload(uuidDl);
         $('.downloads').find('.listDls').find('#'+uuidDl).find('.title').text(title)
         $('.downloads').find('.listDls').find('#'+uuidDl).find('.subtitle').text(subtitle)
-        $('.downloads').find('.listDls').find('#'+uuidDl).find('.percent').text(percentage)
+        $('.downloads').find('.listDls').find('#'+uuidDl).find('.percent').text(percentage+"%")
+        document.querySelector('#downloadbar').style.width = percentage+'%';
     }
 
     finishDownload(uuidDl){
         $('.endListDls').find('.nothing').hide();
         $('.downloads').find('.listDls').find('#'+uuidDl).find('.subtitle').text("Terminé")
-        $('.downloads').find('.listDls').find('#'+uuidDl).find('.percent').text("")
-        $('.downloads').find('.listDls').find('#'+uuidDl).appendTo('.endListDls');
+        $('.downloads').find('.listDls').find('#'+uuidDl).find('.icon').remove()
+        $('.downloads').find('.listDls').find('#'+uuidDl).find('.progress').remove()
+        $('.downloads').find('.listDls').find('#'+uuidDl).prependTo('.endListDls');
         $('.downloads').find('.listDls').find('#'+uuidDl).remove();
         if($('.listDls').find('.dl-items').length == 0)
             $('.listDls').find('.nothing').show();

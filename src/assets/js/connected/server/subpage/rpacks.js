@@ -102,7 +102,7 @@ class RPacks extends FzPage {
                 this.notyf('error', 'Impossible de télécharger le pack, le dossier cible n\'existe pas.');
                 return resolve();
             }
-            FZUtils.download(instance, "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip", dir, true, undefined).then((result) => {
+            FZUtils.download(instance, "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip", dir, true, "Resources Pack", undefined).then((result) => {
                 this.loadList(instance);
                 this.notyf('success', 'Le pack a bien été '+((isUpdate) ? "mis à jour" : "téléchargé"))
                 return resolve();

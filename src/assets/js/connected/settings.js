@@ -21,6 +21,24 @@ class Settings extends FzPage {
             instance.store.set('lang', langKey)
             FZUtils.loadURL('/connected/layout', [{session: instance.store.get('session')}, {linkPage: "#settings"}, {openPage: "settings"}])
         })
+        $('.config__launcher_checkbox').each((index, element) => {
+            if(instance.store.has($(element).attr('data-id'))){
+                $(element).prop('checked', (instance.store.get($(element).attr('data-id')) ? true : false));
+            }else{
+                var defaultValue = JSON.parse($(element).attr('data-default').toLowerCase());
+                instance.store.set($(element).attr('data-id'), defaultValue);
+                $(element).prop('checked', defaultValue);
+            }
+        })
+        $('.config__launcher_checkbox').on('change', function(){
+            instance.store.set($(this).attr('data-id'), $(this).is(':checked'));
+            if($(this)[0].hasAttribute('data-notyf')){
+                instance.notyf('success', $(this).attr('data-notyf'))
+            }
+        })
+        $('.config__launcher_pnotes').on('click', function() {
+            instance.showModal(false, 'changelog')
+        })
     }
 
 }

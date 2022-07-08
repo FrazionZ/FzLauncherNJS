@@ -23,26 +23,33 @@ let store;
 
 renderer.use(ejs, true, __dirname+ '/src/assets', __dirname+ '/src/template', ejs.renderFile, undefined, false)
 
-Sentry.init({ dsn: "https://22c32b0ec90c4a56924fd5d6e485e698@o1296996.ingest.sentry.io/6524957" });
+store = new Store({accessPropertiesByDotNotation: false});
+
+var sentryInit = ((store.has('launcher__sentry')) ? store.get('launcher__sentry') : true)
+if(sentryInit){
+    console.log('[FZLauncher] Init sentry service..')
+    Sentry.init({ dsn: "https://22c32b0ec90c4a56924fd5d6e485e698@o1296996.ingest.sentry.io/6524957" });
+}else
+    console.log('[FZLauncher] Sentry service not launch..')
+  
 
 async function createWindow() {
 
     remoteMain.initialize();
 
-    store = new Store({accessPropertiesByDotNotation: false});
-
     var cantOpenDevTools = (((store.has('session')) ? store.get('session').role.is_admin : false));
 
     mainWindow = new BrowserWindow({
-        width: 1280, 
-        height: 720,
+        width: 800, 
+        height: 220,
         maximizable: false,
         resizable: false,
         autoHideMenuBar: true,
         frame: false,
         title: "FrazionZ Launcher",
         app: "production",
-        titleBarStyle: 'hidden',
+        hide: true,
+        titleBarStyle: 'hiddenInset',
         icon: path.join(__dirname, "src/assets/img/icons/icon.png"),
         webPreferences: {
             contextIsolation: false,
@@ -111,9 +118,11 @@ async function createWindow() {
         }
     })
     var afterUpdateAndRuntime = function() {
+        mainWindow.setSize(1280, 720);
+        mainWindow.center()
         store.set('gameLaunched', false);
         if(store.has('session'))
-            loadURL('/logging', [{form: {accessToken: store.get('session').access_token}}, {type: "autolog"}])
+            loadURL('/logging', [{type: "autolog"}])
         else
             loadURL('/login', [])
         /*const login = new Login(mainWindow.webContents);
@@ -155,7 +164,7 @@ async function createWindow() {
 
     ipcMain.on('openUrlExternal', async (event, data) => {
         const open = require('open');
-        await open(data);
+        await open(data.url);
     })
 
     ipcMain.on('loadURL', async (event, data) => {

@@ -27,7 +27,8 @@ class Runtime {
             const pack = onezip.extract(fileZipDepend, dirRuntime);
                         
             pack.on('progress', (percent) => {
-                document.getElementById('downloadbar').value = percent
+                document.getElementById('downloadpercent').innerHTML = parseInt(percent)+'%';
+                document.getElementById('downloadbar').style.width = percent+'%';
             });
                         
             pack.on('error', (error) => {
@@ -37,10 +38,13 @@ class Runtime {
                         
             pack.on('end', () => {
                 fs.unlinkSync(fileZipDepend)
+                document.querySelector('body').innerHTML = "";
                 ipcRenderer.send('loadAppAfterUpdate');
             });
-        }else
+        }else{
+            document.querySelector('body').innerHTML = "";
             ipcRenderer.send('loadAppAfterUpdate');
+        }
     }
 
 }

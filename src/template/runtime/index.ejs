@@ -9,17 +9,26 @@
         <link rel="stylesheet" type="text/css" href="asset://css/notyf.min.css">
     </head>
     <body>
-        <br><br><br><br>
+        <%- include('../includes/top.ejs') %>
+        <div class="flex align-center gap-30 pt-20 pl-60 pr-60">
+            <div style="width: 30px;height: 28px;" class="loader-3"></div>
+            <div class="flex direct-column w-100">
+                <div class="flex gap-10 align-end">
+                    <h5 id="downloadpercent"></h5><h6 id="download-label"></h6>
+                </div>
+                <div class="progress">
+                    <div class="indicator" id="downloadbar" style="width: 0%;"></div>
+                </div>
+            </div>
+        </div>
+        <!--<br><br><br><br>
         <img src="asset://img/icons/icon.png" style="display:block;margin:0 auto;width:100px;">
         <div class="text-center"><br><br>
             <h3 for="download" class="text-white" id="download-label"></h3>
             <h6 for="download" class="text-gray" id="download-sublabel"><%= FZUtils.getLangKey("runtime.expl") %></h6><br>
             <progress id="downloadbar"  max="100" value="-1"></progress>
-        </div>
+        </div>-->
         <script src="asset://js/notyf.min.js"></script>
-        <script>
-            var notyf = new Notyf();
-        </script>
         <script>
             dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
             dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";

@@ -1,10 +1,9 @@
-var Notyf = require('notyf');
+var appRoot = require('app-root-path');
 const path = require('path');
 const rootPath = require('electron-root-path').rootPath;
 const Store = require('electron-store');
-const FZUtils = require('./utils.js');
-const server_config = require(path.join(__dirname, '../../../server_config.json'));
-const { v4: uuidv4 } = require('uuid');
+const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'));
+const ejs = require('ejs');
 
 class FzPage {
 
@@ -95,10 +94,14 @@ class FzPage {
     }
 
     showModal(isInit, id, promise) {
-        $("body").find("#modal").load("./modals/"+id+".html", () => {
-            var modal = bootstrap.Modal.getInstance(document.querySelector("body").querySelector("#modal").querySelector(".modal"));
-            modal.show()
-        });
+        var data = [];
+        FZUtils.initVariableEJS(data).then((datar) => {
+            ejs.renderFile(appRoot.path+"/src/template/modals/"+id+".ejs", datar, {}, (err, str) => {
+                if (err) return console.log(err)
+                $("body").find("#modals").html(str);
+                $("body").find("#modals").find(id).modal('show');
+            })
+        })
     }
     
 

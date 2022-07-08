@@ -60,7 +60,7 @@ class Logging extends FzPage {
             this.store.set('profiles', profiles);*/
             setTimeout(() => {
                 this.finishAuth(user);
-            }, 2500)
+            }, 1000)
         } catch (e) {
             console.log(user);
             return;
@@ -70,8 +70,9 @@ class Logging extends FzPage {
         }
     }
 
-    async auth(atoken){
+    async auth(){
         //var mess = new Messaging(true, "Chargement de votre profil..");
+        var atoken = this.store.get('session').access_token;
         try {
             //var profileTarget = this.loadProfiles()[target_profile];
             var user = await this.authenticator.verify(atoken);
