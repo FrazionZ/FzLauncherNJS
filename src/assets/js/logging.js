@@ -4,6 +4,7 @@ var appRoot = require('app-root-path');
 const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
 const FzPage = require(path.join(appRoot.path, '/src/assets/js/FzPage.js'))
 const Authenticator = require('azuriom-auth').Authenticator;
+const axios = require('axios').default;
 class Logging extends FzPage {
 
     constructor(document, type, data) {
@@ -21,8 +22,12 @@ class Logging extends FzPage {
     }
 
     async finishAuth(user){
+        await axios.get('https://api.frazionz.net/faction/profile/'+user.uuid)
+            .then((response) => {
+                //if(response.data.result == "success")
+                    //user.fzProfile = response.data;
+            })
         this.store.set('session', user);
-        this.store.set('gameLaunched', false);
         this.store.set('serverCurrent', {
             idServer: 0,
             server: [0]
@@ -60,7 +65,7 @@ class Logging extends FzPage {
             this.store.set('profiles', profiles);*/
             setTimeout(() => {
                 this.finishAuth(user);
-            }, 1000)
+            }, 500)
         } catch (e) {
             console.log(user);
             return;
@@ -85,14 +90,14 @@ class Logging extends FzPage {
             user = user.data;
             setTimeout(() => {
                 this.finishAuth(user);
-            }, 2500)
+            }, 500)
         } catch (e) {
             if(e.message.includes('401')){
                 setTimeout(() => {
                     //mess.hide();
                     this.store.delete('session')
                     return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
-                }, 1000)
+                }, 500)
             }
         }
     }

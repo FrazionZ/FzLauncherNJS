@@ -9,6 +9,11 @@
         <h4 class="server__description mt-10"><%= server_current.server.expl_server %></h4>
       </div>
     </div>
+    <div class="flex justif-center">
+      <div class="alert black-3 serverUnavailble" style="border-radius:8px;position: relative;bottom: 6px;display: none;width: 50%; text-align: center;">
+        <i class="fa-solid fa-triangle-exclamation fcolor-2 mr-10"></i> <%= FZUtils.getLangKey("server.play.unavailable") %>
+      </div>
+    </div>
     <button class="btn btn-primary btn-download-launch-game btn-progress" id="btnDLGFirst" disabled>
       <div class="content"><span class="label"><%= FZUtils.getLangKey("general.pwait") %></span></div>
       <div class="progress">
@@ -40,16 +45,16 @@
   </div>
   <div class="tab-content pl-40 pr-40 pb-40" id="tab-server">
     <div class="tab-pane fade show active" id="news" role="tabpanel" aria-labelledby="pills-news-tab">
-      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+      <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
     <div class="tab-pane fade" id="pnotes" role="tabpanel" aria-labelledby="pills-pnotes-tab">
-      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+      <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
     <div class="tab-pane fade" id="rpacks" role="tabpanel" aria-labelledby="pills-rpacks-tab">
-      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+      <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
     <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="pills-config-tab">
-      <div class="server pl-30 pr-30 pb-30 pt-60"></div>
+      <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
   </div>
 </div>

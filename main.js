@@ -9,12 +9,12 @@ const remoteMain = require('@electron/remote/main')
 const FZUtils = require('./src/assets/js/utils.js');
 const JSONUtils = require('./src/assets/js/JSONUtils.js');
 const Fr = require('./src/languages/fr.json');
-const servers = require('./server_config.json');
 require('log-timestamp');
 
 const renderer = require('@futurelucas4502/light-electron-renderer')
 const ejs = require('ejs');
 const { get } = require('request');
+const axios = require('axios').default;
 
 app.commandLine.appendSwitch ("disable-http-cache");
 
@@ -28,7 +28,7 @@ store = new Store({accessPropertiesByDotNotation: false});
 var sentryInit = ((store.has('launcher__sentry')) ? store.get('launcher__sentry') : true)
 if(sentryInit){
     console.log('[FZLauncher] Init sentry service..')
-    Sentry.init({ dsn: "https://22c32b0ec90c4a56924fd5d6e485e698@o1296996.ingest.sentry.io/6524957" });
+    Sentry.init({ dsn: "https://bb48df8adaeb4da6b84b94ae6382c098@o1316392.ingest.sentry.io/6570059" });
 }else
     console.log('[FZLauncher] Sentry service not launch..')
   
@@ -48,8 +48,7 @@ async function createWindow() {
         frame: false,
         title: "FrazionZ Launcher",
         app: "production",
-        hide: true,
-        titleBarStyle: 'hiddenInset',
+        show: false,
         icon: path.join(__dirname, "src/assets/img/icons/icon.png"),
         webPreferences: {
             contextIsolation: false,
@@ -62,53 +61,62 @@ async function createWindow() {
         }
     })
 
-    remoteMain.BrowserWindow = mainWindow;
-
-    remoteMain.enable(mainWindow.webContents);
-
-    mainWindow.center();
-
-    dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
-    dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";
-    dirFzLauncherServer = dirFzLauncherRoot + "\\Servers";
-
-    if(!fs.existsSync(dirFzLauncherRoot)){
-        fs.mkdirSync(dirFzLauncherRoot)
-    }
-    if(!fs.existsSync(dirFzLauncherDatas)){
-        fs.mkdirSync(dirFzLauncherDatas)
-    }
-    if(!fs.existsSync(dirFzLauncherServer)){
-        fs.mkdirSync(dirFzLauncherServer)
-    }
-    if(!fs.existsSync(dirFzLauncherDatas+"/profiles.json")){
-        await fs.writeFile(dirFzLauncherDatas+"/profiles.json", "[]", function (err) {
-            if(err) console.log(err);
-            app.exit();
-            app.relaunch();
-        })
-    }
-
-    process.noAsar = false
-
-    if(!store.has('lang')) store.set('lang', 'fr')
-
-    var lang = ((store.has('lang')) ? require('./src/languages/'+store.get('lang')+'.json') : Fr)
-
-    var loadURL = (url, data) => {
-        var datas = FZUtils.initVariableEJS(data)
-        datas.then((dataFind) => {
-            try {
-                renderer.load(mainWindow, url, dataFind)
-            }catch(e){
-                console.log(e)
-            }
-        })
-    }
     
+    await axios.get('https://api.frazionz.net/servers/list')
+        .then(async function (response) {
+            await fs.writeFile('server_config.json', JSON.stringify(response.data), err => {});
+        })
+        .catch(function (error) {
+            console.log(error)
+            dialog.showMessageBoxSync(mainWindow, {
+                message: "Impossible de récuperer les informations de l'API FrazionZ.\nLe launcher n'est donc pas disponible.",
+                title: "FrazionZ Launcher",
+                icon: "src/assets/img/icons/icon.png",
+                buttons: ["Fermer"]
+            })
+            app.exit()
+            process.exit()
+        })
+    
+    let lang;
+    let loadURL;
 
+    setTimeout(() => {
+        remoteMain.BrowserWindow = mainWindow;
 
-    loadURL('/updater/index', [])
+        remoteMain.enable(mainWindow.webContents);
+    
+        mainWindow.center();
+    
+        dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
+        dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";
+        dirFzLauncherServer = dirFzLauncherRoot + "\\Servers";
+    
+        if(!fs.existsSync(dirFzLauncherRoot))
+            fs.mkdirSync(dirFzLauncherRoot)
+        if(!fs.existsSync(dirFzLauncherDatas))
+            fs.mkdirSync(dirFzLauncherDatas)
+        if(!fs.existsSync(dirFzLauncherServer))
+            fs.mkdirSync(dirFzLauncherServer)
+    
+        process.noAsar = false
+    
+        if(!store.has('lang')) store.set('lang', 'fr')
+    
+        lang = ((store.has('lang')) ? require('./src/languages/'+store.get('lang')+'.json') : Fr)
+    
+        loadURL = (url, data) => {
+            var datas = FZUtils.initVariableEJS(data)
+            datas.then((dataFind) => {
+                try {
+                    renderer.load(mainWindow, url, dataFind)
+                }catch(e){
+                    console.log(e)
+                }
+            })
+        }
+        loadURL('/updater/index', [])
+    }, 1000)
 
     mainWindow.webContents.on('will-navigate', async function(e, url) {
         const open = require('open');
@@ -120,13 +128,11 @@ async function createWindow() {
     var afterUpdateAndRuntime = function() {
         mainWindow.setSize(1280, 720);
         mainWindow.center()
-        store.set('gameLaunched', false);
         if(store.has('session'))
             loadURL('/logging', [{type: "autolog"}])
         else
             loadURL('/login', [])
         /*const login = new Login(mainWindow.webContents);
-        login.store.set('gameLaunched', false)
         login.store.delete('downloads')
         login.showPage(true);*/
     };

@@ -38,6 +38,7 @@
         "server.news.title": "News",
         "server.news.return.error": "Impossible to recover news",
         "server.play.java_nf": "Java not found",
+        "server.play.unavailable": "Access to the server is unavailable.",
         "server.play.btn.play": "Play",
         "server.play.btn.install": "Install",
         "server.play.btn.repare": "Repare",

@@ -44,6 +44,7 @@
         "server.news.title": "Actualités",
         "server.news.return.error": "Impossile de récupérer les actualités",
         "server.play.java_nf": "Java non trouvée",
+        "server.play.unavailable": "L'Accès au serveur est indisponible.",
         "server.play.btn.play": "Jouer",
         "server.play.btn.install": "Installer",
         "server.play.btn.repare": "Réparer",

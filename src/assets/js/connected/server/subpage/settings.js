@@ -58,72 +58,85 @@ class Settings extends FzPage {
             setRangeSliderRam(this.value, this.max)
         });
         $('.config__clear_cachesc_dir').on('click', function(){
-            if(instance.store.get('gameLaunched'))
-                return this.notyf('error', 'Une instance est déjà lancé !')
-            $('.config__clear_cachesc_dir').addClass('disabled');
-            instance.fs.rm(instance.path.join(instance.dirServer, "assets/frazionz/skins"), { recursive: true, force: true }, (err => {
-                $('.config__clear_cachesc_dir').removeClass('disabled');
-                if (err) return instance.notyf('error', err);
-                else instance.notyf('success', 'Le dossier a bien été supprimé !')
-            }));
+            FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+                if(result)
+                    return this.notyf('error', 'Une instance est déjà lancé !')
+                else {
+                    $('.config__clear_cachesc_dir').addClass('disabled');
+                    instance.fs.rm(instance.path.join(instance.dirServer, "assets/frazionz/skins"), { recursive: true, force: true }, (err => {
+                        $('.config__clear_cachesc_dir').removeClass('disabled');
+                        if (err) return instance.notyf('error', err);
+                        else instance.notyf('success', 'Le dossier a bien été supprimé !')
+                    }));
+                }
+            })
         })
         $('.config__repare_dir').on('click', function(){
-            if(instance.store.get('gameLaunched'))
-                return this.notyf('error', 'Une instance est déjà lancé !')
-            instance.buttonActionPlay.find('.label').text('Réparer');
-            instance.buttonActionPlay.attr('disabled', 'disabled');
-            $('.config__repare_dir').addClass('disabled');
-            $('.config__clear_dir').addClass('disabled');
-            play.prepareInstallOrUpdate();
+            FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+                if(result)
+                    return this.notyf('error', 'Une instance est déjà lancé !')
+                else {
+                    instance.buttonActionPlay.find('.label').text('Réparer');
+                    instance.buttonActionPlay.attr('disabled', 'disabled');
+                    $('.config__repare_dir').addClass('disabled');
+                    $('.config__clear_dir').addClass('disabled');
+                    play.prepareInstallOrUpdate();
+                }
+            })
+            
         })
         $('.config__clear_dir').on('click', function(){
-            if(instance.store.get('gameLaunched'))
-                return this.notyf('error', 'Une instance est déjà lancé !')
-            $('.config__clear_dir').addClass('disabled');
-            var excludesFiles = ["resourcepacks", "saves", "shaderpacks", "options.txt", "optionsof.txt"]
-            instance.fs.readdir(instance.dirServer, function (err, files) {
-                //handling error
-                if (err) return instance.notyf('error', err);
-                var rmOrUnlinkLoop = new Promise((resolve, reject) => {
-                    files.forEach(function (fileOrDir, index, array) {
-                        var hasDelete = true;
-                        excludesFiles.forEach((excludesFile) => {
-                            if(excludesFile == fileOrDir)
-                                hasDelete = false;
-                        })
-                        if(hasDelete){
-                            var statFile = instance.fs.lstatSync(instance.path.join(instance.dirServer, fileOrDir));
-                            if(statFile.isDirectory()){
-                                instance.fs.rm(instance.path.join(instance.dirServer, fileOrDir), { recursive: true, force: true }, (err => {
+            FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+                if(result)
+                    return this.notyf('error', 'Une instance est déjà lancé !')
+                else {
+                    $('.config__clear_dir').addClass('disabled');
+                    var excludesFiles = ["resourcepacks", "saves", "shaderpacks", "options.txt", "optionsof.txt"]
+                    instance.fs.readdir(instance.dirServer, function (err, files) {
+                        //handling error
+                        if (err) return instance.notyf('error', err);
+                        var rmOrUnlinkLoop = new Promise((resolve, reject) => {
+                            files.forEach(function (fileOrDir, index, array) {
+                                var hasDelete = true;
+                                excludesFiles.forEach((excludesFile) => {
+                                    if(excludesFile == fileOrDir)
+                                        hasDelete = false;
+                                })
+                                if(hasDelete){
+                                    var statFile = instance.fs.lstatSync(instance.path.join(instance.dirServer, fileOrDir));
+                                    if(statFile.isDirectory()){
+                                        instance.fs.rm(instance.path.join(instance.dirServer, fileOrDir), { recursive: true, force: true }, (err => {
+                                            if (index === array.length -1) resolve();
+                                        }));
+                                    }else if(statFile.isFile()){
+                                        instance.fs.unlink(instance.path.join(instance.dirServer, fileOrDir), (err => {
+                                            if (index === array.length -1) resolve();
+                                        }));
+                                    }
+                                }else
                                     if (index === array.length -1) resolve();
-                                }));
-                            }else if(statFile.isFile()){
-                                instance.fs.unlink(instance.path.join(instance.dirServer, fileOrDir), (err => {
-                                    if (index === array.length -1) resolve();
-                                }));
+                            });
+                        });
+                        rmOrUnlinkLoop.then(() => {
+                            $('.config__clear_dir').removeClass('disabled');
+                            if (err) return instance.notyf('error', err);
+                            else {
+                                instance.buttonActionPlay.find('.label').text('Installer');
+                                instance.buttonActionPlay.removeAttr('disabled');
+                                $('.server__version').text("Version MCP - ");
+                                $('.config__clear_dir').addClass('disabled');
+                                $('.config__repare_dir').addClass('disabled');
+                                instance.buttonActionPlay.off();
+                                instance.buttonActionPlay.on('click', () => {
+                                    instance.buttonActionPlay.attr('disabled', 'disabled')
+                                    play.prepareInstallOrUpdate();
+                                })
+                                instance.notyf('success', 'Le dossier a bien été supprimé !')
                             }
-                        }else
-                            if (index === array.length -1) resolve();
+                        });
                     });
-                });
-                rmOrUnlinkLoop.then(() => {
-                    $('.config__clear_dir').removeClass('disabled');
-                    if (err) return instance.notyf('error', err);
-                    else {
-                        instance.buttonActionPlay.find('.label').text('Installer');
-                        instance.buttonActionPlay.removeAttr('disabled');
-                        $('.server__version').text("Version MCP - ");
-                        $('.config__clear_dir').addClass('disabled');
-                        $('.config__repare_dir').addClass('disabled');
-                        instance.buttonActionPlay.off();
-                        instance.buttonActionPlay.on('click', () => {
-                            instance.buttonActionPlay.attr('disabled', 'disabled')
-                            play.prepareInstallOrUpdate();
-                        })
-                        instance.notyf('success', 'Le dossier a bien été supprimé !')
-                    }
-                });
-            });
+                }
+            })
         });
         $('.config__server_checkbox').each((index, element) => {
             if(instance.store.has(instance.keyStoreServerOptions($(element).attr('data-id')))){

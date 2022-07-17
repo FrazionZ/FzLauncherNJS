@@ -1,6 +1,7 @@
 var appRoot = require('app-root-path');
 const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
 const Authenticator = require('azuriom-auth').Authenticator;
+const axios = require('axios').default;
 class Profile extends FzPage {
 
     constructor(){
@@ -15,6 +16,7 @@ class Profile extends FzPage {
             $('.main').addClass('connected');
             instance.logout()
         })
+
 
         var skinUrl = "https://api.frazionz.net/skins/display?username="+this.store.get('session').username;
         var capeUrl = "https://api.frazionz.net/capes/display?username="+this.store.get('session').username;
@@ -44,8 +46,16 @@ class Profile extends FzPage {
         controlInfos.enablePan = false;
 
         $("#skinInput").on('change', function(event) {
-            skinViewer.loadSkin(URL.createObjectURL(event.target.files[0]));
-            $(this).parent().find('span').text(event.target.files[0].name)
+            FZUtils.checkRulesSize(event.target.files[0], 64, 64).then((result) => {
+                $(this).parent().find('span').text("Choisir un fichier")
+                if(result){
+                    skinViewer.loadSkin(URL.createObjectURL(event.target.files[0]));
+                    $(this).parent().find('span').text(event.target.files[0].name)
+                }else{
+                    $("#skinInput").val(null)
+                    instance.notyf("error", "Votre skin doit faire une taille de 64x64 pour être valide !")
+                }
+            });
         });
 
         $(".checkbox").find('input[name=typeskin]').on('change', function(event) {
@@ -99,8 +109,7 @@ class Profile extends FzPage {
                     $('#nav_menu_avatar').attr('src', "https://auth.frazionz.net/skins/face.php?u="+instance.store.get('session').id);
                 },
                 error: function(err){
-                    var responseText = JSON.parse(err.responseText)
-                    console.log(err)
+                    var responseText = err.responseText;
                     instance.notyf('error', responseText.message)
                 }
              });
@@ -108,11 +117,14 @@ class Profile extends FzPage {
     }
 
     async logout() {
-        if(this.store.has('gameLaunched'))
-            if(this.store.get('gameLaunched'))
+        FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+            if(result)
                 return this.notyf('error', 'Vous ne pouvez pas vous déconnecter, une instance Minecraft est ouverte.')
-        this.store.delete('session');
-        ipcRenderer.send('logout')
+            else {
+                this.store.delete('session');
+                ipcRenderer.send('logout')
+            }
+        })
     }
 
 }

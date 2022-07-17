@@ -44,10 +44,11 @@ function ExecuteCodeJS(code) {
 
 async function initVariableEJS(data){
     const rootPath = require('electron-root-path').rootPath;
+    var appRoot = require('app-root-path');
     const path = require('path')
     const Store = require('electron-store')
     const FZUtils = require('./utils.js')
-    const servers = require('../../../server_config.json');
+    const servers = require(path.join(appRoot.path, "server_config.json"));
     store = new Store({accessPropertiesByDotNotation: false});
     var initDatas = [
         {
@@ -87,6 +88,54 @@ async function storeDataEJS(key, data){
     const { ipcRenderer } = require('electron');
     ipcRenderer.send('ejseData', {key: data, data: data});
 }
+
+async function checkRulesSize(file, checkWidth, checkHeight){
+    return new Promise((resolve, reject) => {
+        var reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = function (e) {
+            var image = new Image();
+            image.src = e.target.result;
+            image.onload = function () {
+                var height = this.height;
+                var width = this.width;
+                if(height == checkWidth && width == checkHeight)
+                    resolve(true);
+                else
+                    resolve(false);
+            };
+        };
+    })
+}
+
+async function checkedIfinecraftAlreadyLaunch(){
+    var fs = require('fs');
+    var path = require('path');
+    return new Promise(async (resolve, reject) => {
+        dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
+        dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";
+        dirFzLauncherServer = dirFzLauncherRoot + "\\Servers";
+        await fs.readdir(dirFzLauncherServer, async function (err, files) {
+            //handling error
+            if (!err) {
+                files.forEach(async function (file, key, array) {
+                    var dirServ = path.join(dirFzLauncherServer, file);
+                    if(fs.lstatSync(dirServ).isDirectory()){
+                        var minecraftjar = path.join(dirServ, "minecraft.jar");
+                        fs.promises.rename(minecraftjar, minecraftjar).then((result) => {
+                            if (key === array.length -1) resolve(false);
+                        }).catch(async (err) => {
+                            if(err.code == "EBUSY")
+                                resolve(true);
+                            if (key === array.length -1) resolve(false);
+                        });
+                    }
+                });
+            }
+        });
+    })
+}
+
 
 async function download(instance, installerfileURL, installerfilename, dialog, type, branch) {
     const fs = require('fs')
@@ -240,4 +289,4 @@ function javaversion(dirLaucher, callback) {
     });
 }
 
-module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }
+module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, checkRulesSize, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }

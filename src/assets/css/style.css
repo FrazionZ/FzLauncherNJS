@@ -55,12 +55,16 @@
 }
 * {
     cursor: default;
+    user-select: none; 
 }
 body {
     background-color: var(--black-4);
     font-family: Comfortaa-Bold !important;
     overflow-y: hidden;
     overflow-x: hidden;
+}
+img {
+    pointer-events: none
 }
 .title_bar {
     -webkit-user-select: none;
@@ -350,7 +354,13 @@ input {
     width: 100%;
     padding: 0px 20px;
 }
-  
+.alert {
+    padding: 1rem;
+    background: var(--color-2);
+    border-radius: 8px;
+    color: white;
+    font-size: 1rem;
+}
 .login-flex .infos {
     display: block;
     flex-grow: 0;
@@ -465,6 +475,7 @@ nav .menu .image-text img {
     position: relative;
     font-weight: 400;
     font-family: 'Comfortaa';
+    pointer-events: none;
 }
 .header-text .name {
     font-weight: 900;
@@ -1037,6 +1048,9 @@ option[disabled] {
 }
 .color-2 {
     background: var(--color-2);
+}
+.fcolor-2 {
+    color: var(--color-2);
 }
 .color-3 {
     background: var(--color-3);

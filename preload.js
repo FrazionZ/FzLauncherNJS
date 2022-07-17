@@ -9,7 +9,7 @@ if(sentryInit){
   console.log('[FZLauncher] Launch sentry service..')
   const Sentry = require('@sentry/electron')
   Sentry.init({
-    dsn: 'https://22c32b0ec90c4a56924fd5d6e485e698@o1296996.ingest.sentry.io/6524957',
+    dsn:  "https://bb48df8adaeb4da6b84b94ae6382c098@o1316392.ingest.sentry.io/6570059",
     environment: process.env.NODE_ENV,
   })
 }else
