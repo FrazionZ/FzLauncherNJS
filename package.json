@@ -1,6 +1,6 @@
 {
   "name": "fzlauncher",
-  "version": "1.2.6",
+  "version": "1.2.4",
   "description": "",
   "email": "florent.cala@gmail.com",
   "main": "main.js",
@@ -39,7 +39,8 @@
       ]
     },
     "linux": {
-      "icon": "build/icons",
+      "icon": "src/assets/img/icons/icon-256.png",
+      "category": "Game",
       "target": "deb"
     },
     "files": [
@@ -62,7 +63,7 @@
   "license": "ISC",
   "devDependencies": {
     "cross-env": "^7.0.3",
-    "electron": "^19.0.4",
+    "electron": "^19.0.8",
     "electron-builder": "^23.0.3"
   },
   "dependencies": {

@@ -14,6 +14,7 @@ require('log-timestamp');
 const renderer = require('@futurelucas4502/light-electron-renderer')
 const ejs = require('ejs');
 const { get } = require('request');
+const { platform } = require('os');
 const axios = require('axios').default;
 
 app.commandLine.appendSwitch ("disable-http-cache");
@@ -48,7 +49,7 @@ async function createWindow() {
         frame: false,
         title: "FrazionZ Launcher",
         app: "production",
-        show: false,
+        show: ((process.platform == "linux" || process.platform == "darwin") ? true : false),
         icon: path.join(__dirname, "src/assets/img/icons/icon.png"),
         webPreferences: {
             contextIsolation: false,
@@ -87,10 +88,12 @@ async function createWindow() {
         remoteMain.enable(mainWindow.webContents);
     
         mainWindow.center();
+
+        var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
     
-        dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
-        dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";
-        dirFzLauncherServer = dirFzLauncherRoot + "\\Servers";
+        dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
+        dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
+        dirFzLauncherServer = path.join(dirFzLauncherRoot, "Servers");
     
         if(!fs.existsSync(dirFzLauncherRoot))
             fs.mkdirSync(dirFzLauncherRoot)

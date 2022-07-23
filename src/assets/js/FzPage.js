@@ -14,9 +14,13 @@ class FzPage {
         this.store = new Store({accessPropertiesByDotNotation: false});
         this.session = ((this.store.has('session')) ? this.store.get('session') : undefined)
         this.ipcRenderer = require("electron").ipcRenderer;
-        this.dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
-        this.dirFzLauncherDatas = this.dirFzLauncherRoot + "\\Launcher";
-        this.dirFzLauncherServer = this.dirFzLauncherRoot + "\\Servers";
+
+        var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
+    
+        this.dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
+        this.dirFzLauncherDatas = path.join(this.dirFzLauncherRoot, "Launcher");
+        this.dirFzLauncherServer = path.join(this.dirFzLauncherRoot, "Servers");
+
         this.page = page;
         this.webDocs = webDocs;
         FZUtils.initCustomTlBar();
