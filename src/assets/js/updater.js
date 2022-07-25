@@ -31,16 +31,16 @@ EAU.init({
     if (error) {
       if (error === 'no_update_available') { 
         document.querySelector('body').innerHTML = "";
-        //ipcRenderer.send('loadAppAfterUpdate');
+        ipcRenderer.send('loadAppAfterUpdate');
         return false; 
       }
       if (error === 'version_not_specified' && process.env.NODE_ENV === 'development') {
         document.querySelector('body').innerHTML = "";
-        //ipcRenderer.send('loadAppAfterUpdate');
+        ipcRenderer.send('loadAppAfterUpdate');
         return false 
       }
       document.querySelector('body').innerHTML = "";
-      //ipcRenderer.send('loadAppAfterUpdate');
+      ipcRenderer.send('loadAppAfterUpdate');
       return false
     }
 

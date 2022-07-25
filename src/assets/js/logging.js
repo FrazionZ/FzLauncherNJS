@@ -28,11 +28,17 @@ class Logging extends FzPage {
                     //user.fzProfile = response.data;
             })
         this.store.set('session', user);
-        this.store.set('serverCurrent', {
-            idServer: 0,
-            server: [0]
-        })
-        FZUtils.loadURL('/connected/layout', [{session: user}, {notyf: {type: "success", value: FZUtils.getLangKey("logging.result.logged", [{search: "%session__name%", replace: user.username}])}}])
+        if(user.banned)
+            FZUtils.loadURL('/session/banned', [])
+        else if(!user.email_verified)
+            FZUtils.loadURL('/session/eVerified', [])
+        else{
+            this.store.set('serverCurrent', {
+                idServer: 0,
+                server: [0]
+            })
+            FZUtils.loadURL('/connected/layout', [{session: user}, {notyf: {type: "success", value: FZUtils.getLangKey("logging.result.logged", [{search: "%session__name%", replace: user.username}])}}])
+        }
     }
 
     async addAccount(email, password, twofa){
@@ -75,29 +81,44 @@ class Logging extends FzPage {
         }
     }
 
-    async auth(){
+    async auth(force){
         //var mess = new Messaging(true, "Chargement de votre profil..");
-        var atoken = this.store.get('session').access_token;
-        try {
-            //var profileTarget = this.loadProfiles()[target_profile];
-            var user = await this.authenticator.verify(atoken);
-            if(user.status !== undefined){
-                if(user.status == "error"){
-                    FZUtils.loadURL('/login', [])
-                    return FZUtils.loadURL('/login', [{notyf: {value: "error", value: user.message}}])
+        //CHECK IF USER HAS CONNECTED!
+        //https://api.frazionz.net/faction/profile/<uuid>/online
+        var isOnline = false;
+        await axios.get("https://api.frazionz.net/faction/profile/"+this.store.get('session').uuid+"/online")
+            .then((response) => {
+                if(response.data.isOnline !== undefined){
+                    if(response.data.isOnline){
+                        isOnline = response.data.isOnline;
+                    }
                 }
-            }
-            user = user.data;
-            setTimeout(() => {
-                this.finishAuth(user);
-            }, 500)
-        } catch (e) {
-            if(e.message.includes('401')){
+            })
+        if(isOnline && !force){
+            return FZUtils.loadURL('/session/renew', [])
+        }else{
+            //CONTINUE AUTH
+            var atoken = this.store.get('session').access_token;
+            try {
+                //var profileTarget = this.loadProfiles()[target_profile];
+                var user = await this.authenticator.verify(atoken);
+                if(user.status !== undefined){
+                    if(user.status == "error"){
+                        return FZUtils.loadURL('/login', [{notyf: {value: "error", value: user.message}}])
+                    }
+                }
+                user = user.data;
                 setTimeout(() => {
-                    //mess.hide();
-                    this.store.delete('session')
-                    return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
+                    this.finishAuth(user);
                 }, 500)
+            } catch (e) {
+                if(e.message.includes('401')){
+                    setTimeout(() => {
+                        //mess.hide();
+                        this.store.delete('session')
+                        return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
+                    }, 500)
+                }
             }
         }
     }

@@ -1,0 +1,26 @@
+<%- include("../includes/head.ejs") %>
+<div class="logging">
+    <img width="120" src="asset://img/icons/icon.png">
+    <div class="flex gap-20 direct-column pl-60 pr-60 align-center justif-center">
+        <div class="column">
+            <h2>Banni Définitivement !</h2>
+        </div>
+        <div class="column text-center">
+            <h6>Vous avez été banni de nos services de façon permanente.<p/>Pour plus d'informations, veuillez contacter notre support.<br/><br/>- L'équipe FrazionZ</h6>
+        </div>
+        <div class="column flex gap-15">
+            <a href="#" class="btn btn-primary logoutAuth">Déconnexion</a>
+        </div>
+    </div>
+</div>
+<script>
+    const path = require('path')
+    var appRoot = require('app-root-path');
+    var Store = require('electron-store');
+    const store = new Store({accessPropertiesByDotNotation: false});
+    const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
+    $('.logoutAuth').on('click', () => {
+        store.delete('session');
+        return FZUtils.loadURL('/login', [])
+    })
+</script>

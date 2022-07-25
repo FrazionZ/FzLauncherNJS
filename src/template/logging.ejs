@@ -1,5 +1,5 @@
 <%- include("./includes/head.ejs") %>
-<div class="logging" style="-webkit-app-region: drag">
+<div class="logging">
     <img width="120" src="asset://img/icons/icon.png">
     <div class="flex gap-20 align-center">
         <span class="loader-3"></span>
@@ -15,5 +15,7 @@
 <% if (type == "form") { %>
     <script>logging.addAccount('<%= form.username %>', '<%= form.password %>', '<%= form.user2FA %>')</script>
 <% }else if(type == "autolog") { %>
-    <script>logging.auth()</script>
+    <script>logging.auth(false)</script>
+<% }else if(type == "forceAutolog") { %>
+    <script>logging.auth(true)</script>
 <% } %>
