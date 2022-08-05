@@ -45,11 +45,30 @@ function ExecuteCodeJS(code) {
 async function initVariableEJS(data){
     const rootPath = require('electron-root-path').rootPath;
     var appRoot = require('app-root-path');
+    const axios = require('axios').default;
     const path = require('path')
+    const fs = require('fs');
     const Store = require('electron-store')
     const FZUtils = require('./utils.js')
     const servers = require(path.join(appRoot.path, "server_config.json"));
     store = new Store({accessPropertiesByDotNotation: false});
+    let configLauncher;
+
+    //LAUNCHER DIR DATAS APPDATA
+    var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
+    
+    var dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
+    var dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
+    var shelfFzLauncherSkins = path.join(dirFzLauncherDatas, "skins.json");
+    const shelfFzLauncherSkinsJson = require(path.join(shelfFzLauncherSkins));
+
+    await axios.get('https://api.frazionz.net/launcher')
+        .then((response) => {
+            configLauncher = response.data;
+        })
+        .catch((err) => {
+            alert(err)
+        })
     var initDatas = [
         {
             "servers": servers,
@@ -57,9 +76,12 @@ async function initVariableEJS(data){
                 idServer: 0,
                 server: servers[0]
             },  
+
+            "configLauncher": configLauncher,
             "appRoot": require('app-root-path'),
             "path": path,
             "FZUtils": FZUtils, 
+            "countSkins": shelfFzLauncherSkinsJson.length,
             "srcDir": path.join(__dirname, '../../../src/').replaceAll('\\', '/'),
             "language": ((store.has('lang')) ? require('../../languages/'+store.get('lang')+'.json') : Fr),
             "rootDirPath": path.join(rootPath).replaceAll('\\', '\\\\'),
@@ -88,6 +110,124 @@ async function storeDataEJS(key, data){
     const { ipcRenderer } = require('electron');
     ipcRenderer.send('ejseData', {key: data, data: data});
 }
+
+async function removeKeyInArr(arr, key){
+    for( var i = 0; i < arr.length; i++){                  
+        if ( arr[i] === key) { 
+            arr.splice(i, 1); 
+            i--; 
+        }
+    }
+    return arr;
+}
+
+async function getSkinsFile(){
+    var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
+    
+    var dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
+    var dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
+    return path.join(dirFzLauncherDatas, "skins.json");
+}
+
+async function storeSkinShelf(name, base64){
+    const fs = require("fs");
+    const path = require("path");
+    const { v4: uuidv4 } = require('uuid');
+
+    var shelfFzLauncherSkins = await getSkinsFile();
+
+    const skinsJson = require(path.join(shelfFzLauncherSkins));
+    var checkSkinExit = async() => {
+        return new Promise((resolve, reject) => {
+            skinsJson.forEach((skin, key, array) => {
+                if(skin.base64 == base64)
+                    resolve(true);
+                if (key === array.length -1) resolve(false);
+            })
+            if(skinsJson.length == 0) resolve(false);
+        })
+    }
+    await checkSkinExit().then((result) => {
+        if(!result){
+            skinsJson.push({id: uuidv4(), name: name, base64: base64, model: "steve"});
+            fs.writeFileSync(shelfFzLauncherSkins, JSON.stringify(skinsJson));
+        }
+    })
+}
+
+async function getSkinFromID(idSkin){
+    const fs = require("fs");
+    const path = require("path");
+    const { v4: uuidv4 } = require('uuid');
+
+    var shelfFzLauncherSkins = await getSkinsFile();
+
+    const skinsJson = require(path.join(shelfFzLauncherSkins));
+    return new Promise((resolve, reject) => {
+        skinsJson.forEach((skin, key, array) => {
+            if(skin.id == idSkin)
+                resolve(skin);
+            if (key === array.length -1) resolve(null);
+        })
+        if(skinsJson.length == 0) resolve(null);
+    })
+}
+
+async function deleteSkinData(idSkin){
+    const fs = require("fs");
+    var skinFileJson = await getSkinsFile();
+    const skinsJson = require(skinFileJson);
+    skinData = await getSkinFromID(idSkin);
+    return new Promise((resolve, reject) => {
+        if(skinData !== undefined){
+            skinsJson.forEach((skin, key, array) => {
+                if(skin.id == idSkin)
+                    array.splice(key, 1);
+            });
+            fs.writeFileSync(skinFileJson, JSON.stringify(skinsJson));
+            resolve(true);
+        }else
+            resolve(false);
+    })
+}
+
+async function updateSkinData(idSkin, key, value){
+    const fs = require("fs");
+    var skinFileJson = await getSkinsFile();
+    const skinsJson = require(skinFileJson);
+    skinData = await getSkinFromID(idSkin);
+    return new Promise((resolve, reject) => {
+        if(skinData !== undefined){
+            switch(key){
+                case "name":
+                    skinData.name = value;
+                    break;
+                case "model":
+                    skinData.model = value;
+                    break;
+                default:
+                    break;
+            }
+            skinsJson.forEach((skin, key, array) => {
+                if(skin.id == idSkin)
+                    array[key] = skinData;
+            });
+            fs.writeFileSync(skinFileJson, JSON.stringify(skinsJson));
+            resolve(true);
+        }else
+            resolve(false);
+    })
+}
+
+async function getImageDimensions(file) {
+    return new Promise (function (resolved, rejected) {
+      var i = new Image()
+      i.onload = function(){
+        resolved({w: i.width, h: i.height})
+      };
+      i.src = file
+    })
+  }
 
 async function checkRulesSize(file, checkWidth, checkHeight){
     return new Promise((resolve, reject) => {
@@ -136,6 +276,40 @@ async function checkedIfinecraftAlreadyLaunch(){
     })
 }
 
+async function resizeImage(url, width, height, x, y, callback) {
+    var canvas = document.createElement("canvas");
+    var context = canvas.getContext('2d');
+    var imageObj = new Image();
+
+    // set canvas dimensions
+
+    canvas.width = width;
+    canvas.height = height;
+    
+    context.scale(10, 6);
+
+    imageObj.onload = function () {
+        context.drawImage(imageObj, x, y, width, height, 32, 32, width, height);
+        callback(canvas.toDataURL());
+    };
+
+    imageObj.src = url;
+}
+
+async function getSortedFilesByDate(dir) {
+    const fs = require('fs');
+    const files = await fs.promises.readdir(dir);
+  
+    return new Promise((resolve, reject) => {
+        resolve(files
+            .map(fileName => ({
+              name: fileName,
+              time: fs.statSync(`${dir}/${fileName}`).mtime.getTime(),
+            }))
+            .sort((a, b) =>  b.time - a.time)
+            .map(file => file.name));
+    }); 
+}
 
 async function download(instance, installerfileURL, installerfilename, dialog, type, branch) {
     const fs = require('fs')
@@ -175,12 +349,6 @@ async function download(instance, installerfileURL, installerfilename, dialog, t
             var percentage = (received_bytes * 100) / total_bytes;
             if(dialog){
                 downloads.updateDownload(uuidDl, type+" - Téléchargement des fichiers", installerfilename, parseInt(percentage, 10).toString())
-                //$('#downloads').find('#'+uuidDl).find('.title').text("Téléchargement des fichiers");
-                //$('#downloads').find('#'+uuidDl).find('.subtitle').text(path.basename(installerfilename));
-                //document.querySelector('.download').querySelector('#progress').style.width = ""+parseInt(percentage, 10).toString()+"%";
-                //uuidv4();
-
-                //dlDialog.setPercentBar(percentage)
             }else{
                 document.getElementById('downloadpercent').innerHTML = parseInt(percentage)+'%';
                 document.getElementById('downloadbar').style.width = percentage+'%';
@@ -222,12 +390,10 @@ function listRamAllocate(){
     }
 }
 
-function getLang(){
+function getLang(key){
     var appRoot = require('app-root-path');
     var path = require('path')
-    const Store = require('electron-store');
-    const store = new Store();
-    return require(path.join(appRoot.path, '/src/languages/'+store.get('lang')+'.json'));
+    return require(path.join(appRoot.path, '/src/languages/'+key+'.json'));
 }
 
 async function getLangList(){
@@ -247,7 +413,9 @@ async function getLangList(){
 }
 
 function getLangInfos(){
-    var lang = getLang();
+    const Store = require('electron-store');
+    const store = new Store();
+    var lang = getLang(store.get('lang'));
     if(lang.hasOwnProperty("infos")){
         return lang.infos;
     }else{
@@ -256,8 +424,11 @@ function getLangInfos(){
     }
 }
 
-function getLangKey(key, replaceArr){
-    var lang = getLang();
+function getLangKey(key, replaceArr, defaultLang){
+    const Store = require('electron-store');
+    const store = new Store();
+    var lang = getLang((defaultLang) ? "fr" : store.get('lang'));
+
     if(lang.keys.hasOwnProperty(key)){
         var resFind = lang.keys[key];
         if(replaceArr !== undefined){
@@ -267,8 +438,11 @@ function getLangKey(key, replaceArr){
         }
         return resFind;
     }else{
-        console.log(key+ " is not found in configuration file.")
-        return key;
+        if(defaultLang){
+            console.log(key+ " is not found in configuration file.")
+            return key;
+        }else
+            return getLangKey(key, replaceArr, true);
     }
 }
 
@@ -289,4 +463,4 @@ function javaversion(dirLaucher, callback) {
     });
 }
 
-module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, checkRulesSize, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }
+module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, checkRulesSize, removeKeyInArr, resizeImage, deleteSkinData, getSkinsFile, storeSkinShelf, getSkinFromID, getImageDimensions, updateSkinData, getSortedFilesByDate, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }

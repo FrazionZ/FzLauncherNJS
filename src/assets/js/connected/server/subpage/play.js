@@ -10,7 +10,7 @@ class Play  extends FzPage {
     constructor(server){
         super(null)
         this.server = server_config[server];
-        this.lang = FZUtils.getLang();
+        this.lang = FZUtils.getLang(this.store.get('lang'));
         this.dirServer = path.join(this.dirFzLauncherServer, this.server.name);
         this.buttonActionPlay = $('.btn-download-launch-game');
         this.dlDialog = undefined;
@@ -439,7 +439,7 @@ class Play  extends FzPage {
                     }, 1500)
 
                     //var crashGame = new CrashGameDialog(false);
-                    var finishGame = (crash) => {
+                    var finishGame = (crash, logs) => {
                         if(instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app'))){
                             instance.gameLaunched = false;
                             ipcRenderer.send('showApp')
@@ -447,7 +447,9 @@ class Play  extends FzPage {
                             instance.buttonActionPlay.removeClass('disabled');
                             if(crash){
                                 setTimeout(() => {
-                                    //crashGame.show();
+                                    console.log("LOGS SA MERE")
+                                    console.log(logs)
+                                    layoutClass.loadDialog('crashgame', [], "server");
                                 }, 800)
                             }
                         }
@@ -459,13 +461,13 @@ class Play  extends FzPage {
                         exec(stringCMD, (error, stdout, stderr) => {
                             if (error) {
                                 console.error(`error: ${error.message}`);
-                                finishGame(true);
+                                finishGame(true, error);
                                 return;
                             }
 
                             if (stderr) {
                                 console.error(`stderr: ${stderr}`);
-                                finishGame(true);
+                                finishGame(true, stderr);
                                 return;
                             }
 

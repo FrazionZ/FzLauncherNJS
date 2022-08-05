@@ -5,6 +5,7 @@ const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
 const FzPage = require(path.join(appRoot.path, '/src/assets/js/FzPage.js'))
 const Authenticator = require('azuriom-auth').Authenticator;
 const axios = require('axios').default;
+const { v4: uuidv4 } = require('uuid');
 class Logging extends FzPage {
 
     constructor(document, type, data) {
@@ -12,7 +13,7 @@ class Logging extends FzPage {
         var instance = this;
         this.urlApi = "https://auth.frazionz.net";
         this.authenticator = new Authenticator(this.urlApi);
-        this.lang = FZUtils.getLang();
+        this.lang = FZUtils.getLang(this.store.get('lang'));
     }
 
     returnToLogin(){
@@ -22,6 +23,7 @@ class Logging extends FzPage {
     }
 
     async finishAuth(user){
+        const imageToBase64 = require('image-to-base64');
         await axios.get('https://api.frazionz.net/faction/profile/'+user.uuid)
             .then((response) => {
                 //if(response.data.result == "success")
@@ -33,6 +35,23 @@ class Logging extends FzPage {
         else if(!user.email_verified)
             FZUtils.loadURL('/session/eVerified', [])
         else{
+            await imageToBase64("https://api.frazionz.net/skins/display?username="+user.username) // Path to the image
+                .then(
+                    (response) => {
+                        FZUtils.storeSkinShelf(user.username, response)
+                        /*var skinPath = this.path.join(this.dirFzLauncherSkins, user.uuid);
+                        if(!this.fs.existsSync(skinPath)){
+                            require("fs").writeFile(this.path.join(this.dirFzLauncherSkins, user.uuid)+".png", response, {encoding: 'base64'}, function(err) {
+                                console.log(err);
+                            });
+                        }*/
+                    }
+                )
+                .catch(
+                    (error) => {
+                        console.log(error); // Logs an error if there was one
+                    }
+                )
             this.store.set('serverCurrent', {
                 idServer: 0,
                 server: [0]
@@ -84,8 +103,8 @@ class Logging extends FzPage {
     async auth(force){
         //var mess = new Messaging(true, "Chargement de votre profil..");
         //CHECK IF USER HAS CONNECTED!
-        //https://api.frazionz.net/faction/profile/<uuid>/online
         var isOnline = false;
+        var srenewConfig = ((store.has('launcher__srenew')) ? store.get('launcher__srenew') : true)
         await axios.get("https://api.frazionz.net/faction/profile/"+this.store.get('session').uuid+"/online")
             .then((response) => {
                 if(response.data.isOnline !== undefined){
@@ -94,7 +113,7 @@ class Logging extends FzPage {
                     }
                 }
             })
-        if(isOnline && !force){
+        if(isOnline && !force && srenewConfig){
             return FZUtils.loadURL('/session/renew', [])
         }else{
             //CONTINUE AUTH

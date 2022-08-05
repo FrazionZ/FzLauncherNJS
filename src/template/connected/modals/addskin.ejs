@@ -1,0 +1,39 @@
+<div class="changelog pl-60 pr-60 pb-30">
+  <div class="flex justif-between align-center">
+    <h2 class="pt-30 pb-10 underline">Ajout d'un skin</h2>
+    <span class="dialog_close"><i class="fa-solid fa-xmark"></i></span>
+  </div>
+  <span class="loader-3 hide"></span>
+  <div class="forms">
+    <h5>Depuis Mojang</h5>
+    <div class="flex justif-between gap-30 align-center">
+      <div class="column w-100">
+        <input type="text" id="searchSkinInput" name="searchSkinInput" placeholder="Chercher un skin via un pseudo Minecraft premium"/>
+      </div>
+      <div class="column">
+        <button class="searchSkinMojang btn btn-primary">Chercher</button>
+      </div>
+    </div>
+    <br />
+    <h5>Depuis un fichier</h5>
+    <div class="flex justif-between gap-30 align-center">
+      <div class="column w-100">
+        <label class="file-upload">
+          <input  type="file"  class="profile-skin custom-file-input"  id="skinInput"  name="skin"  accept=".png"  required />
+          <span>Choisir un fichier</span>
+        </label>
+      </div>
+      <div class="column">
+        <button class="addSkinFileForm btn btn-primary">Save</button>
+      </div>
+    </div>
+  </div>
+</div>
+<script>
+    const axios = require('axios').default;
+    const path = require('path');
+    const fs = require('fs');
+    const { v4: uuidv4 } = require('uuid');
+    const imageToBase64 = require('image-to-base64');
+    
+</script>

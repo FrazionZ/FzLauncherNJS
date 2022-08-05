@@ -1,6 +1,8 @@
 const FZUtils = require('./utils.js')
 const fs = require('fs')
 const path = require('path')
+const Store = require('electron-store');
+const store = new Store();
 const { ipcRenderer } = require('electron')
 const onezip = require('onezip')
 
@@ -8,7 +10,7 @@ class Runtime {
 
     constructor(dirRuntime){
         //DETERMINE JAVA VERSION
-        this.lang = FZUtils.getLang()
+        this.lang = FZUtils.getLang(store.get('lang'))
         var dirRuntime = path.resolve(dirRuntime)
         if(!fs.existsSync(dirRuntime))
             fs.mkdirSync(dirRuntime, '777')

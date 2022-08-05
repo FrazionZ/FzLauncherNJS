@@ -57,6 +57,9 @@
     cursor: default;
     user-select: none; 
 }
+html {
+    border-radius: 16px;
+}
 body {
     background-color: var(--black-4);
     font-family: Comfortaa-Bold !important;
@@ -73,6 +76,7 @@ img {
     height: 100px;
     justify-content: space-between;
     background-color: var(--black-4);
+    border-radius: 15px 15px 0px 0px;
 }
 .title_bar .beta {
     font-family: 'Comfortaa';
@@ -107,6 +111,7 @@ img {
     padding: 15.5px;
     width: 60px;
     height: 60px;
+    border-top-right-radius: 15px;
 }
 .title_bar .actions .window_reduce:hover {
     background: var(--black-2);
@@ -155,6 +160,9 @@ img {
 }
 ::-webkit-scrollbar-thumb:hover {
     background: #555;
+}
+.dialog .dialog_close i {
+    font-size: 2rem;
 }
 .text-left {
     text-align: left;
@@ -277,6 +285,55 @@ main .row {
     height: calc(100vh - 6.3rem);
     width: 100%;
 }
+.main .alert.fzLauncher {
+    border-radius: 8px;
+    position: absolute;
+    width: 70%;
+    text-align: center;
+    padding: 1rem;
+    margin: 0;
+    z-index: 999;
+    left: 0;
+    right: 0;
+    top: -2rem;
+    margin-left: auto;
+    margin-right: auto;
+    display: flex;
+    overflow: hidden;
+}
+.main .alert.fzLauncher span {
+    display: inline-block;
+    white-space: nowrap;
+    word-break: break-word;
+    position: relative;
+    padding-left: 6%;
+    z-index: -1;
+}
+.main .alert.fzLauncher span.animate {
+    animation: defilement-rtl 90s infinite linear;
+}
+.main .alert.fzLauncher .icon {
+    background: var(--black-3);
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 3rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.main .alert.fzLauncher .icon i {
+    font-size: 23px;
+}
+@keyframes defilement-rtl {
+    0% {
+      transform: translate3d(0,0,0);      /* position initiale ÃƒÂ  droite */
+    }
+    100% {
+      transform: translate3d(-100%,0,0);  /* position finale ÃƒÂ  gauche */
+    }
+}
 .body {
     display: flex;
     flex-direction: row;
@@ -298,10 +355,12 @@ main .row {
     padding: 15px;
     flex-direction: column;
     justify-content: space-between;
+    border-radius: 0px 0px 0px 15px;
 }
   
 .body .main.connected {
     display: block;
+    position: relative;
     flex-grow: 0;
     flex-shrink: 1;
     flex-basis: auto;
@@ -309,6 +368,7 @@ main .row {
     order: 0;
     background: var(--black-3);
     border-top-left-radius: 15px;
+    border-bottom-right-radius: 15px;
 }
 
 .login-flex {
@@ -398,6 +458,13 @@ input {
 }
 .sidebar #nav_menu_avatar {
     border-radius: 5px;
+}
+#skin {
+    width: 145px;
+    height: 145px;
+    position: relative;
+    left: 50%;
+    transform: translateX(-50%);
 }
 #footer {
     position: fixed;
@@ -659,6 +726,7 @@ option[disabled] {
 }
 .card .card-body {
     padding: 0;
+    position: relative;
 }
 .card.sub {
     background-color: transparent;
@@ -1016,6 +1084,9 @@ option[disabled] {
 .mt-80 {
     margin-top: 80px;
 }
+.text-inactive {
+    color: var(--text-inactive)important;
+}
 .text-red {
     color: rgb(219, 55, 55)important;
 }
@@ -1168,6 +1239,44 @@ option[disabled] {
 .server .range_ram_indicator {
     font-size: 20px;
 }
+.rpackd .screens {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    grid-column-gap: 15px;
+    grid-row-gap: 15px;
+}
+.rpackd .screens img {
+    border-radius: 8px;
+}
+a.social {
+    background: var(--black-4);
+    padding: 0.8rem;
+    border-radius: 8px;
+    color: white;
+    min-width: 3rem;
+    min-height: 3rem;
+    text-align: center;
+    cursor: pointer;
+    transition: background 0.2s ease-in-out;
+}
+a.social i {
+    cursor: pointer;
+}
+.credits {
+    font-size: 0.6rem;
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    padding-top: 3rem;
+    color: var(--text-inactive);
+}
+.credits a {
+    color: var(--color-2);
+    text-decoration: none;
+}
+a.social:hover {
+    background: var(--color-2);
+}
 .config .card {
     background: var(--black-4);
     border-radius: 15px;
@@ -1185,6 +1294,13 @@ option[disabled] {
     display: flex;
     justify-content: space-between;
 }
+.config .config-item .icon {
+    font-size: 36px;
+    min-width: 36px;
+    max-width: 36px;
+    display: flex;
+    justify-content: center;
+}
 .config .settings_number {
     width: 8rem;
 }
@@ -1201,6 +1317,96 @@ option[disabled] {
     position: relative;
     top: 2.5px;
 }
+.profile .skinList {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: 1fr;
+    grid-column-gap: 15px;
+    grid-row-gap: 15px;
+}
+.profile .skinList .skin_item {
+    background-color: var(--black-1);
+    border: 1px solid transparent !important;
+    transition: display 0.2s ease-in-out;
+}
+.profile .skinList .skin_item.active {
+    border: 1px solid white !important;
+}
+.profile .skinList .skin_item:hover .actions {
+    display: flex;
+}
+.profile .skinList .actions {
+    position: absolute;
+    bottom: 0rem;
+    display: none;
+    transition: display 0.2s ease-in-out;
+    flex-direction: column;
+    gap: 5px;
+}
+.profile .skinList .actions a {
+    background: var(--black-4);
+    color: white;
+    width: 8.85rem;
+    text-decoration: none;
+    overflow: hidden;
+    padding: 0.6rem;
+    border-radius: 8px;
+    text-align: center;
+}
+.profile .head {
+  perspective: 1000px;
+  perspective-origin: -90% -64%;
+  height: 235px;
+  width: 250px;
+  position: relative;
+}
+
+.profile .faces {
+  margin-top: 20px;
+  margin-left: 40px;
+  width: 170px;
+  height: 170px;
+  position: absolute;
+  transform-style: preserve-3d;
+}
+
+.profile .head .inner {
+  width: 160px;
+  height: 160px;
+  background-size: 1280px 640px;
+  top: 5px;
+  left: 5px;
+}
+
+.profile .head .outer {
+  width: 170px;
+  height: 170px;
+  background-size: 1360px 680px;
+}
+
+.profile .faces > div {
+  position: absolute;
+  background-repeat: no-repeat;
+  image-rendering: -moz-crisp-edges;
+  image-rendering: -o-crisp-edges;
+  image-rendering: -webkit-optimize-contrast;
+  -ms-interpolation-mode: nearest-neighbor;
+  image-rendering: pixelated;
+}
+
+.profile .inner.front  { transform: rotateY(   0deg ) translateZ( 80px ); background-position: -160px -160px; }
+.profile .inner.back   { transform: rotateY( 180deg ) translateZ( 80px ); background-position: -480px -160px; }
+.profile .inner.right  { transform: rotateY(  90deg ) translateZ( 80px ); background-position: -320px -160px; }
+.profile .inner.left   { transform: rotateY( -90deg ) translateZ( 80px ); background-position: 0px -160px; }
+.profile .inner.top    { transform: rotateX(  90deg ) translateZ( 80px ); background-position: -160px 0px; }
+.profile .inner.bottom { transform: rotateX( -90deg ) translateZ( 80px ); background-position: -320px 0px; }
+
+.profile .outer.front  { transform: rotateY(   0deg ) translateZ( 85px ); background-position: -850px -170px; }
+.profile .outer.back   { transform: rotateY( 180deg ) translateZ( 85px ); background-position: -1190px -170px; }
+.profile .outer.right  { transform: rotateY(  90deg ) translateZ( 85px ); background-position: -1020px -170px; }
+.profile .outer.left   { transform: rotateY( -90deg ) translateZ( 85px ); background-position: -680px -170px; }
+.profile .outer.top    { transform: rotateX(  90deg ) translateZ( 85px ); background-position: -850px 0px; }
+.profile .outer.bottom { transform: rotateX( -90deg ) translateZ( 85px ); background-position: -1020px 0px; }
 .dl-items .infos .title {
     margin: 0;
     font-size: 24px;

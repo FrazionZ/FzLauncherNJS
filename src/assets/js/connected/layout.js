@@ -5,6 +5,7 @@ const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
 const fetchUrl = require('fetch').fetchUrl;
 const server_config = require(path.join(appRoot.path, '/server_config.json'));
 const ejs = require('ejs')
+const { shell } = require('electron')
 class Layout {
     
     constructor(linkPage, openPage){
@@ -20,6 +21,9 @@ class Layout {
                 '</li>';
                 $('.sidebar').find('#servers').append(serverNav);
         });
+
+        
+        $('body').css('background', 'transparent')
 
 
         //PRELOAD DOWNLOAD PAGE AND LOAD/SHOW SERVER 0
@@ -41,6 +45,23 @@ class Layout {
         })
     }
 
+    loadDialog(dialog, data, parent){
+        var instance = this;
+        $('.page').addClass('hide')
+        FZUtils.initVariableEJS(data).then((datar) => {
+            ejs.renderFile(appRoot.path+"/src/template/connected/modals/"+dialog+".ejs", datar, {}, (err, str) => {
+                if (err) return console.log(err)
+                $('.dialog.page').html(str)
+                $('.dialog .dialog_close').on('click', function() {
+                    $('.'+parent+'.page').removeClass('hide')
+                    $('.dialog.page').empty()
+                    $('.dialog.page').addClass('hide')
+                })
+                $('.dialog.page').removeClass('hide')
+            })
+        })
+    }
+
     loadContent(nav, url, show){
         var instance = this;
         $('.page').addClass('hide')
@@ -55,6 +76,11 @@ class Layout {
                         if(show){
                             $('.'+url+'.page').removeClass('hide')
                         }
+                        $('a').on('click', function(e){
+                            var link = $(this).attr('data-link');
+                            if(link !== undefined)
+                                shell.openExternal(link);
+                        })
                     })
                 })
             });

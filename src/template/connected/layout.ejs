@@ -1,15 +1,25 @@
 <%- include('../includes/head.ejs') %>
 <%- include('../includes/top.ejs') %>
-
 <div class="body">
     <%- include('../includes/sidebar.ejs') %>
     <div id="modals"></div>
-    <div class="main connected w-100">
-        <div class="content-child">
-            <div class="server page hide"></div>
-            <div class="downloads page hide"></div>
-            <div class="settings page hide"></div>
-            <div class="profile page hide"></div>
+    <div class="black-4 w-100" style="border-bottom-right-radius: 15px;">
+        <div class="main connected w-100">
+            <div class="alert black-3 fzLauncher <% if(configLauncher.general_message_show.value == 'false'){ %> hide <% } %>">
+                <div class="icon">
+                    <i class="fa-solid fa-triangle-exclamation fcolor-2 mr-10"></i>
+                </div>
+                <span id="alertFzLauncher" class="animate">
+                    <%= configLauncher.general_message_value.value %>
+                </span>
+            </div>
+            <div class="content-child">
+                <div class="server page hide"></div>
+                <div class="dialog page hide"></div>
+                <div class="downloads page hide"></div>
+                <div class="settings page hide"></div>
+                <div class="profile page hide"></div>
+            </div>
         </div>
     </div>
 </div>
@@ -27,7 +37,7 @@
     </script>
 <% } %>
 <script>
-    new Layout(linkPage, openPage);
+    const layoutClass = new Layout(linkPage, openPage);
 </script>
 <% if(typeof notyf == 'object') { %>
     <% if(notyf.type == "success") { %>

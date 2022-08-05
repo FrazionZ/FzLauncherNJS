@@ -38,7 +38,11 @@ class RPacks extends FzPage {
                         clone.querySelector('#rpack__description').textContent = rpack.description
                         if(rpack.description.length > 90) clone.querySelector('#rpack__description').textContent = rpack.description.substring(0,90)+"...";
                         clone.querySelector('#rpack__author').textContent = FZUtils.getLangKey("server.rpacks.author", [{search: "%author__name%", replace: rpack.author}])
-    
+
+                        clone.querySelector('#rpack__view').onclick = function() {  
+                            layoutClass.loadDialog('rpackdetails', [{rpack: rpack}], "server");
+                        };
+
                         //STATE 0=DOWNLOAD 1=DELETE 2=UPDATE
                         var state = 0
                         var dirPacks = "resourcepacks/"+rpack.name.replaceAll(' ', '_').toLowerCase()+".zip";
@@ -51,15 +55,15 @@ class RPacks extends FzPage {
                         }
 
                         if(state == 0){
-                            clone.querySelector('#rpack__action').textContent = "Télécharger";
+                            clone.querySelector('#rpack__action').innerHTML = "<i class='fa-solid fa-circle-arrow-down'></i>";
                             clone.querySelector('#rpack__action').classList.add('download');
                             clone.querySelector('#rpack__action').onclick = function() {  
                                 this.classList.add('disabled')
-                                instance.downloadPack(instance, rpack, pathFile, false).then(() => {
+                                    instance.downloadPack(instance, rpack, pathFile, false).then(() => {
                                 }); 
                             };
                         }else if(state == 1){
-                            clone.querySelector('#rpack__action').textContent = "Supprimer";
+                            clone.querySelector('#rpack__action').innerHTML = "<i class='fa-solid fa-trash-can'></i>";
                             clone.querySelector('#rpack__action').classList.add('delete');
                             clone.querySelector('#rpack__action').onclick = function() {  
                                 this.classList.add('disabled')
@@ -67,7 +71,7 @@ class RPacks extends FzPage {
                                 });  
                             };
                         }else if(state == 2){
-                            clone.querySelector('#rpack__action').textContent = "Mettre à jour";
+                            clone.querySelector('#rpack__action').innerHTML = "<i class='fa-solid fa-arrow-up'></i>";
                             clone.querySelector('#rpack__action').classList.add('update');
                             clone.querySelector('#rpack__action').onclick = function() {  
                                 this.classList.add('disabled')

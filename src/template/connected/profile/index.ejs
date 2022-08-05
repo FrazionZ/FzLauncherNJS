@@ -1,7 +1,9 @@
 <div class="profile pd-40">
     <div class="flex">
-        <div class="column">
-            <canvas id="skin"></canvas>
+        <div class="column flex direct-column">
+            <div class="column">
+                <canvas id="skin"></canvas>
+            </div>
         </div>
         <div class="column w-100 flex justif-end gap-15 direct-column">
             <div class="flex justif-between">
@@ -98,38 +100,120 @@
             </div>
         </div>
     </div>
-    <div class="card black-4 w-100 mt-30 pd-30">
-        <div class="card-body justif-center flex gap-36 direct-column">
-            <div class="column">
-                <h2 class="underline">Modèle du Skin</h2>
-                <div class="flex gap-30 justif-between align-center">
-                    <div class="column flex gap-48 align-center">
-                        <div class="ui radio checkbox checked">
-                            <input type="radio" name="typeskin" value="steve" tabindex="0" class="hidden">
-                            <label class="text-white">Steve</label>
+    <div class="card black-4 w-100 mt-30 pd-30 <% if(countSkins >= 10){ %> hide <% } %>">
+        <div class="card-body">
+            <div class="addSkinLoader hide flex justif-center gap-30 align-center">
+                <div class="column">
+                    <span class="addSkin loader-3"></span>
+                </div>
+                <div class="column">
+                    <h5>Veuillez patienter</h5>
+                </div>
+            </div>
+            <div class="forms justif-center flex gap-36 direct-column">
+                <div class="column">
+                    <h5>Depuis Mojang</h5>
+                    <div class="flex justif-between gap-30 align-center">
+                        <div class="column w-100">
+                            <input type="text" id="searchSkinInput" name="searchSkinInput" placeholder="Chercher un skin via un pseudo Minecraft premium"/>
                         </div>
-                        <div class="ui radio checkbox">
-                            <input type="radio" name="typeskin" value="alex" tabindex="1" class="hidden" checked="checked">
-                            <label class="text-white">Alex</label>
+                        <div class="column">
+                            <button class="searchSkinMojang btn btn-primary">Chercher</button>
                         </div>
                     </div>
-                    <div class="column">
-                        <button class="updateSkinTypeForm btn btn-primary">Save</button>
+                </div>
+                <div class="column">
+                    <h5>Depuis un fichier</h5>
+                    <div class="flex justif-between gap-30 align-center">
+                        <div class="column w-100">
+                            <label class="file-upload">
+                            <input  type="file"  class="profile-skin custom-file-input"  id="skinInput"  name="skin"  accept=".png"  required />
+                            <span>Choisir un fichier</span>
+                            </label>
+                        </div>
+                        <div class="column">
+                            <button class="addSkinFileForm btn btn-primary">Save</button>
+                        </div>
                     </div>
                 </div>
             </div>
-            <div class="column">
-                <h2 class="underline">Skin</h2>
-                <!--<label for="skin" class="form-control profile-skin custom-file-input">Choisir un fichier</label>-->
-                <div class="flex justif-between gap-30 align-center">
-                    <div class="column w-100">
-                        <label class="file-upload">
-                            <input type="file" class="profile-skin custom-file-input" id="skinInput" name="skin" accept=".png" required />
-                            <span>Choisir un fichier</span>
-                        </label>
+        </div>
+    </div>
+    <div class="flex gap-15">
+        <div class="card black-4 w-100 mt-30 pd-30">
+            <div class="card-body flex gap-36 direct-column">
+                <!--<div class="column">
+                    <h2 class="underline">Modèle du Skin</h2>
+                    <div class="flex gap-30 justif-between align-center">
+                        <div class="column flex gap-48 align-center">
+                            <div class="ui radio checkbox checked">
+                                <input type="radio" name="typeskin" value="steve" tabindex="0" class="hidden">
+                                <label class="text-white">Steve</label>
+                            </div>
+                            <div class="ui radio checkbox">
+                                <input type="radio" name="typeskin" value="alex" tabindex="1" class="hidden" checked="checked">
+                                <label class="text-white">Alex</label>
+                            </div>
+                        </div>
+                        <div class="column">
+                            <button class="updateSkinTypeForm btn btn-primary">Save</button>
+                        </div>
                     </div>
+                </div>-->
+                <!--<div class="column">
+                    <h2 class="underline">Skin</h2>
+                    <label for="skin" class="form-control profile-skin custom-file-input">Choisir un fichier</label>
+                    <div class="flex justif-between gap-30 align-center">
+                        <div class="column w-100">
+                            <label class="file-upload">
+                                <input type="file" class="profile-skin custom-file-input" id="skinInput" name="skin" accept=".png" required />
+                                <span>Choisir un fichier</span>
+                            </label>
+                        </div>
+                        <div class="column">
+                            <button class="updateSkinForm btn btn-primary">Save</button>
+                        </div>
+                    </div>
+                </div>-->
+                <div class="column">
+                    <h2 class="underline">Bibliothèque de skin</h2>
+                    <span id="shelfCountSkinsSpan"><%= countSkins %> / 10 - Skins enregistrés dans la bibliothèque</span>
+                    <br /><br />
+                    <div class="flex gap-30">
+                        <template id="skins_list" class="skinList" style="overflow: hidden;">
+                            <div class="card skin_item gap-15 black-4" style="border: none;" data-base64="">
+                                <div class="card-body">
+                                    <canvas id="skin"></canvas>
+                                    <h6 id="skin_name" class="text-center"></h6>
+                                    <h6 id="skin_model" style="color: gray;font-size: 0.8rem;" class="text-center"></h6>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="card black-4 skinPreview mt-30 pd-30" style="width: 60%;height:fit-content;">
+            <div class="card-body justif-center flex gap-36 direct-column">
+                <input type="text" id="nameSkinInput" name="nameSkinInput" placeholder="Nom du skin" value="" />
+                <div class="flex gap-30 justif-center align-center">
+                    <div class="ui radio checkbox checked">
+                        <input type="radio" name="typeSkinInput" value="steve" tabindex="0" class="hidden">
+                        <label class="text-white">Steve</label>
+                    </div>
+                    <div class="ui radio checkbox">
+                        <input type="radio" name="typeSkinInput" value="alex" tabindex="1" class="hidden">
+                        <label class="text-white">Alex</label>
+                    </div>
+                </div>
+                <canvas id="skin"></canvas>
+                <input type="file" class="profile-skin custom-file-input hide" id="skinPreviewApplyInput" name="skin" accept=".png" required />
+                <div class="flex gap-15">
                     <div class="column">
-                        <button class="updateSkinForm btn btn-primary">Save</button>
+                        <button class="deleteSkinPreview btn btn-danger"><i class="fa-solid fa-trash-can"></i></button>
+                    </div>
+                    <div class="column  w-100">
+                        <button class="updateSkinForm btn btn-primary w-100">Appliquer</button>
                     </div>
                 </div>
             </div>

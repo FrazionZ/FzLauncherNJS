@@ -16,8 +16,9 @@ const ejs = require('ejs');
 const { get } = require('request');
 const { platform } = require('os');
 const axios = require('axios').default;
-
 app.commandLine.appendSwitch ("disable-http-cache");
+app.commandLine.appendSwitch('disable-gpu-process-crash-limit')
+app.disableDomainBlockingFor3DAPIs()
 
 let mainWindow;
 let store;
@@ -32,7 +33,6 @@ if(sentryInit){
     Sentry.init({ dsn: "https://bb48df8adaeb4da6b84b94ae6382c098@o1316392.ingest.sentry.io/6570059" });
 }else
     console.log('[FZLauncher] Sentry service not launch..')
-  
 
 async function createWindow() {
 
@@ -46,7 +46,9 @@ async function createWindow() {
         maximizable: false,
         resizable: false,
         autoHideMenuBar: true,
+        transparent: true, 
         frame: false,
+        roundedCorners: true,
         title: "FrazionZ Launcher",
         app: "production",
         show: ((process.platform == "linux" || process.platform == "darwin") ? true : false),
@@ -61,23 +63,6 @@ async function createWindow() {
             preload: path.join(__dirname, 'preload.js')
         }
     })
-
-    
-    await axios.get('https://api.frazionz.net/servers/list')
-        .then(async function (response) {
-            await fs.writeFile('server_config.json', JSON.stringify(response.data), err => {});
-        })
-        .catch(function (error) {
-            console.log(error)
-            dialog.showMessageBoxSync(mainWindow, {
-                message: "Impossible de récuperer les informations de l'API FrazionZ.\nLe launcher n'est donc pas disponible.",
-                title: "FrazionZ Launcher",
-                icon: "src/assets/img/icons/icon.png",
-                buttons: ["Fermer"]
-            })
-            app.exit()
-            process.exit()
-        })
     
     let lang;
     let loadURL;
@@ -89,16 +74,26 @@ async function createWindow() {
     
         mainWindow.center();
 
+        var serversConfigFile = path.join(appRoot.path, "server_config.json");
+        if(!fs.existsSync(serversConfigFile))
+            fs.writeFileSync(serversConfigFile, "[]", ()=>{})
+
         var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
     
         dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
         dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
+        shelfFzLauncherSkins = path.join(dirFzLauncherDatas, "skins.json");
         dirFzLauncherServer = path.join(dirFzLauncherRoot, "Servers");
     
         if(!fs.existsSync(dirFzLauncherRoot))
             fs.mkdirSync(dirFzLauncherRoot)
+
         if(!fs.existsSync(dirFzLauncherDatas))
             fs.mkdirSync(dirFzLauncherDatas)
+
+        if(!fs.existsSync(shelfFzLauncherSkins))
+            fs.writeFileSync(shelfFzLauncherSkins, "[]", ()=>{})
+
         if(!fs.existsSync(dirFzLauncherServer))
             fs.mkdirSync(dirFzLauncherServer)
     
@@ -128,13 +123,42 @@ async function createWindow() {
             await open(url);
         }
     })
-    var afterUpdateAndRuntime = function() {
+    var afterUpdateAndRuntime = async function() {
         mainWindow.setSize(1280, 720);
         mainWindow.center()
-        if(store.has('session'))
-            loadURL('/logging', [{type: "autolog"}])
-        else
-            loadURL('/login', [])
+        const checkInternetConnected = require('check-internet-connected');
+
+        const config = {
+            timeout: 5000,
+            retries: 5,
+            domain: 'frazionz.net'
+        }
+
+        await checkInternetConnected(config)
+            .then(async () => {
+                await axios.get('https://api.frazionz.net/servers/list')
+                    .then(async function (response) {
+                        await fs.writeFile('server_config.json', JSON.stringify(response.data), err => {});
+                    })
+                    .catch(function (error) {
+                        console.log(error)
+                        dialog.showMessageBoxSync(mainWindow, {
+                            message: "Impossible de récuperer les informations de l'API FrazionZ.\nLe launcher n'est donc pas disponible.",
+                            title: "FrazionZ Launcher",
+                            icon: "src/assets/img/icons/icon.png",
+                            buttons: ["Fermer"]
+                        })
+                        app.exit()
+                        process.exit()
+                    })
+                if(store.has('session'))
+                    loadURL('/logging', [{type: "autolog"}])
+                else
+                    loadURL('/login', [])   
+            }).catch((error) => {
+                loadURL('/session/nointernet', []);
+            });
+
         /*const login = new Login(mainWindow.webContents);
         login.store.delete('downloads')
         login.showPage(true);*/

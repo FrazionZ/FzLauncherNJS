@@ -3,15 +3,15 @@
     <img width="120" src="asset://img/icons/icon.png">
     <div class="flex gap-20 direct-column pl-60 pr-60 align-center justif-center">
         <div class="column">
-            <h2>Une petite minute !</h2>
+            <h2><%= FZUtils.getLangKey("logging.session.renew.title") %></h2>
         </div>
         <div class="column text-center">
-            <h6>Nous avons détecté qu'une session est déjà ouverte sur notre serveur. <p/>Si vous continuez, l'instance contenant la session deviendra obsolète<p/>et ne pourras plus rejoindre de nouveau le serveur.</h6>
-            <br /><br /><h4>Souhaitez-vous continuer ?</h4>
+            <h6><%- FZUtils.getLangKey("logging.session.renew.expl") %></h6>
+            <br /><br /><h4><% FZUtils.getLangKey("logging.session.renew.question") %></h4>
         </div>
         <div class="column flex gap-15">
-            <a href="#" class="btn btn-primary continueAuth">Oui, je continue</a>
-            <a href="#" class="btn btn-default closeApp">Non, je ferme le launcher</a>
+            <a href="#" class="btn btn-primary closeApp"><%= FZUtils.getLangKey("logging.session.renew.btn.close") %></a>
+            <a href="#" class="btn btn-default continueAuth"><%= FZUtils.getLangKey("logging.session.renew.btn.continue") %</a>
         </div>
     </div>
 </div>

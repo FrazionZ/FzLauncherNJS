@@ -1,5 +1,6 @@
 var appRoot = require('app-root-path');
 const path = require('path')
+const { shell } = require('electron')
 const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
 class Settings extends FzPage {
 
@@ -37,7 +38,7 @@ class Settings extends FzPage {
             }
         })
         $('.config__launcher_pnotes').on('click', function() {
-            instance.showModal(false, 'changelog')
+            layoutClass.loadDialog('changelog', [], "settings");
         })
     }
 

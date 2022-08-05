@@ -19,6 +19,7 @@ class FzPage {
     
         this.dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
         this.dirFzLauncherDatas = path.join(this.dirFzLauncherRoot, "Launcher");
+        this.shelfFzLauncherSkins = path.join(this.dirFzLauncherDatas, "skins.json");
         this.dirFzLauncherServer = path.join(this.dirFzLauncherRoot, "Servers");
 
         this.page = page;
