@@ -3,6 +3,7 @@ const path = require('path')
 const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
 const FZUtils = require(path.join(appRoot.path, "/src/assets/js/utils.js"));
 const server_config = require(path.join(appRoot.path, '/server_config.json'))
+const {shell, ipcRenderer} = require('electron')
 
 class Settings extends FzPage {
 
@@ -84,6 +85,9 @@ class Settings extends FzPage {
                 }
             })
             
+        })
+        $('.config__view_dir').on('click', function(){
+            shell.openPath(instance.dirServer);
         })
         $('.config__clear_dir').on('click', function(){
             FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {

@@ -1,0 +1,12 @@
+<div class="flex justif-between align-center">
+    <h2 class="underline">Screens</h2>
+    <div class="alert black-4" style="border-radius:8px;width: fit-content;">
+        <i class="fa-solid fa-circle-info fcolor-2 mr-10"></i> Cliquez sur une image pour la copier.
+    </div>
+</div>
+<span class="loader-3"></span>
+<div class="server screens"></div>
+<script>
+    var Screens = require(path.join('<%= srcDir %>', '/assets/js/connected/server/subpage/screens.js'));
+    new Screens('<%= server_current.idServer %>');
+</script>

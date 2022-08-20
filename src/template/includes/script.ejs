@@ -1,7 +1,7 @@
 <script src="asset://js/notyf.min.js"></script>
 <script>
     var notyf = new Notyf({
-        duration: 5000,
+        duration: 3000,
         dismissible: true,
         position: {
             x: 'right',
@@ -14,7 +14,20 @@
     $('.window_reduce').on('click', () => {
         ipcRenderer.send('reduceWindow');
     }); 
+    $('.window_maximize').on('click', () => {
+        (async () => {
+            ipcRenderer.send('maximizeWindow', []);
+        })();
+    });
     $('.window_close').on('click', () => {
-        ipcRenderer.send('closeApp');
+        FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+            ipcRenderer.send('closeApp', result);
+        })
     }); 
+
+
+    ipcRenderer.on('responseMaximizeWindow', (event, data) => {
+        store.set('maximizeWindow', data);
+        ((data) ? $('.window_maximize').find('img').attr('src', 'asset://img/frame/maximize_on.svg') : $('.window_maximize').find('img').attr('src', 'asset://img/frame/maximize_off.svg'));
+    })
 </script>

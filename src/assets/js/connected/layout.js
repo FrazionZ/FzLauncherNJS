@@ -23,14 +23,29 @@ class Layout {
         });
 
         
-        $('body').css('background', 'transparent')
+        
+        if(this.store.has('maximizeWindow'))
+            if(this.store.get('maximizeWindow'))
+                ipcRenderer.send('maximizeWindow', []);
 
+        //CHECK UPDATE
+        FZUtils.checkUpdate().then((update) => {
+            if(update){
+                $('a[href="#aupdate"]').parent().removeClass('hide')
+            }
+        })
+
+        
+        $('body').css('background', 'transparent')
+        $('.title_bar .actions .window_maximize').removeClass('hide')
 
         //PRELOAD DOWNLOAD PAGE AND LOAD/SHOW SERVER 0
         instance.loadContent(((typeof linkPage == "object") ? linkPage : $('#'+linkPage)), openPage, true)
         instance.loadContent(null, "downloads", false)
 
         $('.parent-menu-link').on('click', function() {
+            if($(this).find('a').hasClass('isDisabled'))
+                return notyf.error("Le launcher se mets à jour, veuillez patienter...");
             var hyperLink = $(this).find('.menu-link');
             switch(hyperLink.attr('href')){
                 case '#server':
@@ -48,7 +63,7 @@ class Layout {
     loadDialog(dialog, data, parent){
         var instance = this;
         $('.page').addClass('hide')
-        FZUtils.initVariableEJS(data).then((datar) => {
+        FZUtils.initVariableEJS(data, false).then((datar) => {
             ejs.renderFile(appRoot.path+"/src/template/connected/modals/"+dialog+".ejs", datar, {}, (err, str) => {
                 if (err) return console.log(err)
                 $('.dialog.page').html(str)
@@ -68,8 +83,8 @@ class Layout {
         if($('.'+url+'.page').is(':empty')){
             var langListFinal = undefined;
             FZUtils.getLangList().then((langList) => {
-                var data = [{session: instance.store.get('session')}, {langsLocale: langList}]
-                FZUtils.initVariableEJS(data).then((datar) => {
+                var data = [{session: userSession}, {langsLocale: langList}]
+                FZUtils.initVariableEJS(data, false).then((datar) => {
                     ejs.renderFile(appRoot.path+"/src/template/connected/"+url+"/index.ejs", datar, {}, (err, str) => {
                         if (err) return console.log(err)
                         $('.'+url+'.page').html(str)
@@ -77,9 +92,16 @@ class Layout {
                             $('.'+url+'.page').removeClass('hide')
                         }
                         $('a').on('click', function(e){
-                            var link = $(this).attr('data-link');
-                            if(link !== undefined)
-                                shell.openExternal(link);
+                            if (this.hasAttribute("data-link")) {
+                                $(this).off();
+                                var link = $(this).attr('data-link');
+                                var opened = false;
+                                if(link !== undefined)
+                                    if(!opened)
+                                        shell.openExternal(link).then(() => {
+                                            opened = true;
+                                        });
+                            }
                         })
                     })
                 })
@@ -90,7 +112,6 @@ class Layout {
             $('.'+url+'.page').removeClass('hide')
             nav.addClass('active')
         }
-
     }
 
 

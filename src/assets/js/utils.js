@@ -1,4 +1,5 @@
-const main = require('@electron/remote/main')
+const main = require('@electron/remote/main');
+const { default: axios } = require('axios');
 
 function UrlExists(url) {
     var http = new XMLHttpRequest();
@@ -42,7 +43,17 @@ function ExecuteCodeJS(code) {
         })
 }
 
-async function initVariableEJS(data){
+async function checkUpdate(){
+    const axios = require('axios').default;
+    return new Promise(async (resolve, reject) => {
+        await axios.get('https://download.frazionz.net/serverNodeJS/?branch=windows').then((response) => {
+            var result = response.data;
+            resolve((result.version != require('../../../package.json').version));
+        })
+    })
+}
+
+async function initVariableEJS(data, init){
     const rootPath = require('electron-root-path').rootPath;
     var appRoot = require('app-root-path');
     const axios = require('axios').default;
@@ -50,7 +61,10 @@ async function initVariableEJS(data){
     const fs = require('fs');
     const Store = require('electron-store')
     const FZUtils = require('./utils.js')
-    const servers = require(path.join(appRoot.path, "server_config.json"));
+    let servers;
+    if(typeof init == "boolean" && init == false){
+        servers = require(path.join(appRoot.path, "server_config.json"));
+    }
     store = new Store({accessPropertiesByDotNotation: false});
     let configLauncher;
 
@@ -67,14 +81,14 @@ async function initVariableEJS(data){
             configLauncher = response.data;
         })
         .catch((err) => {
-            alert(err)
+            console.log('Error: ' + err);
         })
     var initDatas = [
         {
             "servers": servers,
             "server_current": {
                 idServer: 0,
-                server: servers[0]
+                server: ((servers !== undefined) ? servers[0] : undefined),
             },  
 
             "configLauncher": configLauncher,
@@ -155,6 +169,22 @@ async function storeSkinShelf(name, base64){
     })
 }
 
+async function getSkinFromB64(b64Skin){
+    const path = require("path");
+
+    var shelfFzLauncherSkins = await getSkinsFile();
+
+    const skinsJson = require(path.join(shelfFzLauncherSkins));
+    return new Promise((resolve, reject) => {
+        skinsJson.forEach((skin, key, array) => {
+            if(skin.base64 == b64Skin)
+                resolve(skin);
+            if (key === array.length -1) resolve(null);
+        })
+        if(skinsJson.length == 0) resolve(null);
+    })
+}
+
 async function getSkinFromID(idSkin){
     const fs = require("fs");
     const path = require("path");
@@ -171,6 +201,16 @@ async function getSkinFromID(idSkin){
         })
         if(skinsJson.length == 0) resolve(null);
     })
+}
+
+async function encryptString(str){
+    const { safeStorage } = require('electron')
+    return safeStorage.encryptString(str)
+}
+
+async function decryptString(str){
+    const { safeStorage } = require('electron')
+    return safeStorage.decryptString(str)
 }
 
 async function deleteSkinData(idSkin){
@@ -446,6 +486,27 @@ function getLangKey(key, replaceArr, defaultLang){
     }
 }
 
+async function createRipple(event) {
+    const button = event[0];
+  
+    const circle = document.createElement("span");
+    const diameter = Math.max(button.clientWidth, button.clientHeight);
+    const radius = diameter / 2;
+  
+    circle.style.width = circle.style.height = `${diameter}px`;
+    circle.style.left = `${event.clientX - button.offsetLeft - radius}px`;
+    circle.style.top = `${event.clientY - button.offsetTop - radius}px`;
+    circle.classList.add("ripple");
+  
+    const ripple = button.getElementsByClassName("ripple")[0];
+  
+    if (ripple) {
+      ripple.remove();
+    }
+  
+    button.appendChild(circle);
+}
+
 function javaversion(dirLaucher, callback) {
     const path = require('path')
     var javaExecutable = path.join(dirLaucher, "runtime/bin/java.exe");
@@ -463,4 +524,4 @@ function javaversion(dirLaucher, callback) {
     });
 }
 
-module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, checkRulesSize, removeKeyInArr, resizeImage, deleteSkinData, getSkinsFile, storeSkinShelf, getSkinFromID, getImageDimensions, updateSkinData, getSortedFilesByDate, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }
+module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, createRipple, encryptString, decryptString, checkRulesSize, checkUpdate, removeKeyInArr, getSkinFromB64, resizeImage, deleteSkinData, getSkinsFile, storeSkinShelf, getSkinFromID, getImageDimensions, updateSkinData, getSortedFilesByDate, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }

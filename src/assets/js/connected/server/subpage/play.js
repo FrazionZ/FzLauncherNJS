@@ -30,74 +30,79 @@ class Play  extends FzPage {
 
     async preInit(){
         var instance = this;
-        setTimeout(async () => {
-            await instance.checkIfJavaHomeExist().then(async (result) => {
-                var dirsFilesObligate = [{name: 'assets', isInstalled: false}, {name: 'libs', isInstalled: false}, {name: 'natives', isInstalled: false}, {name: this.server.jarFileMain, isInstalled: false}];
-                var needsToBeInstall = false;
-                var needsToBeRepare = false;
-                var needsToBeUpdate = false;
-                var canPlay = false;
-                var dirExists = instance.fs.existsSync(instance.dirServer)
-                if(!dirExists){
-                    needsToBeInstall = true;
-                }else{
-                    var files = instance.fs.readdirSync(instance.dirServer);
-                    dirsFilesObligate.forEach((v, k) => {
-                        files.forEach(file => {
-                            if(file == v.name){
-                                dirsFilesObligate[k].isInstalled = true;
+        return new Promise(async (resolve, reject) => {
+            setTimeout(async () => {
+                await instance.checkIfJavaHomeExist().then(async (result) => {
+                    var dirsFilesObligate = [{name: 'assets', isInstalled: false}, {name: 'libs', isInstalled: false}, {name: 'natives', isInstalled: false}, {name: this.server.jarFileMain, isInstalled: false}];
+                    var needsToBeInstall = false;
+                    var needsToBeRepare = false;
+                    var needsToBeUpdate = false;
+                    var canPlay = false;
+                    var dirExists = instance.fs.existsSync(instance.dirServer)
+                    if(!dirExists){
+                        needsToBeInstall = true;
+                    }else{
+                        var files = instance.fs.readdirSync(instance.dirServer);
+                        dirsFilesObligate.forEach((v, k) => {
+                            files.forEach(file => {
+                                if(file == v.name){
+                                    dirsFilesObligate[k].isInstalled = true;
+                                }
+                            })
+                        })
+                        dirsFilesObligate.forEach((v) => {
+                            if(!v.isInstalled){
+                                needsToBeRepare = true;
+                                return;
                             }
                         })
-                    })
-                    dirsFilesObligate.forEach((v) => {
-                        if(!v.isInstalled){
-                            needsToBeRepare = true;
-                            return;
-                        }
-                    })
-                }
-                var checkUpdateAvailable = new Promise(async (resolve, reject) => {
-                    var repos = instance.server.repos;
-                    console.log(repos)
-                    let reposUpdateAvailable = [];
-                    var loopCheckRepos = new Promise(async (resolve, reject) => {
-                        await repos.forEach(async (repo, index, array) => {
-                            await instance.checkUpdate(repo).then(async (response) => {
-                                if(response.result)
-                                    reposUpdateAvailable.push({ github: response, repos: repo });
-                                if (index === array.length -1) resolve();
-                            }).catch((err) => {
-                                console.log(err)
-                                if (index === array.length -1) resolve();
+                    }
+                    var checkUpdateAvailable = new Promise(async (resolve, reject) => {
+                        var repos = instance.server.repos;
+                        let reposUpdateAvailable = [];
+                        var loopCheckRepos = new Promise(async (resolve, reject) => {
+                            await repos.forEach(async (repo, index, array) => {
+                                await instance.checkUpdate(repo).then(async (response) => {
+                                    if(response.result)
+                                        reposUpdateAvailable.push({ github: response, repos: repo });
+                                    if (index === array.length -1) resolve();
+                                }).catch((err) => {
+                                    console.log(err)
+                                    if (index === array.length -1) resolve();
+                                })
+    
                             })
-
-                        })
+                        });
+                        await loopCheckRepos.then(() => { resolve({repos: reposUpdateAvailable}); });
                     });
-                    await loopCheckRepos.then(() => { resolve({repos: reposUpdateAvailable}); });
-                });
-                if(!needsToBeRepare && !needsToBeInstall){
-                    canPlay = true;
-                    await checkUpdateAvailable.then(async (resultCUP) => {
-                        if(resultCUP.repos.length > 0){
-                            canPlay = false;
-                            needsToBeUpdate = true;
-                        }else{
-                            canPlay = true;
-                            needsToBeUpdate = false;
-                        }
-                        await this.init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, resultCUP)
-                    }).catch((err) => {
-                        console.log(err)
-                    })
-                }else{
-                    await this.init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, undefined)
-                }
-                
-            }).catch((err) => {
-                console.log(err)
-                instance.buttonActionPlay.find('.label').text(FZUtils.getLangKey("server.play.java_nf"))
-            })
-        }, 1000)
+                    if(!needsToBeRepare && !needsToBeInstall){
+                        canPlay = true;
+                        await checkUpdateAvailable.then(async (resultCUP) => {
+                            if(resultCUP.repos.length > 0){
+                                canPlay = false;
+                                needsToBeUpdate = true;
+                            }else{
+                                canPlay = true;
+                                needsToBeUpdate = false;
+                            }
+                            await this.init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, resultCUP)
+                            resolve();
+                        }).catch((err) => {
+                            console.log(err)
+                            resolve();
+                        })
+                    }else{
+                        await this.init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, undefined)
+                        resolve();
+                    }
+                    
+                }).catch((err) => {
+                    console.log(err)
+                    instance.buttonActionPlay.find('.label').text(FZUtils.getLangKey("server.play.java_nf"))
+                })
+            }, 50)
+        });
+        
  
     }
 
@@ -432,10 +437,7 @@ class Play  extends FzPage {
                     console.log(stringCMD)
 
                     setTimeout(() => {
-                        if(!instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')))
-                            ipcRenderer.send('closeApp')
-                        else
-                            ipcRenderer.send('hideApp')
+                        ipcRenderer.send('closeApp', ((instance.store.has(instance.keyStoreServerOptions('config__server_minimise_app')) ? instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')) : false)))
                     }, 1500)
 
                     //var crashGame = new CrashGameDialog(false);

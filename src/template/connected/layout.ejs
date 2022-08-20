@@ -19,6 +19,7 @@
                 <div class="downloads page hide"></div>
                 <div class="settings page hide"></div>
                 <div class="profile page hide"></div>
+                <div class="aupdate page hide"></div>
             </div>
         </div>
     </div>
@@ -38,6 +39,7 @@
 <% } %>
 <script>
     const layoutClass = new Layout(linkPage, openPage);
+    const userSession = JSON.parse('<%- JSON.stringify(session) %>');
 </script>
 <% if(typeof notyf == 'object') { %>
     <% if(notyf.type == "success") { %>

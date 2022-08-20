@@ -32,6 +32,7 @@
         "sidebar.navs.states": "États",
         "sidebar.navs.downloads": "Téléchargements",
         "sidebar.navs.settings": "Paramètres",
+        "sidebar.navs.update": "MàJ disponible",
         "states.title": "États de nos services",
         "downloads.title": "Téléchargements",
         "downloads.pending": "En cours",
@@ -52,6 +53,7 @@
         "server.tabs.news": "Actualités",
         "server.tabs.pnotes": "Patch Notes",
         "server.tabs.rpacks": "Resource Packs",
+        "server.tabs.screens": "Screenshots",
         "server.tabs.settings": "Configuration",
         "server.news.title": "Actualités",
         "server.news.return.error": "Impossile de récupérer les actualités",
@@ -93,6 +95,12 @@
         "server.config.repare.action": "Réparer",
         "server.config.cleansc.title": "Cache des skins et capes",
         "server.config.cleansc.subtitle": "Vide le cache des skins et des capes",
-        "server.config.cleansc.action": "Vider"
+        "server.config.cleansc.action": "Vider",
+        "server.config.viewdir.title": "Voir le dossier de jeu",
+        "server.config.viewdir.subtitle": "Ouvre le dossier de jeu",
+        "server.config.viewdir.action": "Voir",
+        "settings.updater.title": "Mise à jour",
+        "settings.updater.subtitle": "Activer/Désactiver les mises à jours automatique du Launcher",
+        "aupdate.title": "Mise à jour disponible"
     }
 }

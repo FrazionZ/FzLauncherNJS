@@ -3,6 +3,9 @@ const path = require('path')
 const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
 const FZUtils = require(path.join(appRoot.path, "/src/assets/js/utils.js"));
 const server_config = require(path.join(appRoot.path, '/server_config.json'));
+const { ipcMain } = require('electron');
+const console = require('console');
+const { v4: uuidv4 } = require('uuid');
 
 class RPacks extends FzPage {
 
@@ -10,10 +13,47 @@ class RPacks extends FzPage {
         super(null)
         
         var instance = this;
-        console.log(server_config);
         this.server = server_config[server];
         this.dirServer = `${this.dirFzLauncherServer}\\${this.server.name}`;
-        this.loadList(instance);
+
+        setTimeout(() => {
+            this.loadList(instance);
+        }, 1500);
+
+        $('.importPack').on('click', function() {
+            var uidFile = uuidv4()
+            instance.ipcRenderer.send('openFile', {id: uidFile});
+            instance.ipcRenderer.on('responseOpenFile', (event, data) => {
+                if(uidFile !== data.id) return;
+                var file = data.file;
+                var checkFiles = ["assets/", "pack.mcmeta", "pack.png"]
+                var AdmZip = require("adm-zip");
+                var resourceZipPath = file.filePaths[0];
+                var zip = new AdmZip(resourceZipPath);
+                var zipEntries = zip.getEntries();
+                var allFiles = [];
+                zipEntries.forEach(function(entry) {
+                    allFiles.push(entry.entryName);
+                })
+                var checkValidRPack = async() => {
+                    return new Promise((resolve, reject) => {
+                        checkFiles.forEach(function(zipEntry, index, array) {
+                            if(!allFiles.includes(zipEntry))
+                                resolve({result: false, message: zipEntry.entryName+" n'est pas un fichier valide"});
+                            if(index == array.length - 1) resolve({result: true, message: "Le pack est valide"});
+                        })
+                    })
+                }
+                checkValidRPack().then((result) => {
+                    if(result == false) return instance.notyf('error', result.message);
+                    var destinationFile = instance.path.join(instance.dirServer, "resourcepacks", instance.path.basename(resourceZipPath));
+                    instance.fs.copyFile(resourceZipPath, destinationFile, (err) => {
+                        if (err) throw err;
+                        instance.notyf('success', 'Le pack a bien été importé');
+                    });
+                })
+            })
+        })
     }
 
     async loadList(instance){
@@ -91,7 +131,7 @@ class RPacks extends FzPage {
             })
     
             loadRpacks.then(() => {
-                $('.loader-26').remove()
+                $('.rpack .skeleton').remove();
             })
         })
         .fail(function (error) {

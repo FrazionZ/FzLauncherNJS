@@ -1,10 +1,14 @@
 <%- include('./includes/head.ejs') %>
 <%- include('./includes/top.ejs') %>
 <div class="logging">
-    <img width="120" src="asset://img/icons/icon.png">
-    <div class="flex gap-20 align-center">
+    <img width="120" class="avatar" src="asset://img/icons/icon.png">
+    <div class="flex content gap-20 align-center">
         <span class="loader-3"></span>
-        <h4><%= FZUtils.getLangKey("logging.work") %></h4>
+        <div class="flex direct-column gap-15 align-center actionsText">
+            <h4 class="btext"><%= FZUtils.getLangKey("logging.work") %></h4>
+            <h6 class="sbtext" style="display: none;"></h6>
+            <span class="loader-3" style="display: none;margin-top: 15px;"></span>
+        </div>
     </div>
 </div>
 <script src="asset://js/logging.js"></script>
@@ -12,6 +16,12 @@
     const srcDir = '<%= srcDir %>'
     const logging = new Logging(document);
     var btn = document.querySelector('addAccountContinue')
+    $('.window_reduce').on('click', () => {
+        ipcRenderer.send('reduceWindow');
+    }); 
+    $('.window_close').on('click', () => {
+        ipcRenderer.send('closeApp');
+    }); 
 </script>
 <% if (type == "form") { %>
     <script>logging.addAccount('<%= form.username %>', '<%= form.password %>', '<%= form.user2FA %>')</script>

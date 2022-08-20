@@ -1,6 +1,6 @@
 {
   "name": "fzlauncher",
-  "version": "1.2.10",
+  "version": "1.2.13",
   "description": "",
   "email": "florent.cala@gmail.com",
   "main": "main.js",
@@ -16,6 +16,12 @@
     "appId": "FrazionZ Launcher",
     "directories": {
       "output": "build"
+    },
+    "protocols": {
+      "name": "fzlauncher-protocol",
+      "schemes": [
+        "fzlauncher"
+      ]
     },
     "win": {
       "target": [
@@ -59,7 +65,7 @@
     }
   },
   "keywords": [],
-  "author": "FrazionnZ_Dev <florent.cala@gmail.com> ",
+  "author": "FrazionZ_Dev <florent.cala@gmail.com> ",
   "license": "ISC",
   "devDependencies": {
     "cross-env": "^7.0.3",
@@ -69,7 +75,8 @@
   "dependencies": {
     "@electron/remote": "^2.0.8",
     "@futurelucas4502/light-electron-renderer": "^1.0.3",
-    "@sentry/electron": "^3.0.7",
+    "@sentry/electron": "^4.0.0",
+    "adm-zip": "^0.5.9",
     "app-root-path": "^3.0.0",
     "axios": "^0.27.2",
     "azuriom-auth": "^0.1.2",

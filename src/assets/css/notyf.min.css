@@ -168,7 +168,7 @@
   box-shadow: 0 3px 7px 0 rgba(0, 0, 0, 0.25);
   position: relative;
   padding: 0 15px;
-  border-radius: 2px;
+  border-radius: 10px;
   max-width: 300px;
   transform: translateY(25%);
   box-sizing: border-box;
@@ -226,7 +226,7 @@
   padding-top: 17px;
   padding-bottom: 17px;
   padding-right: 15px;
-  border-radius: 3px;
+  border-radius: 20px;
   position: relative;
   z-index: 10;
 }

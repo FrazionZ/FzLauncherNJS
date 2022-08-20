@@ -1,4 +1,5 @@
 const { Notyf } = require('notyf');
+const { safeStorage } = require('electron');
 const path = require('path')
 var appRoot = require('app-root-path');
 const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
@@ -14,6 +15,7 @@ class Logging extends FzPage {
         this.urlApi = "https://auth.frazionz.net";
         this.authenticator = new Authenticator(this.urlApi);
         this.lang = FZUtils.getLang(this.store.get('lang'));
+        
     }
 
     returnToLogin(){
@@ -23,41 +25,69 @@ class Logging extends FzPage {
     }
 
     async finishAuth(user){
-        const imageToBase64 = require('image-to-base64');
         await axios.get('https://api.frazionz.net/faction/profile/'+user.uuid)
             .then((response) => {
                 //if(response.data.result == "success")
                     //user.fzProfile = response.data;
             })
-        this.store.set('session', user);
-        if(user.banned)
-            FZUtils.loadURL('/session/banned', [])
-        else if(!user.email_verified)
-            FZUtils.loadURL('/session/eVerified', [])
-        else{
-            await imageToBase64("https://api.frazionz.net/skins/display?username="+user.username) // Path to the image
-                .then(
-                    (response) => {
-                        FZUtils.storeSkinShelf(user.username, response)
-                        /*var skinPath = this.path.join(this.dirFzLauncherSkins, user.uuid);
-                        if(!this.fs.existsSync(skinPath)){
-                            require("fs").writeFile(this.path.join(this.dirFzLauncherSkins, user.uuid)+".png", response, {encoding: 'base64'}, function(err) {
-                                console.log(err);
+        this.ipcRenderer.send('sfsEncrypt', user.access_token)
+        this.ipcRenderer.on('respSfsEncrypt', (event, data) => {
+            const userFinal = {uuid: user.uuid, access_token: Buffer.from(data.buffer).toJSON() };
+                this.store.set('session', userFinal);
+                if(user.banned)
+                    FZUtils.loadURL('/session/banned', [])
+                else if(!user.email_verified)
+                    FZUtils.loadURL('/session/eVerified', [])
+                else{
+                    $('.loader-3').fadeOut()
+                    $('.logging .actionsText').fadeOut()
+                    $('.logging .avatar').fadeOut(() => {
+                        $('.logging .avatar').css({borderRadius: 0}).animate({borderRadius: 8}, 700);
+                        $('.logging .avatar').attr('src', 'https://auth.frazionz.net/skins/face.php?s=120&u='+user.id)
+                        $('.logging .avatar').fadeIn(() => {
+                            $('.loader-3').fadeOut()
+                            $('.logging .actionsText .btext').html('Bonjour '+user.username+' !')
+                            $('.logging .actionsText .sbtext').html('Chargement de vos données en cours..')
+                            $('.logging .actionsText').fadeIn()
+                            $('.logging .actionsText .btext').slideDown(() => { 
+                                $('.logging .actionsText .sbtext').slideToggle(() => {
+                                    $('.logging .actionsText .loader-3').fadeIn(() => {
+                                        this.ipcRenderer.send('authorizationDevTools', user.role.is_admin)
+                                        this.store.set('serverCurrent', {
+                                            idServer: 0,
+                                            server: [0]
+                                        })
+                                        setTimeout(() => {
+                                            
+                                            $('.logging').fadeOut(() => 
+                                                FZUtils.loadURL('/connected/layout', [
+                                                    {
+                                                        session: user
+                                                    }, 
+                                                    {
+                                                        notyf: 
+                                                            {
+                                                                type: "success", 
+                                                                value: FZUtils.getLangKey("logging.result.logged", 
+                                                                [
+                                                                    {
+                                                                        search: "%session__name%", 
+                                                                        replace: user.username
+                                                                    }
+                                                                ]
+                                                            )
+                                                        }
+                                                    }
+                                                ]
+                                            )) 
+                                        }, 1500);
+                                    });
+                                });
                             });
-                        }*/
-                    }
-                )
-                .catch(
-                    (error) => {
-                        console.log(error); // Logs an error if there was one
-                    }
-                )
-            this.store.set('serverCurrent', {
-                idServer: 0,
-                server: [0]
-            })
-            FZUtils.loadURL('/connected/layout', [{session: user}, {notyf: {type: "success", value: FZUtils.getLangKey("logging.result.logged", [{search: "%session__name%", replace: user.username}])}}])
-        }
+                        });
+                    })
+                }
+        })
     }
 
     async addAccount(email, password, twofa){
@@ -117,28 +147,39 @@ class Logging extends FzPage {
             return FZUtils.loadURL('/session/renew', [])
         }else{
             //CONTINUE AUTH
-            var atoken = this.store.get('session').access_token;
-            try {
-                //var profileTarget = this.loadProfiles()[target_profile];
-                var user = await this.authenticator.verify(atoken);
-                if(user.status !== undefined){
-                    if(user.status == "error"){
-                        return FZUtils.loadURL('/login', [{notyf: {value: "error", value: user.message}}])
+            var continueAuthLog = async (access_token) => {
+                try {
+                    //var profileTarget = this.loadProfiles()[target_profile];
+                    var user = await this.authenticator.verify(access_token);
+                    if(user.status !== undefined){
+                        if(user.status == "error"){
+                            return FZUtils.loadURL('/login', [{notyf: {value: "error", value: user.message}}])
+                        }
+                    }
+                    user = user.data;
+                    setTimeout(() => {
+                        this.finishAuth(user);
+                    }, 500)
+                } catch (e) {
+                    if(e.message.includes('401')){
+                        setTimeout(() => {
+                            //mess.hide();
+                            this.store.delete('session')
+                            return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
+                        }, 500)
                     }
                 }
-                user = user.data;
-                setTimeout(() => {
-                    this.finishAuth(user);
-                }, 500)
-            } catch (e) {
-                if(e.message.includes('401')){
-                    setTimeout(() => {
-                        //mess.hide();
-                        this.store.delete('session')
-                        return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
-                    }, 500)
-                }
             }
+            var accessToken = this.store.get('session').access_token;
+            if(typeof accessToken == "string")
+                continueAuthLog(accessToken);
+            else {
+                this.ipcRenderer.send('sfsDecrypt', Buffer.from(this.store.get('session').access_token))
+                this.ipcRenderer.on('respSfsDecrypt', async (event, atoken) => {
+                    continueAuthLog(atoken);
+                });
+            }
+            
         }
     }
 

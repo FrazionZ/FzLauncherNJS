@@ -2,7 +2,7 @@
     <h2 class="pt-30 pb-10 underline"><%= FZUtils.getLangKey("settings.title") %></h2>
     <div class="flex gap-20 direct-column">
         <div class="card pd-30">
-            <div class="card-body flex gap-15 justif-between direct-column">
+            <div class="card-body flex gap-20 justif-between direct-column">
                 <div class="config-item">
                     <div class="column flex direct-column justif-center">
                         <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("settings.lang.title") %></h2>
@@ -54,10 +54,22 @@
                         </div>
                     </div>
                 </div>
+                <div class="config-item">
+                    <div class="column flex direct-column justif-center">
+                        <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("settings.updater.title") %></h2>
+                        <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("settings.updater.subtitle") %></h2>
+                    </div>
+                    <div class="flex align-center gap-20">
+                        <div class="ui toggle checkbox mb-10">
+                            <input type="checkbox" class="config__launcher_checkbox" data-default="true" data-id="launcher__updater">
+                            <label></label>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
         <div class="card pd-30">
-            <div class="card-body flex gap-15 justif-between direct-column">
+            <div class="card-body flex gap-20 justif-between direct-column">
                 <div class="config-item">
                     <div class="column flex direct-column justif-center">
                         <h2 class="label__config reset-mp">Version actuelle</h2>

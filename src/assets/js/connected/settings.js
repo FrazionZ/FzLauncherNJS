@@ -8,7 +8,7 @@ class Settings extends FzPage {
         super("connected/settings/index.html")
         var instance = this;
         //config-item devTools
-        var cantOpenDevTools = (((this.store.has('session')) ? this.store.get('session').role.is_admin : false));
+        var cantOpenDevTools = userSession.role.is_admin;
         if(!cantOpenDevTools)
             $('.config-item.devTools').remove();
         $('.settings__open_devTools').on('click', function(){
@@ -20,7 +20,7 @@ class Settings extends FzPage {
             $('.settings__lang_dmenu').html('...')
             var langKey = $(this).attr('data-lang')
             instance.store.set('lang', langKey)
-            FZUtils.loadURL('/connected/layout', [{session: instance.store.get('session')}, {linkPage: "#settings"}, {openPage: "settings"}])
+            FZUtils.loadURL('/connected/layout', [{session: userSession}, {linkPage: "#settings"}, {openPage: "settings"}])
         })
         $('.config__launcher_checkbox').each((index, element) => {
             if(instance.store.has($(element).attr('data-id'))){

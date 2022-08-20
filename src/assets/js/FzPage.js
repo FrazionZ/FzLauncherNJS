@@ -12,7 +12,8 @@ class FzPage {
         this.path = path;
         this.rootPath = rootPath;
         this.store = new Store({accessPropertiesByDotNotation: false});
-        this.session = ((this.store.has('session')) ? this.store.get('session') : undefined)
+        if(typeof userSession !== 'undefined')
+            this.session = userSession;
         this.ipcRenderer = require("electron").ipcRenderer;
 
         var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
@@ -100,7 +101,7 @@ class FzPage {
 
     showModal(isInit, id, promise) {
         var data = [];
-        FZUtils.initVariableEJS(data).then((datar) => {
+        FZUtils.initVariableEJS(data, false).then((datar) => {
             ejs.renderFile(appRoot.path+"/src/template/modals/"+id+".ejs", datar, {}, (err, str) => {
                 if (err) return console.log(err)
                 $("body").find("#modals").html(str);

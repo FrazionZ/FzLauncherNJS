@@ -1,0 +1,36 @@
+<div class="aupdate pl-60 pr-60 pb-30">
+    <div class="flex justif-between align-center">
+        <h2 class="pt-30 pb-20 underline"><%= FZUtils.getLangKey("aupdate.title") %></h2>
+        <a class="btn btn-primary afupdate" style="width: fit-content;">
+            Mettre à jour
+        </a>
+    </div>
+    <div class="flex gap-30 direct-column">
+        <span class="loader-3"></span>
+        <div id="versions" style="overflow: auto;"></div>
+    </div>
+</div>
+<script>
+    var appRoot = require('app-root-path');
+
+    $('.afupdate').on('click', function(){
+        const { ipcRenderer } = require('electron');
+        const store = new Store({accessPropertiesByDotNotation: false});
+        store.set('forceUpdate', true);
+        ipcRenderer.send('relaunchApp');
+    })
+
+    $.get('https://api.frazionz.net/github/launcher', function(response) {
+      var loadPnotes = new Promise((resolve, reject) => {
+        var versions = response;
+        var MarkdownIt = require('markdown-it'),
+        md = new MarkdownIt();
+        var bodyVersion = md.render(versions[0].body);
+        $('.aupdate').find('#versions').append('<h4 class="text-gray"><i class="fa-solid fa-star"></i> '+versions[0].tag_name+'</h4>'+'<h5>'+bodyVersion+'</h5><br />')
+        resolve();
+      })
+      loadPnotes.then(() => {
+        $('.loader-3').addClass('hide')
+      })
+    })
+</script>

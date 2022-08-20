@@ -1,10 +1,10 @@
 <div class="rpack" id="pnotes_last">
     <h2 class="underline"><%= FZUtils.getLangKey("server.rpacks.title") %></h2>
     <span style="color: var(--text-inactive);"><%= FZUtils.getLangKey("server.rpacks.staff") %></span><br /><br />
-    <span class="loader-26"></span>
+    <a href="#" class="btn btn-primary importPack">Importer un resource pack</a>
     <div class="flex direct-column gap-15">
         <template id="rpacks_list" style="overflow: auto;display: block;">
-            <div class="card rpack gap-15 black-4 ml-20 mr-20 mb-30" style="border: none;">
+            <div class="card rpack gap-15 black-4 mt-30 mb-30" style="border: none;">
                 <div class="card-body">
                     <div class="flex gap-30">
                         <div class="column">
@@ -23,6 +23,20 @@
                 </div>
             </div>
         </template>
+        <div class="skeleton">
+            <div class="card rpack gap-15 black-4 mt-30 mb-30" style="border: none;">
+                <div class="card-body">
+                    <div class="flex gap-30">
+                        <div class="column bone icon"></div>
+                        <div class="column flex direct-column justif-between w-100">
+                            <div class="bone" id="rpack__name"></div>
+                            <div class="bone" id="rpack__description"></div>
+                            <div class="bone" id="rpack__author"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
   </div>
   <script>

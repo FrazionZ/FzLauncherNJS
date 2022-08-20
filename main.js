@@ -1,4 +1,4 @@
-const { app, electron, BrowserWindow, dialog, ipcMain, Notification } = require('electron')
+const { app, electron, safeStorage, screen, BrowserWindow, Menu, Tray, dialog, ipcMain, Notification, ipcRenderer } = require('electron')
 const Store = require('electron-store');
 const path = require('path')
 var appRoot = require('app-root-path');
@@ -10,12 +10,12 @@ const FZUtils = require('./src/assets/js/utils.js');
 const JSONUtils = require('./src/assets/js/JSONUtils.js');
 const Fr = require('./src/languages/fr.json');
 require('log-timestamp');
-
 const renderer = require('@futurelucas4502/light-electron-renderer')
 const ejs = require('ejs');
 const { get } = require('request');
 const { platform } = require('os');
 const axios = require('axios').default;
+var authorizationDevTools = false;
 app.commandLine.appendSwitch ("disable-http-cache");
 app.commandLine.appendSwitch('disable-gpu-process-crash-limit')
 app.disableDomainBlockingFor3DAPIs()
@@ -26,7 +26,9 @@ let store;
 renderer.use(ejs, true, __dirname+ '/src/assets', __dirname+ '/src/template', ejs.renderFile, undefined, false)
 
 store = new Store({accessPropertiesByDotNotation: false});
-
+forceUpdate
+var updaterState = ((store.has('launcher__updater')) ? store.get('launcher__updater') : true)
+var forceUpdate = ((store.has('forceUpdate')) ? store.get('forceUpdate') : false)
 var sentryInit = ((store.has('launcher__sentry')) ? store.get('launcher__sentry') : true)
 if(sentryInit){
     console.log('[FZLauncher] Init sentry service..')
@@ -36,19 +38,19 @@ if(sentryInit){
 
 async function createWindow() {
 
-    remoteMain.initialize();
+    
+    const primaryDisplay = screen.getPrimaryDisplay()
 
-    var cantOpenDevTools = (((store.has('session')) ? store.get('session').role.is_admin : false));
+    remoteMain.initialize();
 
     mainWindow = new BrowserWindow({
         width: 800, 
         height: 220,
-        maximizable: false,
-        resizable: false,
+        maximizable: true,
+        resizable: true,
         autoHideMenuBar: true,
-        transparent: true, 
         frame: false,
-        roundedCorners: true,
+        fullscreenable: true,
         title: "FrazionZ Launcher",
         app: "production",
         show: ((process.platform == "linux" || process.platform == "darwin") ? true : false),
@@ -63,6 +65,26 @@ async function createWindow() {
             preload: path.join(__dirname, 'preload.js')
         }
     })
+
+    mainWindow.setFullScreenable(true)
+
+    var appIcon = new Tray(path.join(__dirname, "src/assets/img/icons/icon.png"))
+    var contextMenu = Menu.buildFromTemplate([
+        {
+            label: 'Show App', click: function () {
+                mainWindow.show()
+            }
+        },
+        {
+            label: 'Quit', click: function () {
+                app.isQuiting = true
+                app.quit()
+            }
+        }
+    ])
+    appIcon.setToolTip("FrazionZ Launcher")
+    appIcon.setContextMenu(contextMenu)
+
     
     let lang;
     let loadURL;
@@ -104,7 +126,7 @@ async function createWindow() {
         lang = ((store.has('lang')) ? require('./src/languages/'+store.get('lang')+'.json') : Fr)
     
         loadURL = (url, data) => {
-            var datas = FZUtils.initVariableEJS(data)
+            var datas = FZUtils.initVariableEJS(data, true)
             datas.then((dataFind) => {
                 try {
                     renderer.load(mainWindow, url, dataFind)
@@ -113,7 +135,14 @@ async function createWindow() {
                 }
             })
         }
-        loadURL('/updater/index', [])
+
+        if(updaterState)
+            loadURL('/updater/index', [])
+        else if(forceUpdate){
+            store.delete('forceUpdate')
+            loadURL('/updater/index', [])
+        }else
+            afterUpdate();
     }, 1000)
 
     mainWindow.webContents.on('will-navigate', async function(e, url) {
@@ -123,14 +152,52 @@ async function createWindow() {
             await open(url);
         }
     })
+
+    mainWindow.webContents.on('devtools-opened', () => {
+        setImmediate(() => {
+            //if(!authorizationDevTools)
+                //mainWindow.webContents.closeDevTools()
+        });
+    });
+
+    var afterUpdate = async function() {
+        mainWindow.show()
+        if(process.platform === "win32"){
+            FZUtils.javaversion(dirFzLauncherDatas, function(err,version){
+                if(err){
+                    loadURL('/runtime/index', [])
+                }else{
+                    afterUpdateAndRuntime()
+                }
+            })
+        }else{
+            afterUpdateAndRuntime()
+        }
+    }
+
     var afterUpdateAndRuntime = async function() {
-        mainWindow.setSize(1280, 720);
+
+        var defautSizeWidth = parseInt(primaryDisplay.size.width)
+        var defautSizeHeight = parseInt(primaryDisplay.size.height)
+        var widthScreen = /*1820;*/parseInt(defautSizeWidth / 1.5, 10);
+        var heightScreen = /*1260;*/parseInt(defautSizeHeight / 1.5, 10);
+
+        if(primaryDisplay.size.width < 1920 && primaryDisplay.size.height < 1080 ){
+            widthScreen = 1280;
+            heightScreen = 720;
+            console.log("[FZLauncher] Minimal Set ScreenSize | Width: " + widthScreen + " Height: " + heightScreen)
+        } else 
+            console.log("[FZLauncher] ScreenSize | Width: " + widthScreen + " Height: " + heightScreen)
+
+        mainWindow.setSize(widthScreen, heightScreen);
+        mainWindow.setMinimumSize(widthScreen, heightScreen);
+        mainWindow.setMaximumSize(defautSizeWidth, defautSizeHeight);
         mainWindow.center()
         const checkInternetConnected = require('check-internet-connected');
 
         const config = {
-            timeout: 5000,
-            retries: 5,
+            timeout: 1200,
+            retries: 2,
             domain: 'frazionz.net'
         }
 
@@ -156,6 +223,7 @@ async function createWindow() {
                 else
                     loadURL('/login', [])   
             }).catch((error) => {
+                console.log(error)
                 loadURL('/session/nointernet', []);
             });
 
@@ -165,24 +233,13 @@ async function createWindow() {
     };
 
     ipcMain.on('loadAppAfterUpdate', () => {
-        if(process.platform === "win32"){
-            FZUtils.javaversion(dirFzLauncherDatas, function(err,version){
-                if(err){
-                    loadURL('/runtime/index', [])
-                }else{
-                    afterUpdateAndRuntime()
-                }
-            })
-        }else{
-            afterUpdateAndRuntime()
-        }
-        
+        afterUpdate()
     })
 
     ipcMain.on('openFile', async (event, data) => {
         dialog.showOpenDialog({properties: ['openFile'] }).then(function (response) {
             if (!response.canceled) {
-                event.sender.send("responseOpenFile", response);
+                event.sender.send("responseOpenFile", {file: response, id: data.id});
             }
         });
     })
@@ -195,9 +252,18 @@ async function createWindow() {
         mainWindow.minimize();
     })
 
+    ipcMain.on('maximizeWindow', async (event, data) => {
+        ((mainWindow.isMaximized()) ? mainWindow.unmaximize() : mainWindow.maximize())
+    })
+
     ipcMain.on('openUrlExternal', async (event, data) => {
         const open = require('open');
         await open(data.url);
+    })
+
+    ipcMain.on('authorizationDevTools', async (event, data) => {
+        console.log('User is '+((data) ? 'authorized' : 'not authorized')+' to open DevTools')
+        authorizationDevTools = data;
     })
 
     ipcMain.on('loadURL', async (event, data) => {
@@ -212,9 +278,7 @@ async function createWindow() {
     })
 
     ipcMain.on('showDevTools', (event, data) => {
-        var cantOpenDevTools = (((store.has('session')) ? store.get('session').role.is_admin : false));
-        if(cantOpenDevTools)
-            mainWindow.webContents.openDevTools();
+        mainWindow.webContents.openDevTools();
     })
 
     ipcMain.on('showApp', (event, data) => {
@@ -226,8 +290,12 @@ async function createWindow() {
     })
 
     ipcMain.on('closeApp', (event, data) => {
-        app.exit();
-        process.exit();
+        mainWindow.hide();
+        if(!data){
+            app.exit();
+            app.quit();
+            process.exit();
+        }
     })
 
     ipcMain.on('relaunchApp', (event, data) => {
@@ -245,8 +313,27 @@ async function createWindow() {
             const toWindow = arr[i];
             toWindow.webContents.send('picker-list-update');
         }
-    
     });
+
+    ipcMain.on('sfsDecrypt', async (event, data) => {
+        event.sender.send('respSfsDecrypt', safeStorage.decryptString(data))
+    })
+
+    ipcMain.on('sfsEncrypt', async (event, data) => {
+        event.sender.send('respSfsEncrypt', safeStorage.encryptString(data))
+    })
+
+    mainWindow.on('maximize', (event) => {
+        event.sender.send('responseMaximizeWindow', true)
+    });
+    
+    mainWindow.on('unmaximize', (event) => {
+        event.sender.send('responseMaximizeWindow', false)
+    });
+
+     ipcMain.on('loadURL', async (event, data) => {
+        loadURL(data.url, data.datas);
+    })
 
 }
 
@@ -260,3 +347,6 @@ app.whenReady().then(async () => {
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') app.quit()
 })
+
+
+app.setAsDefaultProtocolClient('fzlauncher');
