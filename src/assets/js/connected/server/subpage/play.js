@@ -15,17 +15,38 @@ class Play  extends FzPage {
         this.buttonActionPlay = $('.btn-download-launch-game');
         this.dlDialog = undefined;
         this.gameLaunched = false;
-        this.keyStoreBranch = function(branch) {
-            return 'server_'+this.server.name.toLowerCase()+'_'+branch+'_version';
+        this.keyStoreBranch = function(branch, categorie) {
+            return 'server_'+this.server.name.toLowerCase()+'_'+branch+'_'+categorie+'_version';
         }
 
         this.keyStoreServerOptions = function(key) {
             return 'server_'+this.server.name.toLowerCase()+'_'+key;
         }
 
+        this.loadBranch().then((repoServer) => {});
+
         $('.server-expl').text(this.store.get('serverCurrent').server.expl_server) 
 
 
+    }
+
+    async loadBranch(){
+        if(!this.store.has(this.keyStoreServerOptions('branch')))
+            this.store.set(this.keyStoreServerOptions('branch'), this.server.defaultBranch)
+
+        this.repoServer = [];
+        this.branch = this.store.get(this.keyStoreServerOptions('branch'))
+        return new Promise((resolve, reject) => {
+            this.server.github.forEach((github) => {
+                if(this.branch == github.branch){
+                    var branch = github.branch;
+                    github.categories.forEach((categorie, index, array) => {
+                        this.repoServer.push({ksb: this.keyStoreBranch(branch, categorie.name), branch: github.branch, categorie: categorie, url: "https://api.frazionz.net/servers/"+this.server.id+"/"+branch+"/"+categorie.name })
+                        if (index === array.length -1) resolve(this.repoServer);
+                    })
+                }
+            })
+        })
     }
 
     async preInit(){
@@ -33,16 +54,16 @@ class Play  extends FzPage {
         return new Promise(async (resolve, reject) => {
             setTimeout(async () => {
                 await instance.checkIfJavaHomeExist().then(async (result) => {
-                    var dirsFilesObligate = [{name: 'assets', isInstalled: false}, {name: 'libs', isInstalled: false}, {name: 'natives', isInstalled: false}, {name: this.server.jarFileMain, isInstalled: false}];
+                    var dirsFilesObligate = [{name: this.server.jarFileMain, isInstalled: false}];
                     var needsToBeInstall = false;
                     var needsToBeRepare = false;
                     var needsToBeUpdate = false;
                     var canPlay = false;
-                    var dirExists = instance.fs.existsSync(instance.dirServer)
+                    var dirExists = instance.fs.existsSync(instance.path.join(instance.dirServer))
                     if(!dirExists){
                         needsToBeInstall = true;
                     }else{
-                        var files = instance.fs.readdirSync(instance.dirServer);
+                        var files = instance.fs.readdirSync(instance.path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch'))));
                         dirsFilesObligate.forEach((v, k) => {
                             files.forEach(file => {
                                 if(file == v.name){
@@ -52,19 +73,19 @@ class Play  extends FzPage {
                         })
                         dirsFilesObligate.forEach((v) => {
                             if(!v.isInstalled){
-                                needsToBeRepare = true;
+                                needsToBeInstall = true;
                                 return;
                             }
                         })
                     }
                     var checkUpdateAvailable = new Promise(async (resolve, reject) => {
-                        var repos = instance.server.repos;
+                        var repos = instance.repoServer;
                         let reposUpdateAvailable = [];
                         var loopCheckRepos = new Promise(async (resolve, reject) => {
                             await repos.forEach(async (repo, index, array) => {
                                 await instance.checkUpdate(repo).then(async (response) => {
                                     if(response.result)
-                                        reposUpdateAvailable.push({ github: response, repos: repo });
+                                        reposUpdateAvailable.push({ github: response, repos: repo, ksb: repo.ksb });
                                     if (index === array.length -1) resolve();
                                 }).catch((err) => {
                                     console.log(err)
@@ -86,14 +107,14 @@ class Play  extends FzPage {
                                 needsToBeUpdate = false;
                             }
                             await this.init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, resultCUP)
-                            resolve();
+                            resolve(instance.repoServer);
                         }).catch((err) => {
                             console.log(err)
-                            resolve();
+                            resolve(instance.repoServer);
                         })
                     }else{
                         await this.init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, undefined)
-                        resolve();
+                        resolve(instance.repoServer);
                     }
                     
                 }).catch((err) => {
@@ -154,16 +175,7 @@ class Play  extends FzPage {
             //INSTALL ACTION
             instance.buttonActionPlay.find('.label').text(FZUtils.getLangKey("server.play.btn.install"));
             instance.buttonActionPlay.removeAttr('disabled')
-            $('.config__repare_dir').addClass('disabled');
-            $('.config__clear_dir').addClass('disabled');
-            instance.buttonActionPlay.on('click', () => {
-                instance.buttonActionPlay.attr('disabled', 'disabled')
-                instance.prepareInstallOrUpdate();
-            })
-        }else if(needsToBeRepare){
-            //REPARE ACTION
-            instance.buttonActionPlay.find('.label').text(FZUtils.getLangKey("server.play.btn.repare"));
-            instance.buttonActionPlay.removeAttr('disabled')
+            $('.config__switch_branch').attr('disabled', true);
             $('.config__repare_dir').addClass('disabled');
             $('.config__clear_dir').addClass('disabled');
             instance.buttonActionPlay.on('click', () => {
@@ -174,11 +186,12 @@ class Play  extends FzPage {
             //UPDATE ACTION
             instance.buttonActionPlay.find('.label').text(FZUtils.getLangKey("server.play.btn.update"));
             instance.buttonActionPlay.removeAttr('disabled')
+            $('.config__switch_branch').attr('disabled', true);
             $('.config__repare_dir').addClass('disabled');
             $('.config__clear_dir').addClass('disabled');
             instance.buttonActionPlay.on('click', () => {
                 instance.buttonActionPlay.attr('disabled', 'disabled')
-                instance.update(resultCUP.repos);
+                instance.update(resultCUP);
             })
         }
     }
@@ -208,14 +221,14 @@ class Play  extends FzPage {
         return new Promise(async (resolve, reject) => {
             $.get( repo.url, function( data ) {
                 var body = data;
-                if(instance.store.has(instance.keyStoreBranch(repo.branch))){
-                    var version = instance.store.get(instance.keyStoreBranch(repo.branch));
+                if(instance.store.has(repo.ksb)){
+                    var version = instance.store.get(repo.ksb);
                     if(version !== body.tag_name)
-                        resolve({ data: body, result: true })
+                        resolve({ data: body, ksb: repo.ksb, categorie: repo.categorie, result: true })
                     else
-                        resolve({ data: body, result: false })
+                        resolve({ data: body, ksb: repo.ksb, categorie: repo.categorie, result: false })
                 }else{
-                    resolve({ data: body, result: true })
+                    resolve({ data: body, ksb: repo.ksb, categorie: repo.categorie, result: true })
                 }
             }).fail(function(error) {
                 console.log(error)
@@ -234,10 +247,10 @@ class Play  extends FzPage {
         var getLinksRepos = new Promise(async (resolveLinks, reject) => {
             var links = [];
             var reposGithubResolve = new Promise((resolve, reject) => {
-                this.server.repos.forEach(async (repo, index, array) => {
+                this.repoServer.forEach(async (repo, index, array) => {
                     $.get( repo.url, function( data ) {
                         var body = data;
-                        links.push({name: body.name, branch: body.target_commitish, version: body.tag_name, dlink: body.browser_download_url})
+                        links.push({name: body.assets.name, dirInstall: instance.path.join(repo.categorie.dir), ksb: repo.ksb, branch: body.target_commitish, categorie: repo.categorie.name, version: body.tag_name, dlink: body.browser_download_url})
                         if (index === array.length -1) resolve();
                     }).fail(function() {
                         console.log(error);
@@ -246,12 +259,10 @@ class Play  extends FzPage {
                 });
             });
             reposGithubResolve.then(() => {
-                console.log(links)
                 resolveLinks(links)
             })
         });
         await getLinksRepos.then((links) => {
-            console.log(links)
             this.installOrRepareOrUpdate(links);
         });
     }
@@ -259,7 +270,7 @@ class Play  extends FzPage {
     async installOrRepareOrUpdate(links){
         var instance = this;
         var startLinkDL = function (index) {
-            FZUtils.download(instance, links[index].dlink, instance.path.join(instance.dirServer, links[index].name), true, instance.server.name, links[index].branch).then((result) => {
+            FZUtils.download(instance, links[index].dlink, instance.path.join(instance.dirServer, links[index].dirInstall, links[index].name), true, instance.server.name, links[index].branch).then((result) => {
                 if(!((index + 1) == links.length))
                     startLinkDL((index + 1))
                 else{
@@ -284,12 +295,11 @@ class Play  extends FzPage {
                             nameCurrent = name;
                         });
                         
-                        pack.on('start', () => {
-                            console.log('extracting started');
-                        });
+                        pack.on('start', () => {});
                         
                         pack.on('progress', (percent) => {
                             downloads.updateDownload(uuidDl, instance.server.name+" - Extraction des dépendances", nameCurrent, parseInt(percent, 10).toString())
+                            instance.ipcRenderer.send('progress', ((percent) / 100));
                         });
                         
                         pack.on('error', (error) => {
@@ -312,12 +322,12 @@ class Play  extends FzPage {
         }
     }
 
-    async update(repos){
+    async update(resultCUP){
         let links = [];
         var updatePromise = new Promise((resolve, reject) => {
-            repos.forEach(async (repo, index, array) => {
+            resultCUP.repos.forEach(async (repo, index, array) => {
                 var github = repo.github.data;
-                links.push({name: github.name, branch: github.target_commitish, version: github.tag_name, dlink: github.browser_download_url})
+                links.push({name: github.assets.name, ksb: repo.ksb, dirInstall: this.path.join(repo.repos.categorie.dir), categorie: repo.repos.categorie.name, branch: github.target_commitish, version: github.tag_name, dlink: github.browser_download_url})
                 if (index === array.length -1) resolve();
             });
         })
@@ -329,11 +339,10 @@ class Play  extends FzPage {
 
     async prepareToLaunch(links, fileZipDepend){
         links.forEach((link) => {
-            this.store.set(this.keyStoreBranch(link.branch), link.version)
+            this.store.set(link.ksb, link.version)
         })
         if(fileZipDepend !== undefined)
             this.fs.unlinkSync(fileZipDepend)
-        $('.server__version').text("Version MCP "+this.store.get(this.keyStoreBranch("mcp")));
 
         let serverAvailable;
         await this.checkServerAvailable()
@@ -343,7 +352,7 @@ class Play  extends FzPage {
             .catch((err) => {
                 serverAvailable = false;
             })
-
+        $('.config__switch_branch').attr('disabled', false);
         $('.config__repare_dir').removeClass('disabled');
         $('.config__clear_dir').removeClass('disabled');
 
@@ -396,7 +405,7 @@ class Play  extends FzPage {
                         });
                     }
                 
-                    sbLibs.append(path.join(instance.dirServer, instance.server.jarFileMain));
+                    sbLibs.append(path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch')), instance.server.jarFileMain));
                 
                     var javaRuntime = 'java';
                     if(process.platform == "win32"){
@@ -493,7 +502,7 @@ class Play  extends FzPage {
             }else{
                 FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
                     if(result)
-                        return this.notyf('error', 'Une instance est déjà lancé !')
+                        return this.notyf('error', FZUtils.getLangKey('minecraft.alreadylaunch'))
                     else
                         launchGameFinal();
                 }).catch((err) => console.log(err))

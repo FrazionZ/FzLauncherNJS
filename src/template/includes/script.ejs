@@ -25,9 +25,54 @@
         })
     }); 
 
+    $('.body .sidebar .state-sidebar').on('click', () => {
+        const sidebar = $('.body .sidebar');
+        ((sidebar.hasClass('minimize')) ? sidebar.removeClass('minimize') : sidebar.addClass('minimize'))
+    })
 
     ipcRenderer.on('responseMaximizeWindow', (event, data) => {
         store.set('maximizeWindow', data);
-        ((data) ? $('.window_maximize').find('img').attr('src', 'asset://img/frame/maximize_on.svg') : $('.window_maximize').find('img').attr('src', 'asset://img/frame/maximize_off.svg'));
+        if(typeof isMaximised !== undefined)
+            isMaximised = data;
+        ((data) ? $('.window_maximize').find('img').attr('src', 'asset://img/<%= ((typeof darkMode !== "'+undefined+'") ? darkMode : "dark") %>/frame/maximize_on.svg') : $('.window_maximize').find('img').attr('src', 'asset://img/<%= ((typeof darkMode !== "'+undefined+'") ? darkMode : "dark") %>/frame/maximize_off.svg'));
+    })
+
+    var Mousetrap = require('mousetrap');
+
+    Mousetrap.bind(['ctrl+f+z'], function() {
+        notyf.success('FrazionZ is a best server!')
+        return false;
+    });
+
+    Mousetrap.bind(['ctrl+f5'], function() {
+        FZUtils.loadURL('/connected/layout', [{session: userSession}, {notyf: {type: "success", value: FZUtils.getLangKey("logging.result.logged", [{search: "%session__name%", replace: userSession.username}])}}])
+    })
+
+    Mousetrap.bind(['ctrl+r'], function() {
+        ipcRenderer.send('reloadFZ', []);
+    })
+
+    Mousetrap.bind(['ctrl+s+p'], function() {
+        $('.sidebar #navs #nav_menu_avatar').attr('src', 'asset://img/egg.png')
+        $('.sidebar #navs #nav_menu_avatar').addClass('animate__animated animate__tada');
+        var notyfEgg = new Notyf({
+            types: [
+                {
+                    type: 'info',
+                    background: "#f86fd3",
+                    icon: false
+                }
+            ],
+            duration: 3000,
+            position: {
+                x: 'left',
+                y: 'center',
+            }
+        });
+        notyfEgg.dismissAll();
+        notyfEgg.open({
+            type: 'info',
+            message: 'SHEEP SHEEP POWEEEEEEEEEEEEEEEEER'
+        })
     })
 </script>

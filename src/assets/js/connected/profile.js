@@ -48,17 +48,17 @@ class Profile extends FzPage {
 
     }
 
-    
-
     async logout() {
-        FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+        FZUtils.checkedIfinecraftAlreadyLaunch().then(async (result) => {
             if(result)
                 return this.notyf('error', 'Vous ne pouvez pas vous déconnecter, une instance Minecraft est ouverte.')
             else {
-                $('.title_bar .actions .window_maximize').addClass('hide')
-                this.ipcRenderer.send('authorizationDevTools', false)
-                this.store.delete('session');
-                ipcRenderer.send('logout')
+                await this.authenticator.logout(this.session.access_token).then(() => {
+                    $('.title_bar .actions .window_maximize').addClass('hide')
+                    this.ipcRenderer.send('authorizationDevTools', false)
+                    this.store.delete('session');
+                    ipcRenderer.send('logout')
+                });
             }
         })
     }

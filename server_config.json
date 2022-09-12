@@ -1,1 +1,41 @@
-[{"id":1,"name":"Faction","assetIndex":"1.12","version":"1.12.2","jarFileMain":"minecraft.jar","expl_server":"FrazionZ Faction est un serveur Faction avec quelques nouveautés ! Découvrez-le dès maintenant en rejoignant la communautée via Discord ou directement sur le serveur ! Nous vous attendons avec impatiente !","urlLogo":"img/icons/icon.png","repos":[{"id":1,"branch":"mcp","url":"https://api.frazionz.net/github/latest/mcp","serverID":1},{"id":2,"branch":"depend","url":"https://api.frazionz.net/github/latest/depend","serverID":1}]}]
+[
+    {
+        "id":1,
+        "name":"Faction",
+        "assetIndex":"1.12",
+        "version":"1.12.2",
+        "jarFileMain":"client.jar",
+        "expl_server":"FrazionZ Faction est un serveur Faction avec quelques nouveautés ! Découvrez-le dès maintenant en rejoignant la communautée via Discord ou directement sur le serveur ! Nous vous attendons avec impatiente !",
+        "urlLogo":"img/icons/icon.png",
+        "defaultBranch":"releases",
+        "serverAddress":"frazionz.net:25587",
+        "github": [
+            {
+                "branch": "beta",
+                "categories": [
+                    {
+                        "name": "client",
+                        "dir": "versions\\beta"
+                    },
+                    {
+                        "name": "depend",
+                        "dir": ""
+                    }
+                ]
+            },
+            {
+                "branch": "releases",
+                "categories": [
+                    {
+                        "name": "client",
+                        "dir": "versions\\releases"
+                    },
+                    {
+                        "name": "depend",
+                        "dir": ""
+                    }
+                ]
+            }
+        ]
+    }
+]

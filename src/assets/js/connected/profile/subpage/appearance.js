@@ -46,19 +46,22 @@ class Appearance extends FzPage {
                 $('.skinNotPresent').show();
                 if(result.b64 !== null){
                     $('.addSkinCurrentShelf').on('click', async() => {
-                        const img = new Image();
-                        img.src = "data:image/png;base64,"+result.b64;
-                        img.onload = function() {
-                            const imgWidth = img.naturalWidth;
-                            const imgHeight = img.naturalHeight;
+                        await layoutClass.loadModal( "messDialog", [{message: "Ajout de votre skin à la bibliothèque.."}], false, () => {}, () => {}, async () => {
+                            const img = new Image();
+                            img.src = "data:image/png;base64,"+result.b64;
+                            img.onload = async function() {
+                                const imgWidth = img.naturalWidth;
+                                const imgHeight = img.naturalHeight;
 
-                            if(imgWidth != 64 || imgHeight != 64){
-                                return profile.notyf("error", "Le skin de "+username+" n'est pas valide !")
-                            }else{
-                                FZUtils.storeSkinShelf(userSession.username, result.b64)
-                                FZUtils.loadURL('/connected/layout', [{notyf: {type: "success", value: "Votre skin a bien été ajouté"}}, {session: userSession}, {linkPage: "#profile"}, {openPage: "profile"}])
-                            }
-                        };
+                                if(imgWidth != 64 || imgHeight != 64){
+                                    await layoutClass.closeModal();
+                                    return profile.notyf("error", "Le skin de "+username+" n'est pas valide !")
+                                }else{
+                                    FZUtils.storeSkinShelf(userSession.username, result.b64)
+                                    FZUtils.loadURL('/connected/layout', [{notyf: {type: "success", value: "Votre skin a bien été ajouté"}}, {session: userSession}, {linkPage: "#profile"}, {openPage: "profile"}])
+                                }
+                            };
+                        })
                     })
                 }
             }
@@ -150,65 +153,82 @@ class Appearance extends FzPage {
                 }
             });
         });
-        $('.searchSkinMojang').on('click', async function(){
-            $('.forms').hide();
-            $('.addSkinLoader').removeClass('hide');
-            var username = $("#searchSkinInput").val();
-            $("#searchSkinInput").attr('disabled', 'disabled')
-                await axios.get("https://api.minetools.eu/uuid/"+$("#searchSkinInput").val().replaceAll('\'', '')).then(async (response) => {
-                    var uuid = response.data.id;
-                    if(uuid !== null || uuid !== undefined){
-                        await axios.get("https://api.minetools.eu/profile/"+uuid).then(async (response) => {
-                            if(response.data.status == "ERR"){
-                                $('.forms').show();
-                                $('.addSkinLoader').hide();
-                                $("#searchSkinInput").val('')
-                                $("#searchSkinInput").removeAttr('disabled')
-                                return profile.notyf("error", "Une erreur est survenue lors du téléchargement du skin de "+username)
-                            }
-                            var dataAxios = response.data;
-                            await imageToBase64(dataAxios.decoded.textures.SKIN.url) // Path to the image
-                                .then(
-                                    (response) => {
 
-                                        const img = new Image();
-
-                                        img.src = "data:image/png;base64,"+response;
-
-                                        img.onload = function() {
-                                            const imgWidth = img.naturalWidth;
-                                            const imgHeight = img.naturalHeight;
-
-                                            if(imgWidth != 64 || imgHeight != 64){
-                                                $('.forms').show();
-                                                $('.addSkinLoader').hide();
-                                                $("#searchSkinInput").val('')
-                                                $("#searchSkinInput").removeAttr('disabled')
-                                                return profile.notyf("error", "Le skin de "+username+" n'est pas valide !")
-                                            }else{
-                                                FZUtils.storeSkinShelf(dataAxios.decoded.profileName, response)
-                                                FZUtils.loadURL('/connected/layout', [{session: userSession}, {linkPage: "#profile"}, {openPage: "profile"}])
-                                            }
-                                        };
-
-                                       
-                                    }
-                                )
-                                .catch(
-                                    (error) => {
-                                        console.log(error)
-                                        $('.forms').show();
-                                        $('.addSkinLoader').hide();
-                                        profile.notyf("error", "Une erreur est survenue lors du téléchargement du skin de "+username)
-                                    }
-                                )
-                        })
-                    }else{
-                        $('.forms').show();
-                        $('.addSkinLoader').hide();
+        var addSkinFromMojang = async() => {
+            await layoutClass.loadModal( "messDialog", [{message: "Recherche et ajout du skin via Mojang.."}], false, () => {}, () => {}, async () => {
+                var username = $("#searchSkinInput").val();
+                $("#searchSkinInput").attr('disabled', 'disabled')
+                    await axios.get("https://api.minetools.eu/uuid/"+$("#searchSkinInput").val().replaceAll('\'', '')).then(async (response) => {
+                        var uuid = response.data.id;
+                        if(uuid !== null || uuid !== undefined){
+                            await axios.get("https://api.minetools.eu/profile/"+uuid).then(async (response) => {
+                                if(response.data.status == "ERR"){
+                                    $('.forms').show();
+                                    await layoutClass.closeModal();
+                                    $("#searchSkinInput").val('')
+                                    $("#searchSkinInput").removeAttr('disabled')
+                                    return profile.notyf("error", "Une erreur est survenue lors du téléchargement du skin de "+username)
+                                }
+                                var dataAxios = response.data;
+                                await imageToBase64(dataAxios.decoded.textures.SKIN.url) // Path to the image
+                                    .then(
+                                        async (response) => {
+    
+                                            const img = new Image();
+    
+                                            img.src = "data:image/png;base64,"+response;
+    
+                                            img.onload = async function() {
+                                                const imgWidth = img.naturalWidth;
+                                                const imgHeight = img.naturalHeight;
+    
+                                                if(imgWidth != 64 || imgHeight != 64){
+                                                    $('.forms').show();
+                                                    await layoutClass.closeModal();
+                                                    $("#searchSkinInput").val('')
+                                                    $("#searchSkinInput").removeAttr('disabled')
+                                                    return profile.notyf("error", "Le skin de "+username+" n'est pas valide !")
+                                                }else{
+                                                    FZUtils.storeSkinShelf(dataAxios.decoded.profileName, response)
+                                                    FZUtils.loadURL('/connected/layout', [{session: userSession}, {linkPage: "#profile"}, {openPage: "profile"}])
+                                                }
+                                            };
+    
+                                           
+                                        }
+                                    )
+                                    .catch(
+                                        async (error) => {
+                                            console.log(error)
+                                            $("#searchSkinInput").val('')
+                                            $("#searchSkinInput").removeAttr('disabled')
+                                            await layoutClass.closeModal();
+                                            profile.notyf("error", "Une erreur est survenue lors du téléchargement du skin de "+username)
+                                        }
+                                    )
+                            })
+                        }else{
+                            $("#searchSkinInput").val('')
+                            $("#searchSkinInput").removeAttr('disabled')
+                            await layoutClass.closeModal();
+                            profile.notyf("error", "Le joueur n'existe pas")
+                        }
+                    }).catch(async function (error) {
+                        await layoutClass.closeModal("messDialog");
+                        $("#searchSkinInput").val('')
+                        $("#searchSkinInput").removeAttr('disabled')
                         profile.notyf("error", "Le joueur n'existe pas")
-                    }
-                })
+                    });
+            })
+        }
+
+        $('#searchSkinInput').on('keypress',function(e) {
+            if(e.which == 13) {
+                addSkinFromMojang()
+            }
+        });
+        $('.searchSkinMojang').on('click', async function(){
+            addSkinFromMojang()
         })
         $('.addSkinFileForm').on('click', async function(){
             $('.forms').hide();
@@ -237,6 +257,12 @@ class Appearance extends FzPage {
             //layoutClass.loadDialog('editcape', [], "profile");
         })
 
+        
+
+        
+        var skins = require(this.path.join(this.shelfFzLauncherSkins))
+
+
         instance.loadSkinList(instance)
 
         this.previewSkinViewer = new skinview3d.SkinViewer({
@@ -254,6 +280,10 @@ class Appearance extends FzPage {
         cipsv.enableRotate = true;
         cipsv.enableZoom = false;
         cipsv.enablePan = false;
+
+        
+        if(skins.length == 0)
+            instance.previewSkinViewer.loadSkin(profile.skinUrl);
         
     }
 

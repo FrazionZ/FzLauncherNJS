@@ -6,6 +6,14 @@
 </div>
 <span class="loader-3"></span>
 <div class="server screens"></div>
+<div class="screens selectedPrompt">
+    <div class="flex justif-between">
+        <div id="indicator"></div>
+        <div class="actions">
+            <div class="delete btn btn-danger"><i class="fa-solid fa-trash"></i></div>
+        </div>
+    </div>
+</div>
 <script>
     var Screens = require(path.join('<%= srcDir %>', '/assets/js/connected/server/subpage/screens.js'));
     new Screens('<%= server_current.idServer %>');

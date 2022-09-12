@@ -6,8 +6,12 @@
           <img src="asset://<%= server_current.server.urlLogo %>" width="160" height="160" alt="logo_server">
         </div>
         <div class="infos">
-          <h2 class="reset-mp underline server__title"><%= server_current.server.name %></h2>
+          <h2 class="reset-mp underline dark server__title"><%= server_current.server.name %></h2>
           <h4 class="server__description mt-10"><%= server_current.server.expl_server %></h4>
+          <div class="state">
+            <div class="indicator"><i class="fa-solid fa-circle"></i></div>
+            <div class="label">Recherche des infos..</div>
+          </div>
         </div>
       </div>
       <div class="flex justif-center">
@@ -21,58 +25,54 @@
             <div class="progress-bar" role="progressbar" aria-valuenow="75" aria-valuemin="0" aria-valuemax="100"></div>
         </div>
       </button>
-      <ul class="nav nav-pills mb-3 menu" id="pills-tab-server" role="tablist">
-        <li class="nav-item" role="presentation">
-          <a class="active" id="pills-news-tab" data-bs-toggle="tab" data-bs-target="#news" type="button" role="tab" aria-controls="pills-news" aria-selected="true">
+      
+      <div class="ui top attached tabular nav nav-pills mb-3 menu">
+        <li class="item active"  data-tab="news">
+          <a>
             <%= FZUtils.getLangKey("server.tabs.news") %>
           </a>
         </li>
-        <li class="nav-item" role="presentation">
-          <a class="" id="pills-pnotes-tab" data-bs-toggle="tab" data-bs-target="#pnotes" type="button" role="tab" aria-controls="pills-pnotes" aria-selected="false">
+        <li class="item" data-tab="pnotes">
+          <a>
             <%= FZUtils.getLangKey("server.tabs.pnotes") %>
           </a>
         </li>
-        <li class="nav-item" role="presentation">
-          <a class="" id="pills-rpacks-tab" data-bs-toggle="tab" data-bs-target="#rpacks" type="button" role="tab" aria-controls="pills-rpacks" aria-selected="false">
+        <li class="item" data-tab="rpacks">
+          <a>
             <%= FZUtils.getLangKey("server.tabs.rpacks") %>
           </a>
         </li>
-        <li class="nav-item" role="presentation">
-          <a class="" id="pills-screens-tab" data-bs-toggle="tab" data-bs-target="#screens" type="button" role="tab" aria-controls="pills-screens" aria-selected="false">
+        <li class="item" data-tab="screens">
+          <a>
             <%= FZUtils.getLangKey("server.tabs.screens") %>
           </a>
         </li>
-        <li class="nav-item" role="presentation">
-          <a class="" id="pills-config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab" aria-controls="pills-config" aria-selected="false">
+        <li class="item" data-tab="config">
+          <a>
             <%= FZUtils.getLangKey("server.tabs.settings") %>
           </a>
         </li>
-      </ul>
+      </div>
     </div>
   </div>
-  <div class="tab-content pl-40 pr-40 pb-40" id="tab-server">
-    <div class="tab-pane fade show active" id="news" role="tabpanel" aria-labelledby="pills-news-tab">
+  <div class="pl-40 pr-40 pb-40">
+    <div class="ui bottom attached tab segment server active" data-tab="news">
       <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
-    <div class="tab-pane fade" id="pnotes" role="tabpanel" aria-labelledby="pills-pnotes-tab">
+    <div class="ui bottom attached tab segment server" data-tab="pnotes">
       <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
-    <div class="tab-pane fade" id="rpacks" role="tabpanel" aria-labelledby="pills-rpacks-tab">
+    <div class="ui bottom attached tab segment server" data-tab="rpacks">
       <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
-    <div class="tab-pane fade" id="screens" role="tabpanel" aria-labelledby="pills-screens-tab">
+    <div class="ui bottom attached tab segment server" data-tab="screens">
       <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
-    <div class="tab-pane fade" id="config" role="tabpanel" aria-labelledby="pills-config-tab">
+    <div class="ui bottom attached tab segment server" data-tab="config">
       <div class="server pl-30 pr-30 pb-60 pt-60"></div>
     </div>
   </div>
 </div>
-<!--<div id="load" style="height: calc(100vh - 3.3rem);background: url(asset://img/wallpaper.png);background-position-y: -2.5rem;background-repeat: no-repeat;background-size: cover;border-top-left-radius: 15px;">
-  <div class="flex gap-30 pl-60 pr-60 pb-30" style="height: 100%;justify-content: center;align-items: center;">
-    <span class="loader-3"></span> <span style="font-size: 1.6rem;">Veuillez patienter</span>
-  </div>
-</div>-->
 <script src="asset://js/utils.js"></script>
 <script>
   const path = require('path');
@@ -82,85 +82,48 @@
   var rootDir = require('electron-root-path').rootPath;
 
   var play = new Play('<%= server_current.idServer %>');
-
+  const axios = require('axios').default;
   var pinit = async () => {
-    await play.preInit().then(() => {
-      /*console.log('playAnimate')
-      $('#load').find('.flex').fadeOut(() => {
-        $('#load').css('height', 'calc(100vh - 3.3rem)').animate({height: '454px'}, 500, () => {
-          $('#load').remove();
-          $('.server').show();
-          $('.server .subhead').fadeIn()
-          $('.main.connected .content-child').css('overflow', 'overlay')
-        })
-      })*/
-    });
+    await play.preInit().then(() => {});
   }
 
   pinit()
 
-  /*setTimeout(async() => {
-    await play.preInit().then(() => {
-      console.log('playAnimate')
-      $('#load').find('.flex').fadeOut(() => {
-        $('#load').css('height', 'calc(100vh - 3.3rem)').animate({height: '454px'}, 500, () => {
-          $('#load').remove();
-          $('.server').show();
-          $('.server .subhead').fadeIn()
-          $('.main.connected .content-child').css('overflow', 'overlay')
-        })
-      })
-    });
-  });*/
-
-  function loadTab(tab, data_bs_target){
+  function loadServerTab(tab, data_bs_target, reload){
     var link = data_bs_target;
-    var data = [{session: userSession}]
+    if(reload === true)
+      $('.tab.segment.server[data-tab="'+link+'"]').find('.server').empty();
+    var data = [{session: userSession}];
     return new Promise(async (resolve, reject) => {
       await FZUtils.initVariableEJS(data, false).then(async (datar) => {
         await ejs.renderFile(appRoot.path+"/src/template/connected/server/subpage/"+link.replaceAll('#', '')+".ejs", datar, {}, async (err, str) => {
           if (err) return console.log(err)
-          await $('.tab-content').find(link).find('.server').html(str);
-          tab.setAttribute("aload", "true");
+          await $('.tab.segment.server[data-tab="'+link+'"]').find('.server').html(str);
+          tab.attr("aload", "true");
           resolve()
         })
       })
     })
   }
 
+  
+  $('.menu .item').tab({'onVisible': function(tabPath){
+    $('.menu .item').removeClass('active')
+    //$('.menu .item').parent().removeClass('active')
+    var tabMenuItem = $('.menu .item[data-tab="'+tabPath+'"]');
+    //tabMenuItem.parent().addClass('active');
+    if(!tabMenuItem.is('[aload]'))
+      loadServerTab(tabMenuItem, tabPath, false)
+  }});
+
   //INIT CONFIG
-  loadTab(document.querySelector('#pills-config-tab'), "#config");
+  loadServerTab($('.menu .item[data-tab="news"]'), "news", false);
+  loadServerTab($('.menu .item[data-tab="config"]'), "config", false);
 
-
-  var triggerServerTabList = [].slice.call(document.querySelectorAll('#pills-tab-server a'))
-    triggerServerTabList.forEach(function (triggerEl) {
-        var tabServerTrigger = $('.tab-pane[aria-labelledby="'+triggerEl.getAttribute('id')+'"]');
-
-        //LOAD FIRST SUBPAGE ACTIVE DEFAULT
-        if(triggerEl.getAttribute('class').includes('active')){
-            var link = triggerEl.getAttribute('data-bs-target');
-            loadTab(triggerEl, "#news").then(() => {
-              $('#tab-server .tab-pane').removeClass('show active');
-              tabServerTrigger.addClass('show active')
-            })
-        }
-
-        triggerEl.addEventListener('click', function (event) {
-            event.preventDefault()
-            if(tabServerTrigger.hasClass('show')) return;
-            $('.tab-pane.show.active').removeClass('show')
-            $('.tab-pane.active').removeClass('active')
-            if(!triggerEl.hasAttribute("aload")) {
-              loadTab(triggerEl, triggerEl.getAttribute('data-bs-target')).then(() => {
-                $('#tab-server .tab-pane').removeClass('show active');
-                $('#tab-server .tab-pane').hide();
-                tabServerTrigger.fadeIn()
-              })
-            }else{
-              $('#tab-server .tab-pane').removeClass('show active');
-              $('#tab-server .tab-pane').hide();
-              tabServerTrigger.fadeIn()
-            }
-        })
-    })
+  //STATE SERVER
+  axios.get('https://api.mcsrvstat.us/2/<%= server_current.server.serverAddress %>').then((response) => {
+    var data = response.data;
+    $('.infos .state .indicator').addClass(((data.online) ? "online" : "offline"));
+    $('.infos .state .label').html(((data.online) ? "En ligne, "+data.players.online+" joueur(s)" : "Hors ligne"));
+  })
 </script>

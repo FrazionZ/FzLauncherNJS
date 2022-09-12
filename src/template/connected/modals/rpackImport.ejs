@@ -1,0 +1,32 @@
+<div id="rpackImport" class="ui fzmodal">
+    <div class="header">Resources Packs importés</div>
+    <div class="content">
+      <div class="description server" style="overflow-y: overlay;max-height: calc(100vh - 11rem);">
+        <div id="drop_zone" class="dropZone importPack" ondrop="dropHandler(event);" ondragleave="dragOverLeave(event);" ondragover="dragOverHandler(event);">
+          <p>Glissez/Déposez votre fichier ZIP ou cliquez pour importer un resource pack</p>
+        </div>
+        <div class="flex gap-15 direct-column" id="rpacks_list" style="overflow: auto;">
+          <% rpackImportData.forEach(function(rpack) { %>
+              <div class="card rpack gap-15 black-4" style="border: none;">
+                  <div class="card-body">
+                      <div class="flex gap-30">
+                          <div class="column">
+                              <img style="border-radius: 8px;width: 115px;" src="data:image/png;base64,<%= rpack.icon %>" id="rpack__icon" class="icon" alt="rpack">
+                          </div>
+                          <div class="column flex direct-column justif-around w-100">
+                              <div id="rpack__name"><%= rpack.file %></div>
+                              <div id="rpack__description"><%- rpack.mcMetaJson %></div>
+                              <div id="rpack__author"></div>
+                          </div>
+                      </div>
+                  </div>
+              </div>
+          <% }); %>
+        </div>
+      </div>
+    </div>
+</div>
+<script>
+  var RpacksImport = require(path.join('<%= srcDir %>', '/assets/js/connected/modals/rpackImport.js'));
+  new RpacksImport('<%= server_current.idServer %>');
+</script>

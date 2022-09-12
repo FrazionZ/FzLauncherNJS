@@ -1,6 +1,6 @@
 <div class="config flex gap-15 direct-column">
     <h2 class="underline"><%= FZUtils.getLangKey("server.config.title") %></h2>
-    <div class="card">
+    <div class="card pd-30">
         <div class="card-body flex gap-30 direct-column">
             <div class="column flex gap-15 direct-column">
                 <h2 class="label__config"><%= FZUtils.getLangKey("server.config.ram.title") %></h2>
@@ -9,6 +9,27 @@
             <div class="flex align-center gap-20 justif-center">
                 <span class="range_ram_indicator"></span>
                 <input type="range" class="reset-mp" id="range_ram_allocate" max="" min="1" value="0">
+            </div>
+        </div>
+    </div>
+    <div class="card pd-30">
+        <div class="card-body flex gap-20 justif-between">
+            <div class="column flex gap-15 direct-column w-75">
+                <h2 class="label__config"><%= FZUtils.getLangKey("server.config.branch.title") %></h2>
+                <h2 class="expl__config"><%= FZUtils.getLangKey("server.config.branch.subtitle", [
+                    {
+                        search: "%server_name%", 
+                        replace: server_current.server.name
+                    }
+                ]) %></h2>
+            </div>
+            <div class="flex align-center gap-20 justif-center">
+                <div class="ui selection dropdown config__switch_branch">
+                    <input type="hidden" name="gitBranch">
+                    <i class="dropdown icon"></i>
+                    <div class="default text">Gender</div>
+                    <div class="menu"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -160,10 +181,10 @@
       
         </div>
     </div>
+
+
 </div>
 <script>
     var Settings = require(path.join('<%= srcDir %>', '/assets/js/connected/server/subpage/settings.js'));
     var settingsServer = new Settings('<%= server_current.idServer %>');
-
-    
 </script>

@@ -1,4 +1,4 @@
-const { app, electron, safeStorage, screen, BrowserWindow, Menu, Tray, dialog, ipcMain, Notification, ipcRenderer } = require('electron')
+const { app, electron, nativeTheme, safeStorage, screen, BrowserWindow, Menu, Tray, dialog, ipcMain, Notification, ipcRenderer } = require('electron')
 const Store = require('electron-store');
 const path = require('path')
 var appRoot = require('app-root-path');
@@ -59,12 +59,17 @@ async function createWindow() {
             contextIsolation: false,
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
-            webviewTag: true,
+            webviewTag: false,
             devTools: true,
             enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }
     })
+
+    if(!store.has('launcher__darkmode')) 
+        store.set('launcher__darkmode', true)
+
+    mainWindow.setBackgroundColor('#0E1014')
 
     mainWindow.setFullScreenable(true)
 
@@ -89,16 +94,18 @@ async function createWindow() {
     let lang;
     let loadURL;
 
-    setTimeout(() => {
+    let contentReduceWindow;
+
+    setTimeout(async () => {
         remoteMain.BrowserWindow = mainWindow;
 
         remoteMain.enable(mainWindow.webContents);
     
         mainWindow.center();
 
-        var serversConfigFile = path.join(appRoot.path, "server_config.json");
+        /*var serversConfigFile = path.join(appRoot.path, "server_config.json");
         if(!fs.existsSync(serversConfigFile))
-            fs.writeFileSync(serversConfigFile, "[]", ()=>{})
+            fs.writeFileSync(serversConfigFile, "[]", ()=>{})*/
 
         var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
     
@@ -125,32 +132,34 @@ async function createWindow() {
     
         lang = ((store.has('lang')) ? require('./src/languages/'+store.get('lang')+'.json') : Fr)
     
-        loadURL = (url, data) => {
-            var datas = FZUtils.initVariableEJS(data, true)
-            datas.then((dataFind) => {
+        loadURL = async (url, data) => {
+            await FZUtils.initVariableEJS(data, true).then((datas) => {
                 try {
-                    renderer.load(mainWindow, url, dataFind)
+                    renderer.load(mainWindow, url, datas)
                 }catch(e){
                     console.log(e)
                 }
             })
         }
 
-        if(updaterState)
-            loadURL('/updater/index', [])
-        else if(forceUpdate){
-            store.delete('forceUpdate')
-            loadURL('/updater/index', [])
-        }else
-            afterUpdate();
+        await loadURL('/updater/index', [])
     }, 1000)
 
     mainWindow.webContents.on('will-navigate', async function(e, url) {
         const open = require('open');
+        if(url.startsWith('about:bank')) return e.preventDefault();
         if(url.startsWith("https://") || url.startsWith("http://")){
             e.preventDefault()
             await open(url);
         }
+    })
+
+    mainWindow.webContents.on('did-start-navigation', async function(e, url) {
+        
+    })
+
+    mainWindow.webContents.on('will-redirect', async function(e, url) {
+        
     })
 
     mainWindow.webContents.on('devtools-opened', () => {
@@ -163,9 +172,9 @@ async function createWindow() {
     var afterUpdate = async function() {
         mainWindow.show()
         if(process.platform === "win32"){
-            FZUtils.javaversion(dirFzLauncherDatas, function(err,version){
+            FZUtils.javaversion(dirFzLauncherDatas, async function(err,version){
                 if(err){
-                    loadURL('/runtime/index', [])
+                    await loadURL('/runtime/index', [])
                 }else{
                     afterUpdateAndRuntime()
                 }
@@ -203,7 +212,7 @@ async function createWindow() {
 
         await checkInternetConnected(config)
             .then(async () => {
-                await axios.get('https://api.frazionz.net/servers/list')
+                /*await axios.get('https://api.frazionz.net/servers/list')
                     .then(async function (response) {
                         await fs.writeFile('server_config.json', JSON.stringify(response.data), err => {});
                     })
@@ -217,14 +226,14 @@ async function createWindow() {
                         })
                         app.exit()
                         process.exit()
-                    })
+                    })*/
                 if(store.has('session'))
-                    loadURL('/logging', [{type: "autolog"}])
+                    await loadURL('/logging', [{type: "autolog"}])
                 else
-                    loadURL('/login', [])   
-            }).catch((error) => {
+                    await loadURL('/login', [])   
+            }).catch(async (error) => {
                 console.log(error)
-                loadURL('/session/nointernet', []);
+                await loadURL('/session/nointernet', []);
             });
 
         /*const login = new Login(mainWindow.webContents);
@@ -240,6 +249,8 @@ async function createWindow() {
         dialog.showOpenDialog({properties: ['openFile'] }).then(function (response) {
             if (!response.canceled) {
                 event.sender.send("responseOpenFile", {file: response, id: data.id});
+            }else if(response.canceled) {
+                event.sender.send("cancelOpenFile", {});
             }
         });
     })
@@ -249,11 +260,16 @@ async function createWindow() {
     })
 
     ipcMain.on('reduceWindow', async (event, data) => {
-        mainWindow.minimize();
+        var theWindow = BrowserWindow.getFocusedWindow();
+        theWindow.minimize();
     })
 
     ipcMain.on('maximizeWindow', async (event, data) => {
         ((mainWindow.isMaximized()) ? mainWindow.unmaximize() : mainWindow.maximize())
+    })
+
+    ipcMain.on('reloadFZ', async (event, data) => {
+        afterUpdateAndRuntime();
     })
 
     ipcMain.on('openUrlExternal', async (event, data) => {
@@ -267,7 +283,7 @@ async function createWindow() {
     })
 
     ipcMain.on('loadURL', async (event, data) => {
-        loadURL(data.url, data.datas);
+        await loadURL(data.url, data.datas);
     })
 
     ipcMain.on('ejseData', async (event, data) => {
@@ -324,6 +340,8 @@ async function createWindow() {
     })
 
     mainWindow.on('maximize', (event) => {
+        mainWindow.show();
+        mainWindow.webContents.goBack()
         event.sender.send('responseMaximizeWindow', true)
     });
     
@@ -331,8 +349,8 @@ async function createWindow() {
         event.sender.send('responseMaximizeWindow', false)
     });
 
-     ipcMain.on('loadURL', async (event, data) => {
-        loadURL(data.url, data.datas);
+    mainWindow.on('restore', (event) => {
+        if(mainWindow.webContents.getURL() == "about:blank#blocked") afterUpdateAndRuntime();
     })
 
 }
@@ -340,6 +358,7 @@ async function createWindow() {
 app.whenReady().then(async () => {
     await createWindow()
     app.on('activate', () => {
+        console.log(BrowserWindow.getAllWindows().length)
         if (BrowserWindow.getAllWindows().length === 0) createWindow()
     })
 })

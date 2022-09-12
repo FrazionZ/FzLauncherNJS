@@ -1,12 +1,12 @@
-const { Notyf } = require('notyf');
-const { safeStorage } = require('electron');
 const path = require('path')
 var appRoot = require('app-root-path');
 const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
 const FzPage = require(path.join(appRoot.path, '/src/assets/js/FzPage.js'))
 const Authenticator = require('azuriom-auth').Authenticator;
 const axios = require('axios').default;
-const { v4: uuidv4 } = require('uuid');
+const UserAgent = require('user-agents');
+const userAgent = new UserAgent({ platform: 'Win32' });
+
 class Logging extends FzPage {
 
     constructor(document, type, data) {
@@ -30,67 +30,93 @@ class Logging extends FzPage {
                 //if(response.data.result == "success")
                     //user.fzProfile = response.data;
             })
-        this.ipcRenderer.send('sfsEncrypt', user.access_token)
-        this.ipcRenderer.on('respSfsEncrypt', (event, data) => {
-            const userFinal = {uuid: user.uuid, access_token: Buffer.from(data.buffer).toJSON() };
-                this.store.set('session', userFinal);
-                if(user.banned)
-                    FZUtils.loadURL('/session/banned', [])
-                else if(!user.email_verified)
-                    FZUtils.loadURL('/session/eVerified', [])
-                else{
+        
+        // Create our number formatter.
+        var formatter = new Intl.NumberFormat('fr-FR', {
+            style: 'currency',
+            currency: 'USD',
+        });
+        
+        user.money = formatter.format(user.money).replaceAll(',00', '').replaceAll('$US', ''); 
+
+        var d = new Date(user.created_at);
+
+        var dayCreatedAt = (d.getMonth()+1);
+        if(dayCreatedAt < 10)
+            dayCreatedAt = "0"+dayCreatedAt;
+
+        var monthCreatedAt = (d.getMonth()+1);
+        if(monthCreatedAt < 10)
+            monthCreatedAt = "0"+monthCreatedAt;
+
+        var datestring = dayCreatedAt  + "/" + monthCreatedAt + "/" + d.getFullYear() + " à " +
+        d.getHours() + ":" + d.getMinutes();
+        user.created_at = datestring; 
+
+        const userFinal = {uuid: user.uuid, access_token: user.access_token };
+        this.store.set('session', userFinal);
+        if(user.banned)
+            FZUtils.loadURL('/session/banned', [])
+        else if(!user.email_verified)
+            FZUtils.loadURL('/session/eVerified', [])
+        else{
+            $('.loader-3').fadeOut()
+            $('.logging .actionsText').fadeOut()
+            $('.logging .avatar').fadeOut(() => {
+                $('.logging .avatar').css({borderRadius: 0}).animate({borderRadius: 8}, 700);
+                $('.logging .avatar').attr('src', 'https://auth.frazionz.net/skins/face.php?s=120&u='+user.id)
+                $('.logging .avatar').fadeIn(() => {
                     $('.loader-3').fadeOut()
-                    $('.logging .actionsText').fadeOut()
-                    $('.logging .avatar').fadeOut(() => {
-                        $('.logging .avatar').css({borderRadius: 0}).animate({borderRadius: 8}, 700);
-                        $('.logging .avatar').attr('src', 'https://auth.frazionz.net/skins/face.php?s=120&u='+user.id)
-                        $('.logging .avatar').fadeIn(() => {
-                            $('.loader-3').fadeOut()
-                            $('.logging .actionsText .btext').html('Bonjour '+user.username+' !')
-                            $('.logging .actionsText .sbtext').html('Chargement de vos données en cours..')
-                            $('.logging .actionsText').fadeIn()
-                            $('.logging .actionsText .btext').slideDown(() => { 
-                                $('.logging .actionsText .sbtext').slideToggle(() => {
-                                    $('.logging .actionsText .loader-3').fadeIn(() => {
-                                        this.ipcRenderer.send('authorizationDevTools', user.role.is_admin)
-                                        this.store.set('serverCurrent', {
-                                            idServer: 0,
-                                            server: [0]
-                                        })
-                                        setTimeout(() => {
-                                            
-                                            $('.logging').fadeOut(() => 
-                                                FZUtils.loadURL('/connected/layout', [
+                    $('.logging .actionsText .btext').html('Bonjour '+user.username+' !')
+                    $('.logging .actionsText .sbtext').html('Chargement de vos données en cours..')
+                    $('.logging .actionsText').fadeIn()
+                    $('.logging .actionsText .btext').slideDown(() => { 
+                        $('.logging .actionsText .sbtext').slideToggle(() => {
+                            $('.logging .actionsText .loader-3').fadeIn(() => {
+                                this.ipcRenderer.send('authorizationDevTools', user.role.is_admin)
+                                this.store.set('serverCurrent', {
+                                    idServer: 0,
+                                    server: [0]
+                                })
+                                FZUtils.loadURL('/connected/layout', [{session: user}, 
+                                    {
+                                        notyf: 
+                                            {
+                                                type: "success", 
+                                                value: FZUtils.getLangKey("logging.result.logged", 
+                                                [
                                                     {
-                                                        session: user
-                                                    }, 
-                                                    {
-                                                        notyf: 
-                                                            {
-                                                                type: "success", 
-                                                                value: FZUtils.getLangKey("logging.result.logged", 
-                                                                [
-                                                                    {
-                                                                        search: "%session__name%", 
-                                                                        replace: user.username
-                                                                    }
-                                                                ]
-                                                            )
-                                                        }
+                                                        search: "%session__name%", 
+                                                        replace: user.username
                                                     }
                                                 ]
-                                            )) 
-                                        }, 1500);
-                                    });
-                                });
+                                            )
+                                        }
+                                    }
+                                ])
                             });
                         });
-                    })
-                }
-        })
+                    });
+                });
+            })
+        }
     }
 
     async addAccount(email, password, twofa){
+
+        /* DETERMINE OS */
+        var opsys = process.platform;
+        if (opsys == "darwin")
+            opsys = "MacOS";
+        else if (opsys == "win32" || opsys == "win64")
+            opsys = "Windows";
+        else if (opsys == "linux")
+            opsys = "Linux";
+        else
+            opsys = "Other";
+        /* DETERMINE OS */
+
+
         var btnAddAcount = $('.addAccountContinue');
         try {
             if(email == "" || password == ""){
@@ -99,9 +125,9 @@ class Logging extends FzPage {
             }
             var user = undefined;
             if(twofa == "none")
-                user = await this.authenticator.auth(email, password);
+                user = await this.authenticator.auth(email, password, opsys, userAgent.toString());
             else
-                user = await this.authenticator.authWith2FA(email, password, twofa);
+                user = await this.authenticator.authWith2FA(email, password, opsys, userAgent.toString(), twofa);
             if(user.status !== undefined){
                 if(user.status == "error"){
                     btnAddAcount.removeAttr('disabled')
@@ -115,72 +141,44 @@ class Logging extends FzPage {
                 }
             }
             user = user.data;
-            /*var profiles = this.loadProfiles();
-            profiles.push({ id: user.id, uuid: user.uuid, access_token: user.access_token, username: user.username })
-            this.store.set('profiles', profiles);*/
             setTimeout(() => {
                 this.finishAuth(user);
             }, 500)
         } catch (e) {
             console.log(user);
             return;
-            /*console.log(e.message)
-            btnAddAcount.removeAttr('disabled')
-            return FZUtils.loadURL('/login', [{notyf: {value: "error", value: FZUtils.getLangKey("logging.result.internal_error")}}])*/
         }
     }
 
     async auth(force){
         //var mess = new Messaging(true, "Chargement de votre profil..");
         //CHECK IF USER HAS CONNECTED!
-        var isOnline = false;
-        var srenewConfig = ((store.has('launcher__srenew')) ? store.get('launcher__srenew') : true)
-        await axios.get("https://api.frazionz.net/faction/profile/"+this.store.get('session').uuid+"/online")
-            .then((response) => {
-                if(response.data.isOnline !== undefined){
-                    if(response.data.isOnline){
-                        isOnline = response.data.isOnline;
+        //CONTINUE AUTH
+        var continueAuthLog = async (access_token) => {
+            try {
+                var user = await this.authenticator.verify(access_token);
+                if(user.status !== undefined){
+                    if(user.status == "error"){
+                        return FZUtils.loadURL('/login', [{notyf: {value: "error", value: user.message}}])
                     }
                 }
-            })
-        if(isOnline && !force && srenewConfig){
-            return FZUtils.loadURL('/session/renew', [])
-        }else{
-            //CONTINUE AUTH
-            var continueAuthLog = async (access_token) => {
-                try {
-                    //var profileTarget = this.loadProfiles()[target_profile];
-                    var user = await this.authenticator.verify(access_token);
-                    if(user.status !== undefined){
-                        if(user.status == "error"){
-                            return FZUtils.loadURL('/login', [{notyf: {value: "error", value: user.message}}])
-                        }
-                    }
-                    user = user.data;
-                    setTimeout(() => {
-                        this.finishAuth(user);
-                    }, 500)
-                } catch (e) {
-                    if(e.message.includes('401')){
-                        setTimeout(() => {
-                            //mess.hide();
-                            this.store.delete('session')
-                            return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
-                        }, 500)
-                    }
-                }
+                user = user.data;
+                setTimeout(() => {
+                    this.finishAuth(user);
+                }, 500)
+            } catch (e) {
+                return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
             }
-            var accessToken = this.store.get('session').access_token;
-            if(typeof accessToken == "string")
-                continueAuthLog(accessToken);
-            else {
-                this.ipcRenderer.send('sfsDecrypt', Buffer.from(this.store.get('session').access_token))
-                this.ipcRenderer.on('respSfsDecrypt', async (event, atoken) => {
-                    continueAuthLog(atoken);
-                });
-            }
-            
         }
+        var accessToken = this.store.get('session').access_token;
+        continueAuthLog(accessToken);
+        /*else {
+            this.ipcRenderer.send('sfsDecrypt', Buffer.from(this.store.get('session').access_token))
+            this.ipcRenderer.on('respSfsDecrypt', async (event, atoken) => {
+                //continueAuthLog(atoken);
+                console.log(atoken)
+            });
+        }*/
     }
 
 

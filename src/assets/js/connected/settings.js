@@ -15,9 +15,9 @@ class Settings extends FzPage {
             const { ipcRenderer } = require('electron');
             ipcRenderer.send('showDevTools');
         })
-        $('.settings__lang_item').on('click', function(){
-            $('.settings__lang_dmenu').addClass('disabled');
-            $('.settings__lang_dmenu').html('...')
+        $('.settingsFZUtils.getLangKey_item').on('click', function(){
+            $('.settingsFZUtils.getLangKey_dmenu').addClass('disabled');
+            $('.settingsFZUtils.getLangKey_dmenu').html('...')
             var langKey = $(this).attr('data-lang')
             instance.store.set('lang', langKey)
             FZUtils.loadURL('/connected/layout', [{session: userSession}, {linkPage: "#settings"}, {openPage: "settings"}])
@@ -35,6 +35,9 @@ class Settings extends FzPage {
             instance.store.set($(this).attr('data-id'), $(this).is(':checked'));
             if($(this)[0].hasAttribute('data-notyf')){
                 instance.notyf('success', $(this).attr('data-notyf'))
+            }
+            if($(this)[0].hasAttribute('data-callback')){
+                eval($(this).attr('data-callback'));
             }
         })
         $('.config__launcher_pnotes').on('click', function() {

@@ -1,5 +1,6 @@
 const main = require('@electron/remote/main');
 const { default: axios } = require('axios');
+const { resolve } = require('path');
 
 function UrlExists(url) {
     var http = new XMLHttpRequest();
@@ -60,11 +61,10 @@ async function initVariableEJS(data, init){
     const path = require('path')
     const fs = require('fs');
     const Store = require('electron-store')
-    const FZUtils = require('./utils.js')
+    const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'));
     let servers;
-    if(typeof init == "boolean" && init == false){
+    if(init == false)
         servers = require(path.join(appRoot.path, "server_config.json"));
-    }
     store = new Store({accessPropertiesByDotNotation: false});
     let configLauncher;
 
@@ -76,38 +76,128 @@ async function initVariableEJS(data, init){
     var shelfFzLauncherSkins = path.join(dirFzLauncherDatas, "skins.json");
     const shelfFzLauncherSkinsJson = require(path.join(shelfFzLauncherSkins));
 
-    await axios.get('https://api.frazionz.net/launcher')
-        .then((response) => {
-            configLauncher = response.data;
-        })
-        .catch((err) => {
-            console.log('Error: ' + err);
-        })
-    var initDatas = [
-        {
-            "servers": servers,
-            "server_current": {
-                idServer: 0,
-                server: ((servers !== undefined) ? servers[0] : undefined),
-            },  
-
-            "configLauncher": configLauncher,
-            "appRoot": require('app-root-path'),
-            "path": path,
-            "FZUtils": FZUtils, 
-            "countSkins": shelfFzLauncherSkinsJson.length,
-            "srcDir": path.join(__dirname, '../../../src/').replaceAll('\\', '/'),
-            "language": ((store.has('lang')) ? require('../../languages/'+store.get('lang')+'.json') : Fr),
-            "rootDirPath": path.join(rootPath).replaceAll('\\', '\\\\'),
-            "rootDirPathNF": path.join(rootPath),
-            "processVersions": process.versions,
-            "version": require('../../../package.json').version
+    return new Promise(async (resolve, reject) => {
+        await axios.get('https://api.frazionz.net/launcher')
+            .then((response) => {
+                configLauncher = response.data;
+            })
+            .catch((err) => {
+                console.log('Error: ' + err);
+            })
+    
+        var initDatas = [
+            {
+                "servers": servers,
+                "server_current": {
+                    idServer: 0,
+                    server: ((servers !== undefined) ? servers[0] : undefined),
+                },  
+                "configLauncher": configLauncher,
+                "appRoot": require('app-root-path'),
+                "path": path,
+                "FZUtils": FZUtils,
+                "countSkins": shelfFzLauncherSkinsJson.length,
+                "srcDir": path.join(appRoot.path, '/src/').replaceAll('\\', '/'),
+                "darkMode":  ((store.has('launcher__darkmode')) ? ((store.get('launcher__darkmode')) ? "dark" : "light") : "dark"),
+                "language": ((store.has('lang')) ? require('../../languages/'+store.get('lang')+'.json') : Fr),
+                "rootDirPath": path.join(rootPath).replaceAll('\\', '\\\\'),
+                "rootDirPathNF": path.join(rootPath),
+                "processVersions": process.versions,
+                "version": require(path.join(appRoot.path, 'package.json')).version
+            }
+        ];
+        if(data.length == 0) resolve(initDatas[0]);
+        else {
+            data.forEach((datai, index, array) => {
+                Object.assign(initDatas[0], datai)
+                if (index === array.length -1) resolve(initDatas[0]);
+            })
         }
-    ];
-    data.forEach((datai) => {
-        Object.assign(initDatas[0], datai)
     })
-    return initDatas[0];
+}
+
+
+
+async function appendZip(source, callback) {
+    // require modules
+    const fs = require('fs');
+    const fsp = fs.promises
+    const archiver = require('archiver');
+    const extract = require('extract-zip')
+
+    try {
+        let tempDir = source + "-temp"
+
+        // create temp dir (folder must exist)
+        await fsp.mkdir(tempDir, { recursive: true })
+
+        // extract to folder
+        await extract(source, { dir: tempDir })
+
+        // delete original zip
+        await fsp.unlink(source)
+
+        // recreate zip file to stream archive data to
+        const output = fs.createWriteStream(source);
+        const archive = archiver('zip', { zlib: { level: 9 } });
+
+        // pipe archive data to the file
+        archive.pipe(output);
+
+        // append files from temp directory at the root of archive
+        archive.directory(tempDir, false);
+
+        // callback to add extra files
+        callback.call(this, archive)
+
+        // finalize the archive
+        await archive.finalize();
+
+        // delete temp folder
+        fs.rmdirSync(tempDir, { recursive: true })
+
+    } catch (err) {
+        // handle any errors
+        console.log(err)
+    }
+}
+
+async function readZip(fileZip) {
+
+    return new Promise((resolve) => {
+        const StreamZip = require('node-stream-zip');
+        const zip = new StreamZip({
+            file: fileZip,
+            storeEntries: true
+        });
+        
+        zip.on('ready', () => {
+            const entries = zip.entries();
+            const dataZip = {
+                zip: zip,
+                entries: entries
+            }
+            resolve(dataZip);
+        });
+    })
+
+}
+
+//NT New Theme / OT Old Theme
+async function switchThemeMode(ot, nt, isMaximized) {
+
+    document.querySelector('html').classList.remove(ot);
+    document.querySelector('html').classList.add(nt);
+
+    document.querySelector('html').querySelector('.title_bar').querySelector('.icon').querySelector('img').src = "asset://img/"+nt+"/icons/top_fz.svg";
+    document.querySelector('html').querySelector('.title_bar').querySelector('.actions').querySelector('.window_reduce').querySelector('img').src = "asset://img/"+nt+"/frame/reduce.svg";
+    document.querySelector('html').querySelector('.title_bar').querySelector('.actions').querySelector('.window_maximize').querySelector('img').src = "asset://img/"+nt+"/frame/"+((isMaximized) ? 'maximize_on' : 'maximize_off')+".svg";
+    document.querySelector('html').querySelector('.title_bar').querySelector('.actions').querySelector('.window_close').querySelector('img').src = "asset://img/"+nt+"/frame/close.svg";
+}
+
+async function capitalize(s)
+{
+    return s[0].toUpperCase() + s.slice(1);
 }
 
 async function loadURL(url, data){
@@ -301,7 +391,7 @@ async function checkedIfinecraftAlreadyLaunch(){
                 files.forEach(async function (file, key, array) {
                     var dirServ = path.join(dirFzLauncherServer, file);
                     if(fs.lstatSync(dirServ).isDirectory()){
-                        var minecraftjar = path.join(dirServ, "minecraft.jar");
+                        var minecraftjar = path.join(dirServ, "client.jar");
                         fs.promises.rename(minecraftjar, minecraftjar).then((result) => {
                             if (key === array.length -1) resolve(false);
                         }).catch(async (err) => {
@@ -354,6 +444,7 @@ async function getSortedFilesByDate(dir) {
 async function download(instance, installerfileURL, installerfilename, dialog, type, branch) {
     const fs = require('fs')
     const path = require('path')
+    const { ipcRenderer } = require('electron')
     const Store = require('electron-store')
     const { v4: uuidv4 } = require('uuid');
     var uuidDl = uuidv4();
@@ -362,7 +453,7 @@ async function download(instance, installerfileURL, installerfilename, dialog, t
         downloadsList.push({uuidDl: uuidDl, title: type+" - Téléchargement des fichiers", subtitle: " - ", percentage: 0, finish: false});
     }
     return new Promise((resolve, reject) => {
-        // Save variable to know progress
+        
         var received_bytes = 0;
         var total_bytes = 0;
 
@@ -524,4 +615,4 @@ function javaversion(dirLaucher, callback) {
     });
 }
 
-module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, createRipple, encryptString, decryptString, checkRulesSize, checkUpdate, removeKeyInArr, getSkinFromB64, resizeImage, deleteSkinData, getSkinsFile, storeSkinShelf, getSkinFromID, getImageDimensions, updateSkinData, getSortedFilesByDate, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }
+module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, createRipple, switchThemeMode, appendZip, readZip, encryptString, decryptString, capitalize, checkRulesSize, checkUpdate, removeKeyInArr, getSkinFromB64, resizeImage, deleteSkinData, getSkinsFile, storeSkinShelf, getSkinFromID, getImageDimensions, updateSkinData, getSortedFilesByDate, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }

@@ -1,7 +1,10 @@
 <div class="rpack" id="pnotes_last">
     <h2 class="underline"><%= FZUtils.getLangKey("server.rpacks.title") %></h2>
     <span style="color: var(--text-inactive);"><%= FZUtils.getLangKey("server.rpacks.staff") %></span><br /><br />
-    <a href="#" class="btn btn-primary importPack">Importer un resource pack</a>
+    <div class="flex gap-20">
+        <!--<a href="#" class="btn btn-primary rpackImportList">Importation</a>-->
+        <a href="#" class="btn btn-primary openPathPack">Ouvrir le dossier</a>
+    </div>
     <div class="flex direct-column gap-15">
         <template id="rpacks_list" style="overflow: auto;display: block;">
             <div class="card rpack gap-15 black-4 mt-30 mb-30" style="border: none;">
@@ -10,13 +13,13 @@
                         <div class="column">
                             <img src="" id="rpack__icon" class="icon" alt="rpack">
                         </div>
-                        <div class="column flex direct-column justif-between w-100">
+                        <div class="column flex direct-column justif-around w-100">
                             <div id="rpack__name"></div>
                             <div id="rpack__description"></div>
                             <div id="rpack__author"></div>
                         </div>
-                        <div class="column flex gap-15 align-end">
-                            <a id="rpack__view" class="btn btn-primary"><i class="fa-solid fa-eye"></i></a>
+                        <div class="column flex direct-column gap-15 align-end">
+                            <a id="rpack__view" class="btn btn-primary"><i st class="fa-solid fa-eye"></i></a>
                             <a id="rpack__action" class="btn"></a>
                         </div>
                     </div>
@@ -41,5 +44,5 @@
   </div>
   <script>
     var Rpacks = require(path.join('<%= srcDir %>', '/assets/js/connected/server/subpage/rpacks.js'));
-    new Rpacks('<%= server_current.idServer %>');
+    const rpackClass = new Rpacks('<%= server_current.idServer %>');
   </script>

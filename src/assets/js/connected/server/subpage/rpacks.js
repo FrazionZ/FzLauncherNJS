@@ -3,10 +3,12 @@ const path = require('path')
 const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
 const FZUtils = require(path.join(appRoot.path, "/src/assets/js/utils.js"));
 const server_config = require(path.join(appRoot.path, '/server_config.json'));
-const { ipcMain } = require('electron');
+const { shell } = require('electron');
 const console = require('console');
 const { v4: uuidv4 } = require('uuid');
-
+var JSZip = require("jszip");
+const { async } = require('node-stream-zip');
+var zip = new JSZip();
 class RPacks extends FzPage {
 
     constructor(server){
@@ -15,45 +17,74 @@ class RPacks extends FzPage {
         var instance = this;
         this.server = server_config[server];
         this.dirServer = `${this.dirFzLauncherServer}\\${this.server.name}`;
-
+        this.resourcePackPath = instance.path.join(instance.dirServer, "resourcepacks");
         setTimeout(() => {
             this.loadList(instance);
         }, 1500);
 
-        $('.importPack').on('click', function() {
-            var uidFile = uuidv4()
-            instance.ipcRenderer.send('openFile', {id: uidFile});
-            instance.ipcRenderer.on('responseOpenFile', (event, data) => {
-                if(uidFile !== data.id) return;
-                var file = data.file;
-                var checkFiles = ["assets/", "pack.mcmeta", "pack.png"]
-                var AdmZip = require("adm-zip");
-                var resourceZipPath = file.filePaths[0];
-                var zip = new AdmZip(resourceZipPath);
-                var zipEntries = zip.getEntries();
-                var allFiles = [];
-                zipEntries.forEach(function(entry) {
-                    allFiles.push(entry.entryName);
-                })
-                var checkValidRPack = async() => {
-                    return new Promise((resolve, reject) => {
-                        checkFiles.forEach(function(zipEntry, index, array) {
-                            if(!allFiles.includes(zipEntry))
-                                resolve({result: false, message: zipEntry.entryName+" n'est pas un fichier valide"});
-                            if(index == array.length - 1) resolve({result: true, message: "Le pack est valide"});
+        $('.openPathPack').on('click', function() {
+            shell.openPath(instance.resourcePackPath);
+        })
+
+        
+        var openListPackImport = async(rpackImport) => {
+            instance.ipcRenderer.removeAllListeners('openFile')
+            instance.ipcRenderer.removeAllListeners('cancelOpenFile')
+            instance.ipcRenderer.removeAllListeners('responseOpenFile')
+            layoutClass.loadModal( "rpackImport", [{rpackImportData: rpackImport, instanceRpackParent: instance}], true, () => {}, () => {}, () => {})
+        }
+
+        $('.rpackImportList').on('click', function() {
+            instance.fs.readdir(instance.resourcePackPath, async (err, files) => {
+                if (err) return console.log(err);
+                else {
+                    var retrieveImportRpack = () => {
+                        return new Promise(async (resolve, reject) => {
+                            const rpackImport = [];
+                            var i = 0;
+                            if(files.length == 0)
+                                resolve(rpackImport);
+                            for(var file of files){
+                                const zipResult = await FZUtils.readZip(instance.path.join(instance.resourcePackPath, file))
+                                var checkFileZip = async () => {
+                                    return new Promise(async (res) => {
+                                        var data = {zipImport: undefined, file: file, mcMetaJson: undefined, icon: undefined};
+                                        try {
+                                            var mcMetaJson = JSON.parse(zipResult.zip.entryDataSync('pack.mcmeta').toString());
+                                            var dataJson = ((JSON.parse(zipResult.zip.entryDataSync('data.json').toString())?.fzdata == "import") ? true : false);
+                                            var icon = zipResult.zip.entryDataSync('pack.png').toString('base64');
+                                            data.zipImport = dataJson;
+                                            data.icon = icon;
+                                            data.mcMetaJson = mineParse(mcMetaJson?.pack?.description).raw;
+                                            res(data);
+                                        }catch(e){
+                                            data.zipImport = false;
+                                            data.icon = undefined;
+                                            res(data);
+                                        }
+                                    })
+                                }
+                                await checkFileZip().then((data) => {
+                                    if(data !== undefined)
+                                        if(data.zipImport)
+                                            rpackImport.push(data);
+                                    zipResult.zip.close();
+                                })
+                                i++;
+                                if (i === files.length){
+                                    resolve(rpackImport);
+                                }
+                            }
                         })
+                    }
+                    await retrieveImportRpack().then((rpackImport) => {
+                        openListPackImport(rpackImport)  
                     })
                 }
-                checkValidRPack().then((result) => {
-                    if(result == false) return instance.notyf('error', result.message);
-                    var destinationFile = instance.path.join(instance.dirServer, "resourcepacks", instance.path.basename(resourceZipPath));
-                    instance.fs.copyFile(resourceZipPath, destinationFile, (err) => {
-                        if (err) throw err;
-                        instance.notyf('success', 'Le pack a bien été importé');
-                    });
-                })
             })
         })
+
+        
     }
 
     async loadList(instance){
@@ -99,7 +130,9 @@ class RPacks extends FzPage {
                             clone.querySelector('#rpack__action').classList.add('download');
                             clone.querySelector('#rpack__action').onclick = function() {  
                                 this.classList.add('disabled')
-                                    instance.downloadPack(instance, rpack, pathFile, false).then(() => {
+                                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
+                                instance.downloadPack(instance, rpack, pathFile, false).then(() => {
+                                    instance.loadList(instance);
                                 }); 
                             };
                         }else if(state == 1){
@@ -107,7 +140,9 @@ class RPacks extends FzPage {
                             clone.querySelector('#rpack__action').classList.add('delete');
                             clone.querySelector('#rpack__action').onclick = function() {  
                                 this.classList.add('disabled')
+                                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
                                 instance.deletePack(instance, rpack, pathFile).then(() => {
+                                    instance.loadList(instance);
                                 });  
                             };
                         }else if(state == 2){
@@ -115,7 +150,9 @@ class RPacks extends FzPage {
                             clone.querySelector('#rpack__action').classList.add('update');
                             clone.querySelector('#rpack__action').onclick = function() {  
                                 this.classList.add('disabled')
+                                this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
                                 instance.updatePack(instance, rpack, pathFile).then(() => {
+                                    instance.loadList(instance);
                                 });  
                             };
                         }
@@ -146,7 +183,12 @@ class RPacks extends FzPage {
                 this.notyf('error', 'Impossible de télécharger le pack, le dossier cible n\'existe pas.');
                 return resolve();
             }
-            FZUtils.download(instance, "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip", dir, true, "Resources Pack", undefined).then((result) => {
+            FZUtils.download(instance, "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip", dir, true, "Resources Pack", undefined).then(async (result) => {
+                /*await appendZip(dir, (archive) => {
+                    const buffer3 = Buffer.from(JSON.stringify({fzdata: "download"}));
+                    archive.append(buffer3, { name: 'data.json' });
+                });*/
+
                 this.loadList(instance);
                 this.notyf('success', 'Le pack a bien été '+((isUpdate) ? "mis à jour" : "téléchargé"))
                 return resolve();
@@ -170,7 +212,7 @@ class RPacks extends FzPage {
     async updatePack(instance, rpack, dir){
         return new Promise((resolve, reject) => {
             this.fs.unlinkSync(dir)
-            downloadPack(instance, rpack, dir, true)
+            this.downloadPack(instance, rpack, dir, true)
         });
     }
 

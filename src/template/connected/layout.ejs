@@ -15,6 +15,7 @@
             </div>
             <div class="content-child">
                 <div class="server page hide"></div>
+                <div class="modal page hide"></div>
                 <div class="dialog page hide"></div>
                 <div class="downloads page hide"></div>
                 <div class="settings page hide"></div>
@@ -40,6 +41,7 @@
 <script>
     const layoutClass = new Layout(linkPage, openPage);
     const userSession = JSON.parse('<%- JSON.stringify(session) %>');
+    var isMaximised = false;
 </script>
 <% if(typeof notyf == 'object') { %>
     <% if(notyf.type == "success") { %>

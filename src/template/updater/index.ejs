@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fr" class="<%= ((typeof darkMode !== 'undefined') ? darkMode : 'dark') %>">
     <head>
         <meta charset="UTF-8">
         <meta http-equiv="Content-Security-Policy" content="script-src 'sha256-hgFOB7MlKIxGHBnyjI1eK6ao8+8btv5sI95t6DPZWBk=' 'self' asset: ">
@@ -20,7 +20,7 @@
             <div style="width: 30px;height: 28px;" class="loader-3"></div>
             <div class="flex direct-column w-100">
                 <div class="flex gap-10 align-end">
-                    <h5 id="downloadpercent"></h5><h6 id="downloadhtml"><%= FZUtils.getLangKey("updater.research") %></h6>
+                    <h5 id="downloadpercent" style="color: var(--text);"></h5><h6 id="downloadhtml" style="color: var(--text);"><%= FZUtils.getLangKey("updater.research") %></h6>
                 </div>
                 <div class="progress">
                     <div class="indicator" id="downloadbar" style="width: 0%;"></div>

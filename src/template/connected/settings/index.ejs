@@ -10,12 +10,12 @@
                     </div>
                     <div class="flex align-center gap-20">
                         <div class="dropdown">
-                            <button class="btn btn-secondary black-2 settings__lang_dmenu dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
+                            <button class="btn btn-secondary black-2 settingsFZUtils.getLangKey_dmenu dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
                                 <%= FZUtils.getLangInfos().display %>
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
                                 <% langsLocale.forEach(function(lang) { %>
-                                    <li><a class="dropdown-item settings__lang_item" data-lang="<%= lang.keycode %>"><%= lang.display %></a></li>
+                                    <li><a class="dropdown-item settingsFZUtils.getLangKey_item" data-lang="<%= lang.keycode %>"><%= lang.display %></a></li>
                                 <% }); %>
                             </ul>
                         </div>
@@ -44,24 +44,12 @@
                 </div>
                 <div class="config-item">
                     <div class="column flex direct-column justif-center">
-                        <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("settings.srenew.title") %></h2>
-                        <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("settings.srenew.subtitle") %></h2>
+                        <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("settings.darkmode.title") %></h2>
+                        <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("settings.darkmode.subtitle") %></h2>
                     </div>
                     <div class="flex align-center gap-20">
                         <div class="ui toggle checkbox mb-10">
-                            <input type="checkbox" class="config__launcher_checkbox" data-default="true" data-id="launcher__srenew">
-                            <label></label>
-                        </div>
-                    </div>
-                </div>
-                <div class="config-item">
-                    <div class="column flex direct-column justif-center">
-                        <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("settings.updater.title") %></h2>
-                        <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("settings.updater.subtitle") %></h2>
-                    </div>
-                    <div class="flex align-center gap-20">
-                        <div class="ui toggle checkbox mb-10">
-                            <input type="checkbox" class="config__launcher_checkbox" data-default="true" data-id="launcher__updater">
+                            <input type="checkbox" class="config__launcher_checkbox" data-default="true" data-callback="FZUtils.switchThemeMode((($(this).is(':checked')) ? 'light' : 'dark'), (($(this).is(':checked')) ? 'dark' : 'light'), isMaximised)" data-id="launcher__darkmode">
                             <label></label>
                         </div>
                     </div>

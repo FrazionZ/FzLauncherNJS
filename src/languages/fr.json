@@ -6,6 +6,7 @@
     "keys": {
         "general.pwait": "Veuillez patienter..",
         "general.done": "Valider",
+        "minecraft.alreadylaunch": "Une instance est déjà lancée",
         "login.form.email": "Adresse Mail",
         "login.form.pword": "Mot de passe",
         "login.form.2fa": "2FA",
@@ -49,11 +50,15 @@
         "settings.srenew.subtitle": "Si une session est déjà ouverte sur nos serveurs, vous serez averti lors du prochain démarrage du launcher",
         "settings.devtools.title": "DevTools",
         "settings.devtools.subtitle": "Ouvrir la fenêtre DevTools Electron (Pour les experts uniquement)",
+        "settings.updater.title": "Mise à jour",
+        "settings.updater.subtitle": "Activer/Désactiver les mises à jours automatique du Launcher",
+        "settings.darkmode.title": "Mode sombre",
+        "settings.darkmode.subtitle": "Activer/Désactiver le mode sombre sur le launcher",
         "settings.pnotes.action": "Voir le patch notes",
         "server.tabs.news": "Actualités",
         "server.tabs.pnotes": "Patch Notes",
         "server.tabs.rpacks": "Resource Packs",
-        "server.tabs.screens": "Screenshots",
+        "server.tabs.screens": "Screens",
         "server.tabs.settings": "Configuration",
         "server.news.title": "Actualités",
         "server.news.return.error": "Impossile de récupérer les actualités",
@@ -75,6 +80,8 @@
         "server.config.title": "Configuration",
         "server.config.ram.title": "Allouage de la ram",
         "server.config.ram.subtitle": "Vous permet d’allouer plus ou moins de mémoire pour le processus Java du client MC",
+        "server.config.branch.title": "Séléction de version",
+        "server.config.branch.subtitle": "Vous permet de choisir le canal de mise à jour de %server_name% afin de reçevoir plus ou moins rapidement une màj",
         "server.config.drpc.title": "Discord RPC",
         "server.config.drpc.subtitle": "Utiliser Discord RPC via le jeu",
         "server.config.miniseapp.title": "Minimiser le launcher au lancement",
@@ -99,8 +106,6 @@
         "server.config.viewdir.title": "Voir le dossier de jeu",
         "server.config.viewdir.subtitle": "Ouvre le dossier de jeu",
         "server.config.viewdir.action": "Voir",
-        "settings.updater.title": "Mise à jour",
-        "settings.updater.subtitle": "Activer/Désactiver les mises à jours automatique du Launcher",
         "aupdate.title": "Mise à jour disponible"
     }
 }

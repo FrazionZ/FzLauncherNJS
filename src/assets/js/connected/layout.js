@@ -16,7 +16,7 @@ class Layout {
             var serverNav =
                 '<li class="parent-menu-link" class="nav" id="nav_server_'+key+'" data-bs-toggle="tooltip" data-bs-placement="right" title="'+item.name+'">' +
                     '<a class="menu-link" href="#server" data-server-id="' + key + '">' +
-                        '<img width="36" height="36" src="asset://' + item.urlLogo + '">' + item.name
+                        '<img width="36" height="36" src="asset://' + item.urlLogo + '"> <span>' + item.name + '</span>'
                     '</a>'
                 '</li>';
                 $('.sidebar').find('#servers').append(serverNav);
@@ -35,8 +35,6 @@ class Layout {
             }
         })
 
-        
-        $('body').css('background', 'transparent')
         $('.title_bar .actions .window_maximize').removeClass('hide')
 
         //PRELOAD DOWNLOAD PAGE AND LOAD/SHOW SERVER 0
@@ -64,7 +62,7 @@ class Layout {
         var instance = this;
         $('.page').addClass('hide')
         FZUtils.initVariableEJS(data, false).then((datar) => {
-            ejs.renderFile(appRoot.path+"/src/template/connected/modals/"+dialog+".ejs", datar, {}, (err, str) => {
+            ejs.renderFile(appRoot.path+"/src/template/connected/dialogs/"+dialog+".ejs", datar, {}, (err, str) => {
                 if (err) return console.log(err)
                 $('.dialog.page').html(str)
                 $('.dialog .dialog_close').on('click', function() {
@@ -77,9 +75,44 @@ class Layout {
         })
     }
 
-    loadContent(nav, url, show){
+    loadModal(modal, data, closable, denyCB, approveCB, visibleCB){
+        var instance = this;
+        FZUtils.initVariableEJS(data, false).then((datar) => {
+            ejs.renderFile(appRoot.path+"/src/template/connected/modals/"+modal+".ejs", datar, {}, (err, str) => {
+                if (err) return console.log(err)
+                $('.modal.page').html(str)
+                $('.modal.page #'+modal)
+                    .fzmodal({
+                        closable  : closable,
+                        onDeny    : denyCB,
+                        onApprove : approveCB,
+                        onVisible : visibleCB,
+                        onHidden : () => {
+                            $('.ui.dimmer.fzmodals').remove();
+                        }
+                    })
+                    .fzmodal('show')
+            })
+        })
+    }
+
+    closeModal(id){
+        return new Promise((resolve, reject) => {
+            $('.ui.fzmodal').fzmodal('hide')
+            $('.modal.page').empty();
+            if(id !== undefined)
+                $('.ui.fzmodal').remove();
+            resolve();
+        })
+    }
+
+    loadContent(nav, url, show, reload, callback){
+        if(reload == undefined)
+            reload = false;
         var instance = this;
         $('.page').addClass('hide')
+        if(reload)
+            $('.'+url+'.page').empty();
         if($('.'+url+'.page').is(':empty')){
             var langListFinal = undefined;
             FZUtils.getLangList().then((langList) => {
@@ -90,6 +123,9 @@ class Layout {
                         $('.'+url+'.page').html(str)
                         if(show){
                             $('.'+url+'.page').removeClass('hide')
+                        }
+                        if(callback !== undefined){
+                            callback();
                         }
                         $('a').on('click', function(e){
                             if (this.hasAttribute("data-link")) {
