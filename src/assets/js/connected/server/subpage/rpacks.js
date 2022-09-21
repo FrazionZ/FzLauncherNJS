@@ -26,6 +26,8 @@ class RPacks extends FzPage {
             shell.openPath(instance.resourcePackPath);
         })
 
+        if(!this.fs.existsSync(this.resourcePackPath))
+            this.fs.mkdirSync(this.resourcePackPath)
         
         var openListPackImport = async(rpackImport) => {
             instance.ipcRenderer.removeAllListeners('openFile')

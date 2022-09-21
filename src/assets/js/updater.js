@@ -44,7 +44,7 @@ EAU.init({
       return false
     }
 
-    EAU.progress(function (state) {
+   EAU.progress(function (state) {
       var percent = Math.round(state.percent * 100);
       document.getElementById('downloadhtml').innerHTML = FZUtils.getLangKey('updater.in_progress')
       document.getElementById('downloadpercent').innerHTML = percent+"%";

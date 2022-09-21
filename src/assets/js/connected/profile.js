@@ -33,11 +33,15 @@ class Profile extends FzPage {
         this.gloalSkinViewer.height = 352.94;
     
         // Load another skin
-        if(FZUtils.UrlExists(this.skinUrl))
-            this.gloalSkinViewer.loadSkin(this.skinUrl, { model: ((userSession.isSlim) ? "slim" : "default") });
+        (async function() {
+            const skinExist = await FZUtils.UrlExists(this.skinUrl);
+            if(skinExist)
+                await this.gloalSkinViewer.loadSkin(this.skinUrl, { model: ((userSession.isSlim) ? "slim" : "default") });
+            else
+                await this.gloalSkinViewer.loadSkin("asset://img/steve.png")
         
-        this.gloalSkinViewer.loadCape(this.capeUrl);
-
+            this.gloalSkinViewer.loadCape(this.capeUrl);
+        })
             
         this.gloalSkinViewer.playerObject.rotation.y = 31.7;
 
@@ -54,7 +58,6 @@ class Profile extends FzPage {
                 return this.notyf('error', 'Vous ne pouvez pas vous déconnecter, une instance Minecraft est ouverte.')
             else {
                 await this.authenticator.logout(this.session.access_token).then(() => {
-                    $('.title_bar .actions .window_maximize').addClass('hide')
                     this.ipcRenderer.send('authorizationDevTools', false)
                     this.store.delete('session');
                     ipcRenderer.send('logout')

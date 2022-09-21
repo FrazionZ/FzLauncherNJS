@@ -5,6 +5,10 @@ const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
 const os = require('os');
 const onezip = require('onezip');
 const { v4: uuidv4 } = require('uuid');
+const { Client } = require('minecraft-launcher-core');
+const { async } = require('node-stream-zip');
+const launcher = new Client();
+
 class Play  extends FzPage {
 
     constructor(server){
@@ -99,6 +103,7 @@ class Play  extends FzPage {
                     if(!needsToBeRepare && !needsToBeInstall){
                         canPlay = true;
                         await checkUpdateAvailable.then(async (resultCUP) => {
+                            console.log(resultCUP)
                             if(resultCUP.repos.length > 0){
                                 canPlay = false;
                                 needsToBeUpdate = true;
@@ -161,7 +166,7 @@ class Play  extends FzPage {
                 instance.buttonActionPlay.on('click', () => {
                     instance.launchGame();
                 })
-            }else if(!serverAvailable && this.session.role.is_admin){
+            }else if(!serverAvailable && this.session.role.is_bplauncher){
                 instance.buttonActionPlay.find('.label').text(FZUtils.getLangKey("server.play.btn.play"));
                 instance.buttonActionPlay.removeAttr('disabled')
                 instance.buttonActionPlay.on('click', () => {
@@ -440,61 +445,89 @@ class Play  extends FzPage {
                         heightDisplay = size[1];
                     }
                 
-                    var stringCMD = javaRuntime + ' -XX:-UseAdaptiveSizePolicy '+ ((process.platform == "linux") ? "-Djavax.accessibility.assistive_technologies=java.lang.Object" : "")+' -Djava.library.path="' + dirServerNatives + '" -Dfml.ignorePatchDiscrepancies=true ' + ramMemoryMax + ' -Dlog4j2.formatMsgNoLookups=true '+((process.platform == "linux") ? "-classpath " : "-cp")+' '+sbLibs.toString() + ' net.minecraft.client.main.Main ' + ((instance.store.get(instance.keyStoreServerOptions('config__server_display_fullscreen'))) ? fullscreen : "") + ' --width '+widthDisplay+' --height '+heightDisplay+' --username ' + instance.session.username + ' --accessToken ' + instance.session.access_token + ' --version ' + instance.server.version + ' --gameDir "' + instance.dirServer + '" --assetsDir "' + dirServerAssets + '" --assetIndex "' + instance.server.assetIndex + '" '+discordRPC+' --userProperties {} --uuid ' + instance.session.uuid + ' --userType legacy ';
-                    instance.notyf("success", "Lancement du jeu..")
+                    var stringCMD = ' -XX:-UseAdaptiveSizePolicy '+ ((process.platform == "linux") ? "-Djavax.accessibility.assistive_technologies=java.lang.Object" : "")+' -Djava.library.path="' + dirServerNatives + '" -Dfml.ignorePatchDiscrepancies=true ' + ramMemoryMax + ' -Dlog4j2.formatMsgNoLookups=true '+((process.platform == "linux") ? "-classpath " : "-cp")+' '+sbLibs.toString() + ' net.minecraft.client.main.Main ' + ((instance.store.get(instance.keyStoreServerOptions('config__server_display_fullscreen'))) ? fullscreen : "") + ' --width '+widthDisplay+' --height '+heightDisplay+' --username ' + instance.session.username + ' --accessToken ' + instance.session.access_token + ' --version ' + instance.server.version + ' --gameDir "' + instance.dirServer + '" --assetsDir "' + dirServerAssets + '" --assetIndex "' + instance.server.assetIndex + '" '+discordRPC+' --userProperties {} --uuid ' + instance.session.uuid + ' --userType legacy ';
+                    //instance.notyf("success", "Lancement du jeu..")
 
-                    console.log(stringCMD)
-
-                    setTimeout(() => {
-                        ipcRenderer.send('closeApp', ((instance.store.has(instance.keyStoreServerOptions('config__server_minimise_app')) ? instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')) : false)))
-                    }, 1500)
-
-                    //var crashGame = new CrashGameDialog(false);
-                    var finishGame = (crash, logs) => {
-                        if(instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app'))){
-                            instance.gameLaunched = false;
-                            ipcRenderer.send('showApp')
-                            instance.buttonActionPlay.removeAttr("disabled")
-                            instance.buttonActionPlay.removeClass('disabled');
-                            if(crash){
-                                setTimeout(() => {
-                                    console.log("LOGS SA MERE")
-                                    console.log(logs)
-                                    layoutClass.loadDialog('crashgame', [], "server");
-                                }, 800)
+                    layoutClass.loadModal( "messDialog", [{message: "Lancement du jeu, veuillez patienter.."}], false, () => {}, () => {}, () => {
+                        //var crashGame = new CrashGameDialog(false);
+                        var finishGame = async (crash, logs) => {
+                            //await layoutClass.closeModal("messDialog");
+                            //instance.notyf('error', 'Une erreur est survenue lors de la session de jeu')
+                            if(instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app'))){
+                                instance.gameLaunched = false;
+                                ipcRenderer.send('showApp')
+                                instance.buttonActionPlay.removeAttr("disabled")
+                                instance.buttonActionPlay.removeClass('disabled');
+                                if(crash){
+                                    setTimeout(() => {
+                                        console.log(logs)
+                                        layoutClass.loadDialog('crashgame', [], "server");
+                                    }, 800)
+                                }
                             }
                         }
-                    }
 
-                    var processJavaLaunch = () => {
-                        instance.gameLaunched = true;
-                        const { exec } = require('child_process');
-                        exec(stringCMD, (error, stdout, stderr) => {
-                            if (error) {
-                                console.error(`error: ${error.message}`);
-                                finishGame(true, error);
-                                return;
+                        var processJavaLaunch = () => {
+                            instance.gameLaunched = true;
+
+
+                            let opts = {
+                                clientPackage: null,
+                                authorization: {
+                                    access_token: instance.session.access_token,
+                                    uuid: instance.session.uuid,
+                                    name: instance.session.username,
+                                    user_properties: '{}',
+                                },
+                                version: {
+                                    number: instance.server.version,
+                                    custom: instance.server.assetIndex
+                                },
+                                root: instance.dirServer,
+                                memory: {
+                                    max: FZUtils.listRamAllocate().list[ramAllocateIndexProperties].gb+"G",
+                                    min: "1G"
+                                },
+                                overrides: {
+                                    testcmd: stringCMD,
+                                    discordRPC: (instance.store.get(instance.keyStoreServerOptions('config__server_discord_rpc'))),
+                                    gameDirectory: instance.dirServer,
+                                    minecraftJar: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch')), instance.server.jarFileMain),
+                                    directory: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch'))), // where the Minecraft jar and version json are located.
+                                    natives: path.join(instance.dirServer, "natives"), // native directory path.
+                                    assetRoot: path.join(instance.dirServer, "assets"),
+                                    libraryRoot: path.join(instance.dirServer, "libs"),
+                                    cwd: '',
+                                    detached: true,
+                                    classes: [],
+                                    minArgs: 11,
+                                    maxSockets: 2
+                                }
                             }
 
-                            if (stderr) {
-                                console.error(`stderr: ${stderr}`);
-                                finishGame(true, stderr);
-                                return;
-                            }
+                            if(javaRuntime !== "java")
+                                opts.javaPath = javaRuntime;
+                            
+                            launcher.launch(opts);
+                            
+                            launcher.on('debug', (e) => finishGame(true));
+                            launcher.on('data', async (e) => {
+                                await layoutClass.closeModal();
+                                ipcRenderer.send('closeApp', ((instance.store.has(instance.keyStoreServerOptions('config__server_minimise_app')) ? instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')) : false)));
+                            });
+                        }
 
-                            finishGame();
+                        if(process.platform == "darwin" || process.platform == "linux"){
+                            processJavaLaunch();
+                        }else{
+                            FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+                                if(!result)
+                                processJavaLaunch(); 
+                            }).catch((err) => console.log(err))
+                        }
+                    })
 
-                        });
-                    }
-
-                    if(process.platform == "darwin" || process.platform == "linux"){
-                        processJavaLaunch();
-                    }else{
-                        FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
-                            if(!result)
-                               processJavaLaunch(); 
-                        }).catch((err) => console.log(err))
-                    }
+                   
             }
 
             if(process.platform == "darwin" || process.platform == "linux"){

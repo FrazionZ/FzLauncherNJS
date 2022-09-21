@@ -43,6 +43,7 @@ class Login extends FzPage {
 
     async initAddAccount(twofa){
         $('.addAccountContinue').attr('disabled', 'disabled')
+        //$('.addAccountContinue').html('<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>');
         var form = ((twofa) ? $('#2FAForm') : $('#addAccountForm'));
         var userEmail = form.find('#email');
         var userPassword = form.find('#password');

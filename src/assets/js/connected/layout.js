@@ -35,8 +35,6 @@ class Layout {
             }
         })
 
-        $('.title_bar .actions .window_maximize').removeClass('hide')
-
         //PRELOAD DOWNLOAD PAGE AND LOAD/SHOW SERVER 0
         instance.loadContent(((typeof linkPage == "object") ? linkPage : $('#'+linkPage)), openPage, true)
         instance.loadContent(null, "downloads", false)

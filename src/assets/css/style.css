@@ -1225,11 +1225,17 @@ option[disabled] {
     border-radius: 33px;
     padding: 10px 15px 10px 15px;
 }
+.server .infos .state .indicator {
+    color: var(--text);
+}
 .server .infos .state .indicator.online i {
     color: rgb(30, 175, 30);
 }
 .server .infos .state .indicator.offline i {
     color: rgb(206, 28, 15);
+}
+.server .infos .state .label {
+    color: var(--text)
 }
 .server .head {
     background: url(asset://img/wallpaper.png);
