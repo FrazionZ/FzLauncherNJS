@@ -60,7 +60,7 @@ async function createWindow() {
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
             webviewTag: false,
-            devTools: true,
+            devTools: false,
             enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }

@@ -7,6 +7,7 @@ const onezip = require('onezip');
 const { v4: uuidv4 } = require('uuid');
 const { Client } = require('minecraft-launcher-core');
 const { async } = require('node-stream-zip');
+const axios = require('axios').default;
 const launcher = new Client();
 
 class Play  extends FzPage {
@@ -82,28 +83,28 @@ class Play  extends FzPage {
                             }
                         })
                     }
-                    var checkUpdateAvailable = new Promise(async (resolve, reject) => {
-                        var repos = instance.repoServer;
-                        let reposUpdateAvailable = [];
-                        var loopCheckRepos = new Promise(async (resolve, reject) => {
-                            await repos.forEach(async (repo, index, array) => {
+                    var checkUpdateAvailable = async() => {
+                        return new Promise(async (resolve, reject) => {
+                            var repos = instance.repoServer;
+                            let reposUpdateAvailable = [];
+                            var index = 0;
+                            for await (const repo of repos) {
                                 await instance.checkUpdate(repo).then(async (response) => {
+                                    console.log(response)
                                     if(response.result)
                                         reposUpdateAvailable.push({ github: response, repos: repo, ksb: repo.ksb });
-                                    if (index === array.length -1) resolve();
+                                    console.log(index, repos.length-1)
+                                    if (index === repos.length-1) resolve({ repos: reposUpdateAvailable }); else index++;
                                 }).catch((err) => {
                                     console.log(err)
-                                    if (index === array.length -1) resolve();
+                                    if (index === repos.length-1) resolve({ repos: reposUpdateAvailable });else index++;
                                 })
-    
-                            })
-                        });
-                        await loopCheckRepos.then(() => { resolve({repos: reposUpdateAvailable}); });
-                    });
+                            }
+                        })
+                    };
                     if(!needsToBeRepare && !needsToBeInstall){
                         canPlay = true;
-                        await checkUpdateAvailable.then(async (resultCUP) => {
-                            console.log(resultCUP)
+                        await checkUpdateAvailable().then(async (resultCUP) => {
                             if(resultCUP.repos.length > 0){
                                 canPlay = false;
                                 needsToBeUpdate = true;
@@ -148,6 +149,7 @@ class Play  extends FzPage {
     }
 
     async init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, resultCUP){
+        console.log(needsToBeUpdate)
         if(canPlay){
 
             let serverAvailable;
@@ -224,8 +226,8 @@ class Play  extends FzPage {
     async checkUpdate(repo){
         var instance = this;
         return new Promise(async (resolve, reject) => {
-            $.get( repo.url, function( data ) {
-                var body = data;
+            await axios.get(repo.url).then((response) => {
+                var body = response.data;
                 if(instance.store.has(repo.ksb)){
                     var version = instance.store.get(repo.ksb);
                     if(version !== body.tag_name)
@@ -235,11 +237,10 @@ class Play  extends FzPage {
                 }else{
                     resolve({ data: body, ksb: repo.ksb, categorie: repo.categorie, result: true })
                 }
-            }).fail(function(error) {
+            }).catch(function(error) {
                 console.log(error)
                 resolve({ data: error, result: false })
             });
-           
         })
         
     }
@@ -430,12 +431,6 @@ class Play  extends FzPage {
                         }
                     }
 
-                    //DISCORD
-                    var discordRPC = "--discordRPC="+(instance.store.get(instance.keyStoreServerOptions('config__server_discord_rpc')))
-
-                    //FULLSCREEN
-                    var fullscreen = "--fullscreen";
-
                     //SIZE
                     var widthDisplay = "1280";
                     var heightDisplay = "720";
@@ -445,87 +440,87 @@ class Play  extends FzPage {
                         heightDisplay = size[1];
                     }
                 
-                    var stringCMD = ' -XX:-UseAdaptiveSizePolicy '+ ((process.platform == "linux") ? "-Djavax.accessibility.assistive_technologies=java.lang.Object" : "")+' -Djava.library.path="' + dirServerNatives + '" -Dfml.ignorePatchDiscrepancies=true ' + ramMemoryMax + ' -Dlog4j2.formatMsgNoLookups=true '+((process.platform == "linux") ? "-classpath " : "-cp")+' '+sbLibs.toString() + ' net.minecraft.client.main.Main ' + ((instance.store.get(instance.keyStoreServerOptions('config__server_display_fullscreen'))) ? fullscreen : "") + ' --width '+widthDisplay+' --height '+heightDisplay+' --username ' + instance.session.username + ' --accessToken ' + instance.session.access_token + ' --version ' + instance.server.version + ' --gameDir "' + instance.dirServer + '" --assetsDir "' + dirServerAssets + '" --assetIndex "' + instance.server.assetIndex + '" '+discordRPC+' --userProperties {} --uuid ' + instance.session.uuid + ' --userType legacy ';
-                    //instance.notyf("success", "Lancement du jeu..")
+                    
+                    //var crashGame = new CrashGameDialog(false);
+                    var finishGame = async (crash, logs) => {
+                        //await layoutClass.closeModal("messDialog");
+                        //instance.notyf('error', 'Une erreur est survenue lors de la session de jeu')
+                        if(instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app'))){
+                            instance.gameLaunched = false;
+                            ipcRenderer.send('showApp')
+                            instance.buttonActionPlay.removeAttr("disabled")
+                            instance.buttonActionPlay.removeClass('disabled');
+                            if(crash){
+                                setTimeout(() => {
+                                    console.log(logs)
+                                    layoutClass.loadDialog('crashgame', [], "server");
+                                }, 800)
+                            }
+                        }
+                    }
 
-                    layoutClass.loadModal( "messDialog", [{message: "Lancement du jeu, veuillez patienter.."}], false, () => {}, () => {}, () => {
-                        //var crashGame = new CrashGameDialog(false);
-                        var finishGame = async (crash, logs) => {
-                            //await layoutClass.closeModal("messDialog");
-                            //instance.notyf('error', 'Une erreur est survenue lors de la session de jeu')
-                            if(instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app'))){
-                                instance.gameLaunched = false;
-                                ipcRenderer.send('showApp')
-                                instance.buttonActionPlay.removeAttr("disabled")
-                                instance.buttonActionPlay.removeClass('disabled');
-                                if(crash){
-                                    setTimeout(() => {
-                                        console.log(logs)
-                                        layoutClass.loadDialog('crashgame', [], "server");
-                                    }, 800)
-                                }
+                    var processJavaLaunch = () => {
+                        instance.gameLaunched = true;
+                        let opts = {
+                            clientPackage: null,
+                            authorization: {
+                                access_token: instance.session.access_token,
+                                uuid: instance.session.uuid,
+                                name: instance.session.username,
+                                user_properties: '{}',
+                            },
+                            version: {
+                                number: instance.server.version,
+                                custom: instance.server.assetIndex
+                            },
+                            root: instance.dirServer,
+                            memory: {
+                                max: FZUtils.listRamAllocate().list[ramAllocateIndexProperties].gb+"G",
+                                min: "1G"
+                            },
+                            features: {
+                                has_custom_resolution: true
+                            },
+                            window: {
+                                width: parseInt(widthDisplay),
+                                height: parseInt(heightDisplay),
+                            },
+                            overrides: {
+                                discordRPC: (instance.store.get(instance.keyStoreServerOptions('config__server_discord_rpc'))),
+                                fullscreen: ((instance.store.get(instance.keyStoreServerOptions('config__server_display_fullscreen'))) ? true : false) ,
+                                gameDirectory: instance.dirServer,
+                                minecraftJar: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch')), instance.server.jarFileMain),
+                                directory: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch'))), // where the Minecraft jar and version json are located.
+                                natives: path.join(instance.dirServer, "natives"), // native directory path.
+                                assetRoot: path.join(instance.dirServer, "assets"),
+                                libraryRoot: path.join(instance.dirServer, "libs"),
+                                cwd: '',
+                                detached: true,
+                                classes: [],
+                                minArgs: 11,
+                                maxSockets: 2
                             }
                         }
 
-                        var processJavaLaunch = () => {
-                            instance.gameLaunched = true;
+                        if(javaRuntime !== "java")
+                            opts.javaPath = javaRuntime;
+                        
+                        launcher.launch(opts);
+                        
+                        launcher.on('debug', (e) => console.log(e));
+                        launcher.on('data', async (e) => {
+                            ipcRenderer.send('closeApp', ((instance.store.has(instance.keyStoreServerOptions('config__server_minimise_app')) ? instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')) : false)));
+                        });
+                    }
 
-
-                            let opts = {
-                                clientPackage: null,
-                                authorization: {
-                                    access_token: instance.session.access_token,
-                                    uuid: instance.session.uuid,
-                                    name: instance.session.username,
-                                    user_properties: '{}',
-                                },
-                                version: {
-                                    number: instance.server.version,
-                                    custom: instance.server.assetIndex
-                                },
-                                root: instance.dirServer,
-                                memory: {
-                                    max: FZUtils.listRamAllocate().list[ramAllocateIndexProperties].gb+"G",
-                                    min: "1G"
-                                },
-                                overrides: {
-                                    testcmd: stringCMD,
-                                    discordRPC: (instance.store.get(instance.keyStoreServerOptions('config__server_discord_rpc'))),
-                                    gameDirectory: instance.dirServer,
-                                    minecraftJar: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch')), instance.server.jarFileMain),
-                                    directory: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch'))), // where the Minecraft jar and version json are located.
-                                    natives: path.join(instance.dirServer, "natives"), // native directory path.
-                                    assetRoot: path.join(instance.dirServer, "assets"),
-                                    libraryRoot: path.join(instance.dirServer, "libs"),
-                                    cwd: '',
-                                    detached: true,
-                                    classes: [],
-                                    minArgs: 11,
-                                    maxSockets: 2
-                                }
-                            }
-
-                            if(javaRuntime !== "java")
-                                opts.javaPath = javaRuntime;
-                            
-                            launcher.launch(opts);
-                            
-                            launcher.on('debug', (e) => finishGame(true));
-                            launcher.on('data', async (e) => {
-                                await layoutClass.closeModal();
-                                ipcRenderer.send('closeApp', ((instance.store.has(instance.keyStoreServerOptions('config__server_minimise_app')) ? instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')) : false)));
-                            });
-                        }
-
-                        if(process.platform == "darwin" || process.platform == "linux"){
-                            processJavaLaunch();
-                        }else{
-                            FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
-                                if(!result)
-                                processJavaLaunch(); 
-                            }).catch((err) => console.log(err))
-                        }
-                    })
+                    if(process.platform == "darwin" || process.platform == "linux"){
+                        processJavaLaunch();
+                    }else{
+                        FZUtils.checkedIfinecraftAlreadyLaunch().then((result) => {
+                            if(!result)
+                            processJavaLaunch(); 
+                        }).catch((err) => console.log(err))
+                    }
 
                    
             }

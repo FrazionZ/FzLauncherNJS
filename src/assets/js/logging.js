@@ -128,6 +128,9 @@ class Logging extends FzPage {
                 user = await this.authenticator.auth(email, password, opsys, userAgent.toString());
             else
                 user = await this.authenticator.authWith2FA(email, password, opsys, userAgent.toString(), twofa);
+
+            console.log(user)
+
             if(user.status !== undefined){
                 if(user.status == "error"){
                     btnAddAcount.removeAttr('disabled')
@@ -145,6 +148,7 @@ class Logging extends FzPage {
                 this.finishAuth(user);
             }, 500)
         } catch (e) {
+            console.log(e);
             console.log(user);
             return;
         }
@@ -157,6 +161,7 @@ class Logging extends FzPage {
         var continueAuthLog = async (access_token) => {
             try {
                 var user = await this.authenticator.verify(access_token);
+                
                 if(user.status !== undefined){
                     if(user.status == "error"){
                         return FZUtils.loadURL('/login', [{notyf: {value: "error", value: user.message}}])
@@ -167,7 +172,8 @@ class Logging extends FzPage {
                     this.finishAuth(user);
                 }, 500)
             } catch (e) {
-                return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
+                console.log(e);
+                //return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
             }
         }
         var accessToken = this.store.get('session').access_token;

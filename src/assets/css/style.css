@@ -489,6 +489,9 @@ input {
     padding: 0px 20px;
     color: var(--text);
 }
+.form#TWOFAForm input {
+    text-align: center;
+}
 .alert {
     padding: 1rem;
     background: var(--color-2);
