@@ -43,6 +43,11 @@
     const userSession = JSON.parse('<%- JSON.stringify(session) %>');
     var isMaximised = false;
 </script>
+<% if(typeof afterGame == 'object') { %>
+    <script>
+        layoutClass.finishGame('<%= afterGame.code %>', '<%- JSON.stringify(afterGame.logs) %>')
+    </script>
+<% } %>
 <% if(typeof notyf == 'object') { %>
     <% if(notyf.type == "success") { %>
         <script>notyf.success('<%= notyf.value %>');</script>

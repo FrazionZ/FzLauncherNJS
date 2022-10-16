@@ -270,10 +270,9 @@ class Appearance extends FzPage {
             width: 325,
             height: 345,
         });
-
+        
         this.previewSkinViewer.loadCape(profile.capeUrl);
 
-        
         this.previewSkinViewer.playerObject.rotation.y = 31.7;
         
         let cipsv = skinview3d.createOrbitControls(this.previewSkinViewer);

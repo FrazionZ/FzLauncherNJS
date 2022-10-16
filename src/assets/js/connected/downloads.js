@@ -1,6 +1,7 @@
 var appRoot = require('app-root-path');
 const path = require('path')
 const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
+let downloadsTask = [];
 class Downloads extends FzPage {
 
     constructor(){
@@ -41,22 +42,52 @@ class Downloads extends FzPage {
             else
                 $('.downloads__countDl').text("")
         }, 500)
+
+        
+        $( '.sidebar #navs .parent-menu-link' ).hover(
+            function() {
+                var task = $(this).find('a').attr('href');
+                if(task == "#downloads"){
+                    var taskOverlay = $('.taskOverlay');
+                    taskOverlay.show()
+                }
+            }, function() {
+                var task = $(this).find('a').attr('href');
+                if(task == "#downloads"){
+                    var taskOverlay = $('.taskOverlay');
+                    taskOverlay.hide()
+                }
+            }
+        );
     }
 
-    addDownload(uuidDl){
+    addDownload(uuidDl, type, ){
+        downloadsTask.push({uuidDl: uuidDl, title: type+" - Téléchargement des fichiers", subtitle: " - ", percentage: 0, finish: false});
         if($('.listDls').find('#'+uuidDl).length == 0){
             $('.listDls').append(this.htmlAppend(uuidDl))
             $('.listDls').find('.nothing').hide();
+            $('.taskOverlay').find('.nothing').hide();
+            $('.taskOverlay').find('.card.dl-items').removeClass('hide');
         }
     }
 
-    async updateDownload(uuidDl, title, subtitle, percentage){
+    async updateDownload(uuidDl, title, subtitle, state){
         this.addDownload(uuidDl);
         $('.downloads').find('.listDls').find('#'+uuidDl).find('.title').text(title)
         $('.downloads').find('.listDls').find('#'+uuidDl).find('.subtitle').text(subtitle)
-        $('.downloads').find('.listDls').find('#'+uuidDl).find('.percent').text(percentage+"%")
+        $('.downloads').find('.listDls').find('#'+uuidDl).find('.percent').text(state.percentage+"%")
+        $('.downloads').find('.listDls').find('#'+uuidDl).find('.indicator').width(state.percentage+'%');
 
-        document.querySelector('#downloadbar').style.width = percentage+'%';
+
+        //OVERLAY
+        var firstTask = $('.listDls').find('.dl-items')[0];
+        var idFirstTask = $(firstTask).attr('id');
+        if(uuidDl == idFirstTask){
+            $('.taskOverlay').find('.card.dl-items').find('.title').text(title)
+            $('.taskOverlay').find('.card.dl-items').find('.subtitle').text(subtitle)
+            $('.taskOverlay').find('.card.dl-items').find('.percent').text(state.percentage+"%")
+            $('.taskOverlay').find('.card.dl-items').find('.indicator').width(state.percentage+'%');
+        }
     }
 
     finishDownload(uuidDl){
@@ -66,8 +97,11 @@ class Downloads extends FzPage {
         $('.downloads').find('.listDls').find('#'+uuidDl).find('.progress').remove()
         $('.downloads').find('.listDls').find('#'+uuidDl).prependTo('.endListDls');
         $('.downloads').find('.listDls').find('#'+uuidDl).remove();
-        if($('.listDls').find('.dl-items').length == 0)
+        if($('.listDls').find('.dl-items').length == 0){
             $('.listDls').find('.nothing').show();
+            $('.taskOverlay').find('.nothing').show();
+            $('.taskOverlay').find('.card.dl-items').addClass('hide');
+        }
     }
 }
 

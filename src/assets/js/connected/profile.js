@@ -33,15 +33,12 @@ class Profile extends FzPage {
         this.gloalSkinViewer.height = 352.94;
     
         // Load another skin
-        (async function() {
-            const skinExist = await FZUtils.UrlExists(this.skinUrl);
+        const skinExist = FZUtils.UrlExists(this.skinUrl).then((result) => {
             if(skinExist)
-                await this.gloalSkinViewer.loadSkin(this.skinUrl, { model: ((userSession.isSlim) ? "slim" : "default") });
-            else
-                await this.gloalSkinViewer.loadSkin("asset://img/steve.png")
+                this.gloalSkinViewer.loadSkin(this.skinUrl, { model: ((userSession.isSlim) ? "slim" : "default") });
+        });
         
-            this.gloalSkinViewer.loadCape(this.capeUrl);
-        })
+        this.gloalSkinViewer.loadCape(this.capeUrl);
             
         this.gloalSkinViewer.playerObject.rotation.y = 31.7;
 

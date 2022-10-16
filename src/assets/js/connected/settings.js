@@ -1,6 +1,7 @@
 var appRoot = require('app-root-path');
 const path = require('path')
-const { shell } = require('electron')
+const { shell } = require('electron');
+const { data } = require('jquery');
 const FzPage = require(path.join(appRoot.path, "/src/assets/js/FzPage.js"))
 class Settings extends FzPage {
 
@@ -40,9 +41,38 @@ class Settings extends FzPage {
                 eval($(this).attr('data-callback'));
             }
         })
+
+        $('.config__choose_dirapp').on('click', function() {
+            ipcRenderer.send('openDialogExpFileRequest', {dialog: { defaultPath: instance.dirFzLauncherRoot, properties: ['openFile', 'openDirectory'] }, channel: "appDataDirRequest"});
+            ipcRenderer.on('appDataDirRequest', (event, dataDirPath) => {
+                if(dataDirPath.filePaths.length == 0) return;
+                if(path.join(dataDirPath.filePaths[0]) !== instance.dirFzLauncherRoot)
+                    instance.fzUtils.modifyAppDataDir(layoutClass, path.join(dataDirPath.filePaths[0]))
+                ipcRenderer.removeAllListeners('openDialogExpFileRequest')
+                ipcRenderer.removeAllListeners('appDataDirRequest')
+            })
+        })
         $('.config__launcher_pnotes').on('click', function() {
             layoutClass.loadDialog('changelog', [], "settings");
         })
+
+        var valueLangs = [];
+        var langConf = this.store.get('lang');
+        $('.ui.dropdown.config__choose_langapp input[name="langKey"]').val(langConf);
+        this.fzUtils.getLangList().then(async (langList) => {
+            for await (const lang of langList){
+                valueLangs.push({name: lang.display, value: lang.keycode, selected: ((langConf == lang.keycode) ? true : false)})
+            }
+            $('.ui.dropdown.config__choose_langapp').dropdown({ values: valueLangs, 
+                onChange: function(value, text, $selectedItem) {
+                    if(langConf !== value && value !== ""){
+                        instance.store.set('lang', value)
+                        FZUtils.loadURL('/connected/layout', [{session: userSession}, {linkPage: "#settings"}, {openPage: "settings"}])
+                    }
+                } 
+            })
+        })
+        //$('.config__switch_branch.ui.dropdown').dropdown({ values: valueGits })
     }
 
 }

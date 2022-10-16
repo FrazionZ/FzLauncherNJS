@@ -4,8 +4,10 @@ var appRoot = require('app-root-path');
 const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
 const fetchUrl = require('fetch').fetchUrl;
 const server_config = require(path.join(appRoot.path, '/server_config.json'));
+const version = require(path.join(appRoot.path, 'package.json')).version
 const ejs = require('ejs')
-const { shell } = require('electron')
+const { shell } = require('electron');
+const { async } = require('node-stream-zip');
 class Layout {
     
     constructor(linkPage, openPage){
@@ -54,6 +56,29 @@ class Layout {
                     break;
             }
         })
+
+        var showPNA = async() => {
+            setTimeout(async() => {
+                this.loadModal( "patchnoteAnnounce", [{pna: { version: version }}], true, () => {})
+            }, 1000)
+        }
+
+        if(!this.store.has('fzlauncher_pna')){
+            this.store.set('fzlauncher_pna', version)
+            showPNA()
+        }else if(this.store.get('fzlauncher_pna') !== version){
+            this.store.set('fzlauncher_pna', version)
+            showPNA()
+        }
+    }
+
+    async finishGame (code, logs) {
+        console.log(code)
+        if(code > 0){
+            setTimeout(() => {
+                this.loadDialog('crashgame', [{logs: logs}], "server");
+            }, 1000)
+        }
     }
 
     loadDialog(dialog, data, parent){
@@ -127,7 +152,7 @@ class Layout {
                         }
                         $('a').on('click', function(e){
                             if (this.hasAttribute("data-link")) {
-                                $(this).off();
+                                $(this).unbind();
                                 var link = $(this).attr('data-link');
                                 var opened = false;
                                 if(link !== undefined)

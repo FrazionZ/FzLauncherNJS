@@ -1,0 +1,27 @@
+        <%- include('../includes/head.ejs') %>
+        <style>
+            body {
+                height: 100vh;
+            }
+        </style>
+        <div class="flex direct-column justif-center align-center" style="height: 100%;">
+            <h3>Session de jeu en cours</h3>
+            <h4>Afin d'économiser des performances, l'affichage du launcher est temporairement désactivé.</h4>
+            <div class="flex gap-20 mt-20">
+                <a class="closeLauncher disabled btn btn-primary" disabled>Fermer le launcher</a>
+            </div>
+        </div>
+        <script>
+            setTimeout(() => {
+                var elementDisabled = ['.closeLauncher']
+                elementDisabled.forEach((element) => {
+                    $(element).removeAttr('disabled')
+                    $(element).removeClass('disabled')
+                })
+            }, 4500)
+            $('.closeLauncher').on('click', () => {
+                ipcRenderer.send('closeApp', false)
+            })
+        </script>
+    </body>
+</html>

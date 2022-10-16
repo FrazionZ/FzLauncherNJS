@@ -61,7 +61,7 @@ class Screens extends FzPage {
                           $( this ).removeClass( "hover" );
                         }
                       );
-                    Mousetrap.bind(['leftclick'], async function() {
+                      $(".screenItem").on('click', async function() {
                         if($(".screenItem.hover").length == 1){
                             var parentScreenItem = $(".screenItem.hover");
                             var idScreenItem = parentScreenItem.data('id');

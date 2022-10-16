@@ -8,6 +8,7 @@ const Sentry = require('@sentry/electron');
 const remoteMain = require('@electron/remote/main')
 const FZUtils = require('./src/assets/js/utils.js');
 const JSONUtils = require('./src/assets/js/JSONUtils.js');
+const PackageFZ = require('./package.json');
 const Fr = require('./src/languages/fr.json');
 require('log-timestamp');
 const renderer = require('@futurelucas4502/light-electron-renderer')
@@ -15,6 +16,10 @@ const ejs = require('ejs');
 const { get } = require('request');
 const { platform } = require('os');
 const axios = require('axios').default;
+
+//RUNTIME
+const MinecraftRuntime = require(path.join(appRoot.path, "/src/assets/js/game/MinecraftRuntime.js"));
+
 var authorizationDevTools = false;
 app.commandLine.appendSwitch ("disable-http-cache");
 app.commandLine.appendSwitch('disable-gpu-process-crash-limit')
@@ -22,6 +27,7 @@ app.disableDomainBlockingFor3DAPIs()
 
 let mainWindow;
 let store;
+let minecraftRuntime;
 
 renderer.use(ejs, true, __dirname+ '/src/assets', __dirname+ '/src/template', ejs.renderFile, undefined, false)
 
@@ -36,9 +42,11 @@ if(sentryInit){
 }else
     console.log('[FZLauncher] Sentry service not launch..')
 
+const IconApp = path.join(__dirname, "src/assets/img/icons/icon.png");
+
 async function createWindow() {
 
-    
+    const instanceMain = this;
     const primaryDisplay = screen.getPrimaryDisplay()
 
     remoteMain.initialize();
@@ -46,25 +54,33 @@ async function createWindow() {
     mainWindow = new BrowserWindow({
         width: 800, 
         height: 220,
-        maximizable: true,
-        resizable: true,
+        maximizable: false,
+        resizable: false,
         autoHideMenuBar: true,
         frame: false,
         fullscreenable: true,
         title: "FrazionZ Launcher",
         app: "production",
         show: ((process.platform == "linux" || process.platform == "darwin") ? true : false),
-        icon: path.join(__dirname, "src/assets/img/icons/icon.png"),
+        icon: IconApp,
         webPreferences: {
             contextIsolation: false,
             nodeIntegration: true,
             nodeIntegrationInWorker: true,
             webviewTag: false,
-            devTools: false,
+            devTools: true,
+            sandbox: false,
             enableRemoteModule: true,
             preload: path.join(__dirname, 'preload.js')
         }
     })
+
+    var closeApp = async() => {
+        mainWindow.hide();
+        app.exit();
+        app.quit();
+        process.exit();
+    }
 
     if(!store.has('launcher__darkmode')) 
         store.set('launcher__darkmode', true)
@@ -76,12 +92,12 @@ async function createWindow() {
     var appIcon = new Tray(path.join(__dirname, "src/assets/img/icons/icon.png"))
     var contextMenu = Menu.buildFromTemplate([
         {
-            label: 'Show App', click: function () {
+            label: 'Ouvrir le launcher', click: function () {
                 mainWindow.show()
             }
         },
         {
-            label: 'Quit', click: function () {
+            label: 'Fermer le launcher', click: function () {
                 app.isQuiting = true
                 app.quit()
             }
@@ -89,7 +105,6 @@ async function createWindow() {
     ])
     appIcon.setToolTip("FrazionZ Launcher")
     appIcon.setContextMenu(contextMenu)
-
     
     let lang;
     let loadURL;
@@ -106,25 +121,6 @@ async function createWindow() {
         /*var serversConfigFile = path.join(appRoot.path, "server_config.json");
         if(!fs.existsSync(serversConfigFile))
             fs.writeFileSync(serversConfigFile, "[]", ()=>{})*/
-
-        var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
-    
-        dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
-        dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
-        shelfFzLauncherSkins = path.join(dirFzLauncherDatas, "skins.json");
-        dirFzLauncherServer = path.join(dirFzLauncherRoot, "Servers");
-    
-        if(!fs.existsSync(dirFzLauncherRoot))
-            fs.mkdirSync(dirFzLauncherRoot)
-
-        if(!fs.existsSync(dirFzLauncherDatas))
-            fs.mkdirSync(dirFzLauncherDatas)
-
-        if(!fs.existsSync(shelfFzLauncherSkins))
-            fs.writeFileSync(shelfFzLauncherSkins, "[]", ()=>{})
-
-        if(!fs.existsSync(dirFzLauncherServer))
-            fs.mkdirSync(dirFzLauncherServer)
     
         process.noAsar = false
     
@@ -133,16 +129,77 @@ async function createWindow() {
         lang = ((store.has('lang')) ? require('./src/languages/'+store.get('lang')+'.json') : Fr)
     
         loadURL = async (url, data) => {
-            await FZUtils.initVariableEJS(data, true).then((datas) => {
-                try {
-                    renderer.load(mainWindow, url, datas)
-                }catch(e){
-                    console.log(e)
-                }
+            return new Promise(async (resolve, reject) => {
+                await FZUtils.initVariableEJS(data, true).then((datas) => {
+                    try {
+                        renderer.load(mainWindow, url, datas);
+                        resolve();
+                    }catch(e){
+                        resolve();
+                    }
+                })
             })
+
         }
 
-        await loadURL('/updater/index', [])
+        //CHECK CHOOSE DIR APPDATA
+        
+
+        var continueLoadApp = async () => {
+            var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : ((store.has('appDirDatas') ? store.get('appDirDatas') : process.env.APPDATA)))
+    
+            dirFzLauncherRoot = path.join(appData);
+            dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
+    
+            shelfFzLauncherSkins = path.join(dirFzLauncherDatas, "skins.json");
+            dirFzLauncherServer = path.join(dirFzLauncherRoot, "Servers");
+        
+            if(!fs.existsSync(dirFzLauncherRoot))
+                fs.mkdirSync(dirFzLauncherRoot, { recursive: true })
+    
+            if(!fs.existsSync(dirFzLauncherDatas))
+                fs.mkdirSync(dirFzLauncherDatas, { recursive: true })
+    
+            if(!fs.existsSync(shelfFzLauncherSkins))
+                fs.writeFileSync(shelfFzLauncherSkins, "[]", ()=>{})
+    
+            if(!fs.existsSync(dirFzLauncherServer))
+                fs.mkdirSync(dirFzLauncherServer, { recursive: true })
+    
+            await loadURL('/updater/index', [])
+        }
+
+        var funcMain = {
+            hideApp: () => {
+                mainWindow.hide()
+            },
+            showApp: () => {
+                mainWindow.show()
+            },
+            closeApp: closeApp,
+            loadURL: loadURL
+        }
+
+        minecraftRuntime = new MinecraftRuntime(funcMain, ipcMain);
+
+        mainWindow.show();
+
+        if(process.platform === "win32")
+            if(!store.has('appDirDatas')){
+                var defaultPath = path.join(process.env.APPDATA, ".FrazionzLauncher");
+                var alreadyLaunch = false;
+                if(fs.existsSync(path.join(defaultPath)))
+                    alreadyLaunch = true;
+                if(!alreadyLaunch) await loadURL('/chooseappdata/index', [])
+                else {
+                    store.set('appDirDatas', defaultPath)
+                    await continueLoadApp();
+                } 
+            }else
+                await continueLoadApp();
+        else
+            await continueLoadApp();
+        
     }, 1000)
 
     mainWindow.webContents.on('will-navigate', async function(e, url) {
@@ -172,6 +229,7 @@ async function createWindow() {
     var afterUpdate = async function() {
         mainWindow.show()
         if(process.platform === "win32"){
+            //CHECK CHOOSE DIR APPDATA
             FZUtils.javaversion(dirFzLauncherDatas, async function(err,version){
                 if(err){
                     await loadURL('/runtime/index', [])
@@ -201,6 +259,8 @@ async function createWindow() {
         mainWindow.setSize(widthScreen, heightScreen);
         mainWindow.setMinimumSize(widthScreen, heightScreen);
         mainWindow.setMaximumSize(defautSizeWidth, defautSizeHeight);
+        mainWindow.setMaximizable(true)
+        mainWindow.setResizable(true)
         mainWindow.center()
         const checkInternetConnected = require('check-internet-connected');
 
@@ -283,7 +343,9 @@ async function createWindow() {
     })
 
     ipcMain.on('loadURL', async (event, data) => {
-        await loadURL(data.url, data.datas);
+        loadURL(data.url, data.datas).then(() => {
+            event.sender.send('loadURL_Utils', [])
+        });
     })
 
     ipcMain.on('ejseData', async (event, data) => {
@@ -341,7 +403,6 @@ async function createWindow() {
 
     mainWindow.on('maximize', (event) => {
         mainWindow.show();
-        mainWindow.webContents.goBack()
         event.sender.send('responseMaximizeWindow', true)
     });
     
@@ -351,6 +412,22 @@ async function createWindow() {
 
     mainWindow.on('restore', (event) => {
         if(mainWindow.webContents.getURL() == "about:blank#blocked") afterUpdateAndRuntime();
+    })
+
+    mainWindow.disa
+
+    ipcMain.on('openDialogExpFileRequest', async (event, data) => {
+        const result = await dialog.showOpenDialog(mainWindow, data.dialog)
+        event.sender.send(data.channel, result)
+    })
+
+    ipcMain.on('openDialogMessage', async (event, data) => {
+
+        data.dialog.title = "FrazionZ Launcher";
+        data.dialog.icon = IconApp;
+
+        const result = await dialog.showMessageBox(mainWindow, data.dialog)
+        event.sender.send(data.channel, result)
     })
 
 }

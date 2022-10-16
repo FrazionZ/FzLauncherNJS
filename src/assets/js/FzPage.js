@@ -16,15 +16,16 @@ class FzPage {
             this.session = userSession;
         this.ipcRenderer = require("electron").ipcRenderer;
 
-        var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
+        var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : ((store.has('appDirDatas') ? store.get('appDirDatas') : process.env.APPDATA)))
     
-        this.dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
+        this.dirFzLauncherRoot = path.join(appData);
         this.dirFzLauncherDatas = path.join(this.dirFzLauncherRoot, "Launcher");
         this.shelfFzLauncherSkins = path.join(this.dirFzLauncherDatas, "skins.json");
         this.dirFzLauncherServer = path.join(this.dirFzLauncherRoot, "Servers");
 
         this.page = page;
         this.webDocs = webDocs;
+        this.fzUtils = FZUtils;
         FZUtils.initCustomTlBar();
     }
 

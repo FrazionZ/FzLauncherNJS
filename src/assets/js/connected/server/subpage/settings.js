@@ -19,25 +19,10 @@ class Settings extends FzPage {
             return "server_" + this.server.name.toLowerCase() + "_" + key;
         };
 
-        this.ramAllocateIndexProperties = this.store.has(
-                this.keyStoreServerOptions("ramIndex")
-            ) ?
-            this.store.get(this.keyStoreServerOptions("ramIndex")) :
-            undefined;
+        this.ramAllocateIndexProperties = this.store.has(this.keyStoreServerOptions("ramIndex")) ? this.store.get(this.keyStoreServerOptions("ramIndex")) : undefined;
         this.listRamAllocate = FZUtils.listRamAllocate();
         var instance = this;
-
-        /**/
-
-        /*$('#inputRamSelector').change(function() {
-                var indexRam = 0;
-                $( "#inputRamSelector option:selected" ).each(function() {
-                    indexRam = $( this ).attr('value');
-                });
-                instance.store.set(instance.keyStoreServerOptions('ramIndex'), parseInt(indexRam));
-                instance.ramAllocateIndexProperties = indexRam;
-                instance.notyf("success", "La ram alloué a bien été changé.")
-            })*/
+        
         if (this.ramAllocateIndexProperties == undefined)
             this.ramAllocateIndexProperties = 0;
 
@@ -279,7 +264,7 @@ class Settings extends FzPage {
                         $(".config__switch_branch").addClass("disabled");
                         $(".config__clear_dir").addClass("disabled");
                         $(".config__repare_dir").addClass("disabled");
-                        instance.buttonActionPlay.off();
+                        instance.buttonActionPlay.unbind();
                         instance.buttonActionPlay.on("click", () => {
                             instance.buttonActionPlay.attr("disabled", "disabled");
                             play.prepareInstallOrUpdate();

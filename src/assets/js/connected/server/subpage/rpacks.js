@@ -26,6 +26,8 @@ class RPacks extends FzPage {
             shell.openPath(instance.resourcePackPath);
         })
 
+        this.downloadCurrentExist = false;
+
         if(!this.fs.existsSync(this.resourcePackPath))
             this.fs.mkdirSync(this.resourcePackPath)
         
@@ -134,6 +136,9 @@ class RPacks extends FzPage {
                                 this.classList.add('disabled')
                                 this.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>';
                                 instance.downloadPack(instance, rpack, pathFile, false).then(() => {
+                                    if(this.downloadCurrentExist)
+                                        return this.notyf('error', 'Un pack est déjà en cours de téléchargement.')
+                                    this.downloadCurrentExist = false;
                                     instance.loadList(instance);
                                 }); 
                             };
@@ -180,12 +185,16 @@ class RPacks extends FzPage {
 
     async downloadPack(instance, rpack, dir, isUpdate){
         return new Promise((resolve, reject) => {
+            
+            this.downloadCurrentExist = true;
             var exist = this.fs.existsSync(instance.path.join(instance.dirServer, "resourcepacks"));
             if(!exist){
                 this.notyf('error', 'Impossible de télécharger le pack, le dossier cible n\'existe pas.');
                 return resolve();
             }
-            FZUtils.download(instance, "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip", dir, true, "Resources Pack", undefined).then(async (result) => {
+            
+            var uuidDl = uuidv4();
+            FZUtils.download(instance, uuidDl, "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip", dir, true, "Resources Pack", undefined).then(async (result) => {
                 /*await appendZip(dir, (archive) => {
                     const buffer3 = Buffer.from(JSON.stringify({fzdata: "download"}));
                     archive.append(buffer3, { name: 'data.json' });
@@ -212,9 +221,13 @@ class RPacks extends FzPage {
     }
 
     async updatePack(instance, rpack, dir){
+        if(this.downloadCurrentExist)
+            return this.notyf('error', 'Un pack est déjà en cours de téléchargement.')
         return new Promise((resolve, reject) => {
             this.fs.unlinkSync(dir)
-            this.downloadPack(instance, rpack, dir, true)
+            this.downloadPack(instance, rpack, dir, true).then(() => {
+                this.downloadCurrentExist = false;
+            })
         });
     }
 

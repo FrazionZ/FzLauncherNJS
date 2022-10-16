@@ -18,9 +18,9 @@ class Runtime {
         document.getElementById('download-label').innerHTML = FZUtils.getLangKey("runtime.download")
         var url = "https://download.frazionz.net/FZLauncher/runtime/";
         if(process.arch === "x64")
-            FZUtils.download(null, url+"/64/jre1.8.0_291.zip", fileZipRuntime, false, undefined).then((result) => { if(result) this.finalizeUnzip(fileZipRuntime, dirRuntime) });
+            FZUtils.download(null, undefined, url+"/64/jre1.8.0_291.zip", fileZipRuntime, false, undefined).then((result) => { if(result) this.finalizeUnzip(fileZipRuntime, dirRuntime) });
         else if(process.arch === "x32")
-            FZUtils.download(null, url+"/32/jre1.8.0_301.zip", fileZipRuntime, false, undefined).then((result) => { if(result) this.finalizeUnzip(fileZipRuntime, dirRuntime) });
+            FZUtils.download(null, undefined, url+"/32/jre1.8.0_301.zip", fileZipRuntime, false, undefined).then((result) => { if(result) this.finalizeUnzip(fileZipRuntime, dirRuntime) });
     }
 
     finalizeUnzip(fileZipDepend, dirRuntime){
@@ -28,9 +28,10 @@ class Runtime {
         if(fileZipDepend !== undefined) {
             const pack = onezip.extract(fileZipDepend, dirRuntime);
                         
-            pack.on('progress', (percent) => {
-                document.getElementById('downloadpercent').innerHTML = parseInt(percent)+'%';
-                document.getElementById('downloadbar').style.width = percent+'%';
+            pack.on('progress', (state) => {
+                console.log(state)
+                document.getElementById('downloadpercent').innerHTML = parseInt(state.percentage)+'%';
+                document.getElementById('downloadbar').style.width = state.percentage+'%';
             });
                         
             pack.on('error', (error) => {

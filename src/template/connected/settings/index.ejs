@@ -9,15 +9,11 @@
                         <h2 class="expl__config reset-mp"><%= FZUtils.getLangKey("settings.lang.subtitle") %></h2>
                     </div>
                     <div class="flex align-center gap-20">
-                        <div class="dropdown">
-                            <button class="btn btn-secondary black-2 settingsFZUtils.getLangKey_dmenu dropdown-toggle" type="button" id="dropdownMenuButton1" data-bs-toggle="dropdown" aria-expanded="false">
-                                <%= FZUtils.getLangInfos().display %>
-                            </button>
-                            <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
-                                <% langsLocale.forEach(function(lang) { %>
-                                    <li><a class="dropdown-item settingsFZUtils.getLangKey_item" data-lang="<%= lang.keycode %>"><%= lang.display %></a></li>
-                                <% }); %>
-                            </ul>
+                        <div class="ui selection dropdown config__choose_langapp">
+                            <input type="hidden" name="langKey">
+                            <i class="dropdown icon"></i>
+                            <div class="default text"></div>
+                            <div class="menu"></div>
                         </div>
                     </div>
                 </div>
@@ -28,6 +24,16 @@
                     </div>
                     <div class="flex align-center gap-20">
                         <a class="btn btn-primary settings__open_devTools">Ouvrir</a>
+                    </div>
+                </div>
+                <div class="config-item">
+                    <div class="column flex direct-column justif-center">
+                        <h2 class="label__config reset-mp"><%= FZUtils.getLangKey("settings.dirapp.title") %></h2>
+                        <h2 class="expl__config reset-mp"><%= dirList[0] %></h2>
+                        <input disabled type="hidden" name="chooseAppDataDirInput" value="<%= dirList[0] %>" required />
+                    </div>
+                    <div class="flex align-center gap-20">
+                        <a class="btn btn-primary config__choose_dirapp" style="width: 8rem;"><%= FZUtils.getLangKey("settings.dirapp.action") %></a>
                     </div>
                 </div>
                 <div class="config-item">

@@ -1,6 +1,6 @@
 {
   "name": "fzlauncher",
-  "version": "1.3.90",
+  "version": "1.3.95",
   "description": "",
   "email": "florent.cala@gmail.com",
   "main": "main.js",
@@ -11,6 +11,7 @@
     "make": "electron-forge make",
     "build-installer": "electron-builder"
   },
+  "outputCapture": "std",
   "build": {
     "productName": "FrazionZ Launcher",
     "appId": "FrazionZ Launcher",
@@ -70,7 +71,8 @@
   "devDependencies": {
     "cross-env": "^7.0.3",
     "electron": "^20.0.0",
-    "electron-builder": "^23.0.3"
+    "electron-builder": "^23.0.3",
+    "javascript-obfuscator": "^4.0.0"
   },
   "dependencies": {
     "@electron/remote": "^2.0.8",
@@ -81,6 +83,8 @@
     "archiver": "^5.3.1",
     "axios": "^0.27.2",
     "azuriom-auth": "^0.1.2",
+    "base-64": "^1.0.0",
+    "byte-size": "^8.1.0",
     "check-internet-connected": "^2.0.6",
     "child_process": "^1.0.2",
     "crypto": "^1.0.1",
@@ -95,6 +99,7 @@
     "find-java-home": "^1.2.2",
     "follow-redirects": "^1.15.0",
     "fs": "^0.0.1-security",
+    "fs-extra": "^10.1.0",
     "got": "^12.1.0",
     "handlebars": "^4.7.7",
     "http": "^0.0.1-security",
@@ -118,10 +123,12 @@
     "os": "^0.1.2",
     "preload": "^0.1.0",
     "properties-reader": "^2.2.0",
+    "readline": "^1.3.0",
     "request": "^2.88.2",
     "skinview3d": "^2.2.1",
     "string-builder": "^0.1.8",
     "sweetalert2": "^11.4.14",
+    "underscore": "^1.13.6",
     "unzipper": "^0.10.11",
     "user-agents": "^1.0.1136",
     "uuid": "^8.3.2"

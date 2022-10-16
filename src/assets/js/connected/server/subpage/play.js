@@ -8,6 +8,10 @@ const { v4: uuidv4 } = require('uuid');
 const { Client } = require('minecraft-launcher-core');
 const { async } = require('node-stream-zip');
 const axios = require('axios').default;
+const MarkdownIt = require('markdown-it');
+const { ipcRenderer } = require('electron');
+
+const md = new MarkdownIt();
 const launcher = new Client();
 
 class Play  extends FzPage {
@@ -90,13 +94,10 @@ class Play  extends FzPage {
                             var index = 0;
                             for await (const repo of repos) {
                                 await instance.checkUpdate(repo).then(async (response) => {
-                                    console.log(response)
                                     if(response.result)
                                         reposUpdateAvailable.push({ github: response, repos: repo, ksb: repo.ksb });
-                                    console.log(index, repos.length-1)
                                     if (index === repos.length-1) resolve({ repos: reposUpdateAvailable }); else index++;
                                 }).catch((err) => {
-                                    console.log(err)
                                     if (index === repos.length-1) resolve({ repos: reposUpdateAvailable });else index++;
                                 })
                             }
@@ -149,9 +150,7 @@ class Play  extends FzPage {
     }
 
     async init(instance, canPlay, needsToBeInstall, needsToBeRepare, needsToBeUpdate, resultCUP){
-        console.log(needsToBeUpdate)
         if(canPlay){
-
             let serverAvailable;
             await this.checkServerAvailable()
                 .then((response) => {
@@ -275,8 +274,9 @@ class Play  extends FzPage {
 
     async installOrRepareOrUpdate(links){
         var instance = this;
+        var uuidDl = uuidv4();
         var startLinkDL = function (index) {
-            FZUtils.download(instance, links[index].dlink, instance.path.join(instance.dirServer, links[index].dirInstall, links[index].name), true, instance.server.name, links[index].branch).then((result) => {
+            FZUtils.download(instance, uuidDl, links[index].dlink, instance.path.join(instance.dirServer, links[index].dirInstall, links[index].name), true, instance.server.name, links[index].branch).then((result) => {
                 if(!((index + 1) == links.length))
                     startLinkDL((index + 1))
                 else{
@@ -303,9 +303,10 @@ class Play  extends FzPage {
                         
                         pack.on('start', () => {});
                         
-                        pack.on('progress', (percent) => {
-                            downloads.updateDownload(uuidDl, instance.server.name+" - Extraction des dépendances", nameCurrent, parseInt(percent, 10).toString())
-                            instance.ipcRenderer.send('progress', ((percent) / 100));
+                        pack.on('progress', (state) => {
+                            var subtitle = "("+state.i+" / "+state.n+") Fichiers extraits";
+                            downloads.updateDownload(uuidDl, instance.server.name+" - Extraction des dépendances", subtitle, state)
+                            instance.ipcRenderer.send('progress', ((state.percentage) / 100));
                         });
                         
                         pack.on('error', (error) => {
@@ -358,14 +359,14 @@ class Play  extends FzPage {
             .catch((err) => {
                 serverAvailable = false;
             })
-        $('.config__switch_branch').attr('disabled', false);
+        $('.config__switch_branch').removeClass('disabled');
         $('.config__repare_dir').removeClass('disabled');
         $('.config__clear_dir').removeClass('disabled');
 
         var setActionLaunch = () => {
             this.buttonActionPlay.find(".label").text("Jouer")
             this.buttonActionPlay.removeAttr("disabled")
-            this.buttonActionPlay.off()
+            this.buttonActionPlay.unbind()
             this.buttonActionPlay.on("click", () => { this.launchGame(); })
         }
 
@@ -414,13 +415,9 @@ class Play  extends FzPage {
                     sbLibs.append(path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch')), instance.server.jarFileMain));
                 
                     var javaRuntime = 'java';
-                    if(process.platform == "win32"){
-                        if(instance.store.get(instance.keyStoreServerOptions('config__server_runtime_launch'))){
+                    if(process.platform == "win32")
+                        if(instance.store.get(instance.keyStoreServerOptions('config__server_runtime_launch')))
                             javaRuntime = instance.path.join(instance.dirFzLauncherDatas, "runtime/bin/java.exe");
-                        }
-                    }
-
-                    console.log("JavaRuntime "+javaRuntime)
 
                     var ramMemoryMax = "";
 
@@ -441,23 +438,6 @@ class Play  extends FzPage {
                     }
                 
                     
-                    //var crashGame = new CrashGameDialog(false);
-                    var finishGame = async (crash, logs) => {
-                        //await layoutClass.closeModal("messDialog");
-                        //instance.notyf('error', 'Une erreur est survenue lors de la session de jeu')
-                        if(instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app'))){
-                            instance.gameLaunched = false;
-                            ipcRenderer.send('showApp')
-                            instance.buttonActionPlay.removeAttr("disabled")
-                            instance.buttonActionPlay.removeClass('disabled');
-                            if(crash){
-                                setTimeout(() => {
-                                    console.log(logs)
-                                    layoutClass.loadDialog('crashgame', [], "server");
-                                }, 800)
-                            }
-                        }
-                    }
 
                     var processJavaLaunch = () => {
                         instance.gameLaunched = true;
@@ -488,12 +468,12 @@ class Play  extends FzPage {
                             overrides: {
                                 discordRPC: (instance.store.get(instance.keyStoreServerOptions('config__server_discord_rpc'))),
                                 fullscreen: ((instance.store.get(instance.keyStoreServerOptions('config__server_display_fullscreen'))) ? true : false) ,
-                                gameDirectory: instance.dirServer,
-                                minecraftJar: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch')), instance.server.jarFileMain),
-                                directory: path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch'))), // where the Minecraft jar and version json are located.
-                                natives: path.join(instance.dirServer, "natives"), // native directory path.
-                                assetRoot: path.join(instance.dirServer, "assets"),
-                                libraryRoot: path.join(instance.dirServer, "libs"),
+                                gameDirectory: ""+instance.dirServer.replace('\\', '//')+"",
+                                minecraftJar: ""+path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch')), instance.server.jarFileMain).replace('\\', '//'),
+                                directory: ""+path.join(instance.dirServer, "versions", instance.store.get(instance.keyStoreServerOptions('branch'))).replace('\\', '//'), // where the Minecraft jar and version json are located.
+                                natives: ""+path.join(instance.dirServer, "natives").replace('\\', '//')+"",
+                                assetRoot: ""+path.join(instance.dirServer, "assets").replace('\\', '//')+"",
+                                libraryRoot: ""+path.join(instance.dirServer, "libs").replace('\\', '//')+"",
                                 cwd: '',
                                 detached: true,
                                 classes: [],
@@ -504,13 +484,20 @@ class Play  extends FzPage {
 
                         if(javaRuntime !== "java")
                             opts.javaPath = javaRuntime;
+
+                        opts.sessionfz =  instance.session;
+
+                        ipcRenderer.send('MinecraftRuntime__setting', opts);
+
+                        var optsLaunch = {closeApp: ((instance.store.has(instance.keyStoreServerOptions('config__server_close_app')) ? instance.store.get(instance.keyStoreServerOptions('config__server_close_app')) : false))}
+
+                        ipcRenderer.send('MinecraftRuntime__launching', optsLaunch);
+
                         
-                        launcher.launch(opts);
-                        
-                        launcher.on('debug', (e) => console.log(e));
-                        launcher.on('data', async (e) => {
-                            ipcRenderer.send('closeApp', ((instance.store.has(instance.keyStoreServerOptions('config__server_minimise_app')) ? instance.store.get(instance.keyStoreServerOptions('config__server_minimise_app')) : false)));
-                        });
+                        FZUtils.loadURL('/connected/playing', []).then(() => {
+                            
+                        })
+
                     }
 
                     if(process.platform == "darwin" || process.platform == "linux"){

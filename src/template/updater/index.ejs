@@ -31,6 +31,13 @@
             <label for="download" class="text-white" id="download-label"><%= FZUtils.getLangKey("updater.in_progress") %></label><br>
             <progress id="downloadbar"  max="100" value="-1"></progress>
         </div>-->
+        <script>
+            const path = require('path');
+            var appRoot = require('app-root-path');
+            const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
+            const { ipcRenderer } = require('electron');
+        </script>
+        <%- include('../includes/script.ejs') %>
         <script src="asset://js/updater.js"></script>
     </body>
 </html>

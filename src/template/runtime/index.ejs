@@ -7,6 +7,10 @@
         <link rel="stylesheet" href="asset://css/bootstrap.min.css">
         <link rel="stylesheet" href="asset://css/style.css">
         <link rel="stylesheet" type="text/css" href="asset://css/notyf.min.css">
+        <script src="asset://js/jquery.min.js"></script>
+        <script>
+            window.$ = window.jQuery = require('jQuery');
+        </script>
     </head>
     <body>
         <%- include('../includes/top.ejs') %>
@@ -30,13 +34,18 @@
         </div>-->
         <script src="asset://js/notyf.min.js"></script>
         <script>
-            dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
-            dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";
-            
-            var path = require('path');
+            const path = require('path');
             var appRoot = require('app-root-path');
+            const FZUtils = require(path.join(appRoot.path, '/src/assets/js/utils.js'))
+
+            const { ipcRenderer } = require('electron');
+            
+            dirFzLauncher = '<%= dirList[1] %>'; 
+
+            
             const Runtime = require(path.join(appRoot.path, "/src/assets/js/runtime.js"))
-            const runtime = new Runtime(dirFzLauncherDatas+"\\runtime");
+            const runtime = new Runtime(dirFzLauncher+"\\runtime");
         </script>
+        <%- include('../includes/script.ejs') %>
     </body>
 </html>

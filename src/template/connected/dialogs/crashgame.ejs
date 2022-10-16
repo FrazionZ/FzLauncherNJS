@@ -1,7 +1,40 @@
-<div class="rpackd pl-60 pr-60 pb-30">
+<style>
+    h1,h2,h3,h4,h5,h6 {
+        font-size: 1.4rem;
+        margin-top: 1rem;
+    }
+</style>
+<div class="crashGame pl-60 pr-60 pb-30">
     <div class="flex justif-between align-center">
         <h2 class="pt-30 pb-10 underline">Crash du jeu</h2>
         <span class="dialog_close"><i class="fa-solid fa-xmark"></i></span>
     </div>
+    <div class="card black-4">
+        <div class="content" style="max-height: 26rem;overflow-y: overlay;"></div>
+    </div>
+    <a class="openDirCrashReport btn btn-primary w-fcontent mt-10">Ouvrir le dossier</a>
 </div>
-<script></script>
+<script>
+    const { shell } = require("electron"),
+            fs = require('fs'),
+            readline = require('readline'),
+            path = require('path');
+    var base64 = require('base-64'),
+        pathCrashReport = base64.decode('<%- logs.replaceAll("\"", "") %>');
+
+    async function processLineByLine() {
+        const fileStream = fs.createReadStream(path.join(pathCrashReport));
+        const rl = readline.createInterface({
+            input: fileStream,
+            crlfDelay: Infinity
+        });
+        for await (const line of rl)
+            $('.crashGame .card .content').append(line).append('<br />')
+    }
+
+    processLineByLine();
+
+    $('.openDirCrashReport').on('click', function(){
+        shell.showItemInFolder(path.join(pathCrashReport));
+    })
+</script>

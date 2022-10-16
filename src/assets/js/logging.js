@@ -148,8 +148,6 @@ class Logging extends FzPage {
                 this.finishAuth(user);
             }, 500)
         } catch (e) {
-            console.log(e);
-            console.log(user);
             return;
         }
     }
@@ -172,8 +170,7 @@ class Logging extends FzPage {
                     this.finishAuth(user);
                 }, 500)
             } catch (e) {
-                console.log(e);
-                //return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
+                return FZUtils.loadURL('/login', [{notyf: {type: "error", value: FZUtils.getLangKey("logging.result.token_expired")}}])
             }
         }
         var accessToken = this.store.get('session').access_token;

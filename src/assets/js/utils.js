@@ -1,15 +1,19 @@
 const main = require('@electron/remote/main');
 const { default: axios } = require('axios');
+const { subtle } = require('crypto');
+const { async } = require('node-stream-zip');
 const { resolve } = require('path');
 
 function UrlExists(url) {
-    var http = new XMLHttpRequest();
-    http.open('HEAD', url, false);
-    http.send();
-    if (http.status != 404)
-        return true;
-    else
-        return false;
+    return new Promise((resolve, reject) => {
+        var http = new XMLHttpRequest();
+        http.open('HEAD', url, false);
+        http.send();
+        if (http.status != 404)
+            return resolve(true);
+        else
+            return resolve(false);
+    })
 }
 
 function showOpenFileDialog(){
@@ -69,12 +73,20 @@ async function initVariableEJS(data, init){
     let configLauncher;
 
     //LAUNCHER DIR DATAS APPDATA
-    var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
+    var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : ((store.has('appDirDatas') ? store.get('appDirDatas') : process.env.APPDATA)))
     
-    var dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
+    var dirFzLauncherRoot = path.join(appData);
     var dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
+
+    var dirList = [path.join(dirFzLauncherRoot).replaceAll('\\', '/'), path.join(dirFzLauncherDatas).replaceAll('\\', '/')];
+
     var shelfFzLauncherSkins = path.join(dirFzLauncherDatas, "skins.json");
-    const shelfFzLauncherSkinsJson = require(path.join(shelfFzLauncherSkins));
+    let shelfFzLauncherSkinsJson;
+    if(fs.existsSync(shelfFzLauncherSkins))
+        shelfFzLauncherSkinsJson = require(path.join(shelfFzLauncherSkins));
+    else
+        shelfFzLauncherSkinsJson = JSON.parse("[]");
+    
 
     return new Promise(async (resolve, reject) => {
         await axios.get('https://api.frazionz.net/launcher')
@@ -96,6 +108,7 @@ async function initVariableEJS(data, init){
                 "appRoot": require('app-root-path'),
                 "path": path,
                 "FZUtils": FZUtils,
+                "dirList": dirList,
                 "countSkins": shelfFzLauncherSkinsJson.length,
                 "srcDir": path.join(appRoot.path, '/src/').replaceAll('\\', '/'),
                 "darkMode":  ((store.has('launcher__darkmode')) ? ((store.get('launcher__darkmode')) ? "dark" : "light") : "dark"),
@@ -116,7 +129,67 @@ async function initVariableEJS(data, init){
     })
 }
 
+async function modifyAppDataDir(layoutClass, pathChoice){
+    var appData = ((store.has('appDirDatas') ? store.get('appDirDatas') : process.env.APPDATA))
+    const fs = require('fs');
+    var newInstall = async() => {
+        const fs = require('fs');
+        var channelIPC = "modifyAppDataDirRequest";
+        try {
+            if(fs.existsSync(pathChoice)){
+                fs.writeFileSync(path.join(pathChoice, "text.txt"), "[]", ()=>{})
+                fs.unlinkSync(path.join(pathChoice, "text.txt"))
+            }else
+                fs.mkdirSync(pathChoice);
+    
+            store.set('appDirDatas', pathChoice);
+            ipcRenderer.send('relaunchApp');
+        }catch (err) {
+            console.log(err)
+            ipcRenderer.send('openDialogMessage', {dialog: { cancelId: 2, message: "Le launcher n'a pas la permission d'écrire dans ce dossier." }, channel: channelIPC});
+        }
+    }
 
+    var transfertInstall = async() => {
+        $('#messDialog #content').html('Vos fichiers sont en cours de transfert, veuillez ne pas fermer le launcher.')
+        var source = path.join(appData);
+        var dest = path.resolve(pathChoice);
+        const fs = require('fs-extra')
+        await fs.move(source, dest, { overwrite: true })
+            .then(() => {
+                layoutClass.closeModal("messDialog")
+                store.set('appDirDatas', path.join(pathChoice));
+                ipcRenderer.send('relaunchApp');
+            })
+            .catch(err => {
+                console.error(err)
+                layoutClass.closeModal("messDialog")
+            })
+    }
+
+    if(layoutClass !== undefined){
+        layoutClass.loadModal( "messDialog", [{message: "Changement de votre dossier de jeu.."}], false, () => {})
+        ipcRenderer.send('openDialogMessage', {dialog: { buttons: ["Continuer avec une nouvelle installation", "Continuer en transférant les fichiers", "Annuler"], cancelId: 2, type: "question", title: "FrazionZ Launcher", message: "Choisissez la méthode de changement de dossier:" }, channel: "dialogMessageRequest"});
+        ipcRenderer.on("dialogMessageRequest", (event, data) => {
+            console.log(data)
+            switch(data.response){
+                case 0:
+                    newInstall();
+                    break;
+                case 1:
+                    transfertInstall();
+                    break;
+                default:
+                    layoutClass.closeModal("messDialog")
+                    break;
+            }
+            ipcRenderer.removeAllListeners('openDialogMessage')
+            ipcRenderer.removeAllListeners('dialogMessageRequest')
+        })
+    }else
+        await newInstall();
+
+}
 
 async function appendZip(source, callback) {
     // require modules
@@ -162,6 +235,22 @@ async function appendZip(source, callback) {
     }
 }
 
+async function getMostRecentFileName(dir) {
+    var fs = require('fs'),
+        path = require('path'),
+        _ = require('underscore');
+    var files = fs.readdirSync(dir);
+
+    // use underscore for max()
+    return _.max(files, function (f) {
+        var fullpath = path.join(dir, f);
+
+        // ctime = creation time is used
+        // replace with mtime for modification time
+        return fs.statSync(fullpath).ctime;
+    });
+}
+
 async function readZip(fileZip) {
 
     return new Promise((resolve) => {
@@ -201,8 +290,13 @@ async function capitalize(s)
 }
 
 async function loadURL(url, data){
-    const { ipcRenderer } = require('electron');
-    ipcRenderer.send('loadURL', {url: url, datas: data});
+    return new Promise((resolve, reject) => {
+        const { ipcRenderer } = require('electron');
+        ipcRenderer.send('loadURL', {url: url, datas: data});
+        ipcRenderer.on('loadURL_Utils', (event, data) => {
+            resolve();
+        })
+    })
 }
 
 async function openURLExternal(url) {
@@ -226,9 +320,9 @@ async function removeKeyInArr(arr, key){
 }
 
 async function getSkinsFile(){
-    var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : process.env.APPDATA)
+    var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : ((store.has('appDirDatas') ? store.get('appDirDatas') : process.env.APPDATA)))
     
-    var dirFzLauncherRoot = path.join(appData, ".FrazionzLauncher");
+    var dirFzLauncherRoot = path.join(appData);
     var dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
     return path.join(dirFzLauncherDatas, "skins.json");
 }
@@ -382,9 +476,10 @@ async function checkedIfinecraftAlreadyLaunch(){
     var fs = require('fs');
     var path = require('path');
     return new Promise(async (resolve, reject) => {
-        dirFzLauncherRoot = process.env.APPDATA  + "\\.FrazionzLauncher" || (process.platform == 'darwin' ? process.env.HOME + '/Library/Preferences' : process.env.HOME + "/.local/share") + ".FrazionzLauncher";
-        dirFzLauncherDatas = dirFzLauncherRoot + "\\Launcher";
-        dirFzLauncherServer = dirFzLauncherRoot + "\\Servers";
+        var appData = ((process.platform == "linux" || process.platform == "darwin") ? process.env.HOME : ((store.has('appDirDatas') ? store.get('appDirDatas') : process.env.APPDATA)))
+        dirFzLauncherRoot = path.join(appData);
+        dirFzLauncherDatas = path.join(dirFzLauncherRoot, "Launcher");
+        dirFzLauncherServer = path.join(dirFzLauncherRoot, "Servers");
         await fs.readdir(dirFzLauncherServer, async function (err, files) {
             //handling error
             if (!err) {
@@ -441,17 +536,16 @@ async function getSortedFilesByDate(dir) {
     }); 
 }
 
-async function download(instance, installerfileURL, installerfilename, dialog, type, branch) {
+async function download(instance, uuidDl, installerfileURL, installerfilename, dialog, type, branch) {
     const fs = require('fs')
     const path = require('path')
-    const { ipcRenderer } = require('electron')
-    const Store = require('electron-store')
+    const byteSize = require('byte-size')
     const { v4: uuidv4 } = require('uuid');
-    var uuidDl = uuidv4();
-    if(dialog){
-        downloads.addDownload(uuidDl)
-        downloadsList.push({uuidDl: uuidDl, title: type+" - Téléchargement des fichiers", subtitle: " - ", percentage: 0, finish: false});
-    }
+    if(dialog)
+        downloads.addDownload(uuidDl, type)
+    if(uuidDl == undefined)
+        uuidDl = uuidv4();
+    console.log("Download file from URL: "+installerfileURL)
     return new Promise((resolve, reject) => {
         
         var received_bytes = 0;
@@ -463,7 +557,7 @@ async function download(instance, installerfileURL, installerfilename, dialog, t
             uri: installerfileURL
         });
 
-        var out = fs.createWriteStream(installerfilename);
+        var out = fs.createWriteStream(installerfilename.split('%20').join(" "));
         req.pipe(out);
 
         req.on('response', function ( data ) {
@@ -479,7 +573,10 @@ async function download(instance, installerfileURL, installerfilename, dialog, t
             received_bytes += chunk.length;
             var percentage = (received_bytes * 100) / total_bytes;
             if(dialog){
-                downloads.updateDownload(uuidDl, type+" - Téléchargement des fichiers", installerfilename, parseInt(percentage, 10).toString())
+                var rb = byteSize(received_bytes);
+                var tb = byteSize(total_bytes);
+                var subtitle = path.basename(installerfilename)+" - "+rb.value+rb.unit+" / "+ tb.value+tb.unit;
+                downloads.updateDownload(uuidDl, type+" - Téléchargement des fichiers", subtitle, {percentage: parseInt(percentage, 10).toString(),  total: total_bytes, received_bytes: received_bytes})
             }else{
                 document.getElementById('downloadpercent').innerHTML = parseInt(percentage)+'%';
                 document.getElementById('downloadbar').style.width = percentage+'%';
@@ -615,4 +712,4 @@ function javaversion(dirLaucher, callback) {
     });
 }
 
-module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, createRipple, switchThemeMode, appendZip, readZip, encryptString, decryptString, capitalize, checkRulesSize, checkUpdate, removeKeyInArr, getSkinFromB64, resizeImage, deleteSkinData, getSkinsFile, storeSkinShelf, getSkinFromID, getImageDimensions, updateSkinData, getSortedFilesByDate, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }
+module.exports = { UrlExists, ExecuteCodeJS, initCustomTlBar, createRipple, switchThemeMode, getMostRecentFileName,  appendZip, readZip, encryptString, modifyAppDataDir, decryptString, capitalize, checkRulesSize, checkUpdate, removeKeyInArr, getSkinFromB64, resizeImage, deleteSkinData, getSkinsFile, storeSkinShelf, getSkinFromID, getImageDimensions, updateSkinData, getSortedFilesByDate, checkedIfinecraftAlreadyLaunch, openURLExternal, getLangList, getLangInfos, getLangKey, initVariableEJS, getLang, storeDataEJS, loadURL, showOpenFileDialog, listRamAllocate, download, javaversion }

@@ -1806,6 +1806,20 @@ a.social:hover {
     font-size: 26px;
     color: var(--text);
 }
+.taskOverlay {
+    position: absolute;
+    z-index: 99;
+    bottom: 9.5rem;
+    left: 100px;
+    background: var(--fzbg-4);
+    padding: 1rem 1rem;
+    transition: 0.2s all ease-in-out;
+    border-radius: 1rem;
+    display: none;
+}
+.taskOverlay.show {
+    display: block;
+}
 /*
 .download {
     position: absolute;
