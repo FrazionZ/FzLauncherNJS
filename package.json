@@ -1,136 +1,84 @@
 {
   "name": "fzlauncher",
-  "version": "1.3.95",
-  "description": "",
-  "email": "florent.cala@gmail.com",
-  "main": "main.js",
-  "scripts": {
-    "start": "electron --trace-deprecation .",
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "package": "electron-forge package",
-    "make": "electron-forge make",
-    "build-installer": "electron-builder"
-  },
-  "outputCapture": "std",
-  "build": {
-    "productName": "FrazionZ Launcher",
-    "appId": "FrazionZ Launcher",
-    "directories": {
-      "output": "build"
-    },
-    "protocols": {
-      "name": "fzlauncher-protocol",
-      "schemes": [
-        "fzlauncher"
-      ]
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ],
-      "icon": "src/assets/img/icons/frazionz-logo.ico"
-    },
-    "dmg": {
-      "contents": [
-        {
-          "x": 410,
-          "y": 150,
-          "type": "link",
-          "path": "/Applications"
-        },
-        {
-          "x": 130,
-          "y": 150,
-          "type": "file"
-        }
-      ]
-    },
-    "linux": {
-      "icon": "src/assets/img/icons/icon-256.png",
-      "category": "Game",
-      "target": "deb"
-    },
-    "files": [
-      "**/*",
-      "!hud/*",
-      "!logs/*",
-      "!tmp/*",
-      "!build/*"
-    ],
-    "nsis": {
-      "installerIcon": "src/assets/img/icons/frazionz-logo.ico",
-      "uninstallerIcon": "src/assets/img/icons/frazionz-logo.ico",
-      "uninstallDisplayName": "FrazionZ Launcher",
-      "oneClick": true,
-      "allowToChangeInstallationDirectory": false
+  "version": "1.4.0",
+  "main": "dist-electron/main/index.js",
+  "description": "FrazionZ Launcher",
+  "author": "FrazionZ",
+  "license": "MIT",
+  "private": true,
+  "debug": {
+    "env": {
+      "VITE_DEV_SERVER_URL": "http://127.0.0.1:7777/"
     }
   },
-  "keywords": [],
-  "author": "FrazionZ_Dev <florent.cala@gmail.com> ",
-  "license": "ISC",
+  "binary": {
+    "module_name": "fzlauncher",
+    "module_path": "./lib/binding/",
+    "host": "https://download.frazionz.net"
+  },
+  "scripts": {
+    "dev": "vite",
+    "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
+    "build": "tsc && vite build && electron-builder",
+    "preview": "vite preview && electron .",
+    "e2e": "npx playwright test"
+  },
   "devDependencies": {
-    "cross-env": "^7.0.3",
-    "electron": "^20.0.0",
-    "electron-builder": "^23.0.3",
-    "javascript-obfuscator": "^4.0.0"
+    "@mapbox/node-pre-gyp": "^1.0.10",
+    "@playwright/test": "^1.29.1",
+    "@types/react": "^18.0.26",
+    "@types/react-dom": "^18.0.10",
+    "@typescript-eslint/eslint-plugin": "^5.48.2",
+    "@typescript-eslint/parser": "^5.48.2",
+    "@vitejs/plugin-react": "^3.0.0",
+    "autoprefixer": "^10.4.13",
+    "electron": "^22.0.0",
+    "electron-builder": "^23.6.0",
+    "eslint": "^8.32.0",
+    "eslint-plugin-react": "^7.32.1",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "sass": "^1.57.1",
+    "tailwindcss": "^3.2.4",
+    "typescript": "^4.9.4",
+    "vite": "^4.0.4",
+    "vite-electron-plugin": "^0.7.3",
+    "vite-plugin-electron-renderer": "^0.11.4"
+  },
+  "engines": {
+    "node": "^14.18.0 || >=16.0.0"
   },
   "dependencies": {
-    "@electron/remote": "^2.0.8",
-    "@futurelucas4502/light-electron-renderer": "^1.0.3",
-    "@sentry/electron": "^4.0.0",
-    "adm-zip": "^0.5.9",
-    "app-root-path": "^3.0.0",
-    "archiver": "^5.3.1",
-    "axios": "^0.27.2",
-    "azuriom-auth": "^0.1.2",
-    "base-64": "^1.0.0",
+    "@electron/remote": "^2.0.9",
+    "@headlessui/react": "^1.7.7",
+    "@headlessui/tailwindcss": "^0.1.2",
+    "@heroicons/react": "^2.0.13",
+    "@sentry/electron": "^4.2.0",
+    "axios": "^1.2.3",
+    "azuriom-auth": "^1.0.1",
     "byte-size": "^8.1.0",
-    "check-internet-connected": "^2.0.6",
-    "child_process": "^1.0.2",
-    "crypto": "^1.0.1",
-    "ejs": "^3.1.8",
+    "discord-rpc": "^4.0.1",
     "electron-asar-hot-updater": "^0.1.3",
-    "electron-better-ipc": "^2.0.1",
-    "electron-is-packaged": "^1.0.2",
-    "electron-root-path": "^1.0.16",
-    "electron-store": "^8.0.1",
-    "extract-zip": "^2.0.1",
-    "fetch": "^1.1.0",
-    "find-java-home": "^1.2.2",
-    "follow-redirects": "^1.15.0",
-    "fs": "^0.0.1-security",
-    "fs-extra": "^10.1.0",
-    "got": "^12.1.0",
-    "handlebars": "^4.7.7",
-    "http": "^0.0.1-security",
-    "https": "^1.0.0",
+    "electron-store": "^8.1.0",
+    "find-java-home": "^2.0.0",
+    "flowbite-react": "^0.3.7",
     "image-to-base64": "^2.2.0",
-    "jquery": "^3.6.0",
-    "jQuery": "^1.7.4",
-    "jsdom": "^19.0.0",
-    "jszip": "^3.10.1",
-    "log-timestamp": "^0.3.0",
-    "markdown-it": "^13.0.1",
-    "md5-file": "^5.0.0",
-    "minecraft-launcher-core": "^3.16.16",
-    "mousetrap": "^1.6.5",
-    "node-fetch": "^2.6.7",
-    "node-stream-zip": "^1.15.0",
-    "notyf": "^3.10.0",
+    "konsta": "^1.0.2",
+    "minecraft-launcher-core": "^3.16.17",
+    "moment-timezone": "^0.5.40",
     "onezip": "^5.0.0",
-    "open": "^8.4.0",
-    "original-fs": "^1.1.0",
-    "os": "^0.1.2",
-    "preload": "^0.1.0",
-    "properties-reader": "^2.2.0",
-    "readline": "^1.3.0",
-    "request": "^2.88.2",
-    "skinview3d": "^2.2.1",
+    "prop-types": "^15.8.1",
+    "react-auth-code-input": "^3.2.1",
+    "react-circular-progressbar": "^2.1.0",
+    "react-filerobot-image-editor": "^4.3.7",
+    "react-google-recaptcha": "^2.1.0",
+    "react-hook-form": "^7.42.1",
+    "react-icons": "^4.7.1",
+    "react-router-dom": "^6.6.2",
+    "react-skinview3d": "^5.0.0",
+    "react-slideshow-image": "^4.1.1",
+    "react-toastify": "^9.1.1",
     "string-builder": "^0.1.8",
-    "sweetalert2": "^11.4.14",
-    "underscore": "^1.13.6",
-    "unzipper": "^0.10.11",
-    "user-agents": "^1.0.1136",
-    "uuid": "^8.3.2"
+    "underscore": "^1.13.6"
   }
 }

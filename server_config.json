@@ -6,12 +6,15 @@
         "version":"1.12.2",
         "jarFileMain":"client.jar",
         "expl_server":"FrazionZ Faction est un serveur Faction avec quelques nouveautés ! Découvrez-le dès maintenant en rejoignant la communautée via Discord ou directement sur le serveur ! Nous vous attendons avec impatiente !",
-        "urlLogo":"img/icons/icon.png",
+        "urlLogo":"../renderer/src/assets/img/icons/icon.png",
         "defaultBranch":"releases",
-        "serverAddress":"frazionz.net:25587",
+        "serverAddress":"play.frazionz.net:25565",
+        "classMain": "fz.frazionz.LaunchClient",
         "github": [
             {
                 "branch": "beta",
+                "title": "Beta",
+                "description": "Versions les moins stables mais plus régulières",
                 "categories": [
                     {
                         "name": "client",
@@ -25,6 +28,8 @@
             },
             {
                 "branch": "releases",
+                "title": "Releases",
+                "description": "Versions les plus stables",
                 "categories": [
                     {
                         "name": "client",

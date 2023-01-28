@@ -1,0 +1,45 @@
+/**
+ * @see https://www.electron.build/configuration/configuration
+ */
+{
+  "productName": "FrazionZ Launcher",
+  "appId": "FrazionZ Launcher",
+  "asar": true,
+  "directories": {
+    "output": "release/${version}"
+  },
+  "files": [
+    "dist-electron",
+    "dist",
+    "src",
+    "!hud/*",
+    "!logs/*",
+    "!tmp/*",
+    "!build/*"
+  ],
+  "mac": {
+    "artifactName": "${productName}_${version}.${ext}",
+    "target": [
+      "dmg"
+    ]
+  },
+  "win": {
+    "target": [
+      {
+        "target": "nsis",
+        "arch": [
+          "x64"
+        ]
+      }
+    ],
+    "artifactName": "${productName}_${version}.${ext}",
+    "icon": "src/assets/img/icons/frazionz-logo.ico"
+  },
+  "nsis": {
+    "installerIcon": "src/assets/img/icons/frazionz-logo.ico",
+    "uninstallerIcon": "src/assets/img/icons/frazionz-logo.ico",
+    "uninstallDisplayName": "FrazionZ Launcher",
+    "oneClick": true,
+    "allowToChangeInstallationDirectory": false
+  }
+}
