@@ -642,7 +642,7 @@ class Server extends React.Component {
                     heightDisplay = size[1];
                 }
 
-
+                sessionStorage.setItem('gameLaunched', true)
 
                 var processJavaLaunch = () => {
                     instance.gameLaunched = true;
@@ -703,6 +703,7 @@ class Server extends React.Component {
                         buttonActionPlay.disabled = false
                         instance.updateConfigDAG(false)
                         instance.gameLaunched = false
+                        sessionStorage.setItem('gameLaunched', false)
                     })
 
                 }

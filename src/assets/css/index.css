@@ -299,9 +299,45 @@ button[role="switch"][aria-checked="true"] span {
 }
 .btn.font-sml {
   font-size: 12px !important;
-}
+} 
 .btn.icon.font-sml {
   font-size: 17px !important;
+}
+.btn.logout {
+  background: var(--color-red) !important;
+  font-size: 16px;
+  margin-top: 4rem;
+  color: white;
+  display: flex;
+  align-items: flex-end;
+  gap: 10px;
+  min-height: 47px;
+  max-height: 47px;
+  width: 47px;
+  padding: 12px 12px !important;
+  transition: 0.2s all ease-in-out;
+}
+.btn.logout span {
+  animation-delay: 2s;
+  transition: all 0.05s ease-out;
+  word-wrap: break-word;
+  width: 0px;
+  display: none;
+  opacity: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip; 
+}
+.btn.logout:hover {
+  width: 185px;
+}
+.btn.logout:hover span {
+  opacity: 1;
+  width: 128px;
+  display: block;
+}
+.btn.logout svg {
+  font-size: 23px;
 }
 .text-inactive {
   color: var(--text-inactive) !important;
@@ -401,6 +437,18 @@ div[role="radio"] span {
 .screens .item-picture:hover img {
   transform: scale(1.04);
 }
+.profile .head-infos {
+  background: radial-gradient(83.83% 147.08% at 50% -47.08%, rgba(14, 16, 20, 0.04) 0%, rgba(14, 16, 20, 0.0513212) 77.71%, rgba(14, 16, 20, 0.7) 89.02%, rgba(14, 16, 20, 0.9) 96.21%, #0E1014 100%), linear-gradient(0deg, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(/src/assets/img/wallpaper.png);
+  background-repeat: no-repeat;
+  background-size: 100% 33rem;
+  border-top-left-radius: 15px;
+  padding: 6rem 6rem 0rem;
+}
+.profile .content-general {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+}
 .profile .avatar {
   display: flex;
   align-items: center;
@@ -417,6 +465,17 @@ div[role="radio"] span {
 .profile .avatar .datas .fast-infos {
   display: flex;
   gap: 10px;
+}
+.editSkinDialog {
+  padding: 3rem 6rem;
+}
+.editSkinDialog .head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.editSkinDialog .head span {
+  font-size: 1.5rem;
 }
 span.badge {
   padding: 3px 6px;;
@@ -558,7 +617,7 @@ ul[role="listbox"] li[aria-selected="true"]{
 .apparence .library {
   display: grid;
   grid-gap: 10px;
-  justify-content: flex-end;
+  justify-content: flex-start;
   grid-template-columns: repeat(auto-fit, minmax(140px, auto));
   grid-column-gap: 12px;
   width: 100%;
@@ -577,6 +636,7 @@ ul[role="listbox"] li[aria-selected="true"]{
 .apparence .library .card .card-body {
   display: flex;
   flex-direction: column;
+  align-items: center;
   gap: 12px;
 }
 .apparence .library .card.skin .card-body .datas {
@@ -589,6 +649,11 @@ ul[role="listbox"] li[aria-selected="true"]{
   font-weight: 700;
   font-size: 12px;
   line-height: 18px;
+  width: 6.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  text-align: center;
 }
 .apparence .library .card.skin .model {
   font-weight: 400;
@@ -602,9 +667,108 @@ ul[role="listbox"] li[aria-selected="true"]{
   align-items: center;
   margin-bottom: 1.8rem;
 }
+.editSkinDialog .apparence .library .card img {
+  height: 116px;
+  width: 70px;
+  border-radius: 8px;
+}
+.editSkinDialog .apparence .library {
+  height: 30rem;
+  overflow-y: overlay;
+  padding: 0px 0px;
+  width: 92%;
+}
+.editSkinDialog h2.underline {
+  font-size: 2.5rem;
+  margin-bottom: 20px;
+}
+.editSkinDialog .actions.done {
+  
+  display: flex;
+  gap: 15px;
+  flex-direction: column;
+}
+.editSkinDialog .actions.done .btn {
+  position: absolute;
+  right: 2rem;
+  z-index: 9;
+
+  font-size: 16px;
+  width: 48px;
+  height: 48px;
+  transition: 0.2s all ease-in-out;
+}
+.editSkinDialog .actions.done .btn.save {
+  bottom: 2rem;
+}
+.editSkinDialog .actions.done .btn.save_upload {
+  bottom: 6rem;
+}
+.editSkinDialog .actions.done .btn span {
+  animation-delay: 2s;
+  transition: all 0.05s ease-out;
+  word-wrap: break-word;
+  width: 0px;
+  display: none;
+  opacity: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: clip; 
+  color: #311903;
+}
+.editSkinDialog .actions.done .btn.save:hover {
+  width: 185px;
+}
+.editSkinDialog .actions.done .btn.save_upload:hover {
+  width: 270px;
+}
+.editSkinDialog .actions.done .btn.save:hover span {
+  width: 185px;
+}
+.editSkinDialog .actions.done .btn.save_upload:hover span {
+  width: 230px;
+}
+.editSkinDialog .actions.done .btn:hover span {
+  opacity: 1;
+  display: block;
+}
+.cguv {
+  padding: 3rem 6rem;
+  height: calc(100vh - 80px);
+}
+.cguv .head {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+}
+.cguv .head span {
+  font-size: 1.5rem;
+}
+.cguv webview {
+  height: 100%;
+  border-radius: 8px;
+}
+.cguv span {
+  color: white;
+}
+.cguv h1 {
+  font-size: 2rem;
+}
+.cguv h2 {
+  font-size: 1.5rem;
+}
+.cguv h3 {
+  font-size: 1.3rem;
+}
+.cguv a {
+  color: var(--color-2);
+}
 div[role="tooltip"] {
   background: var(--fzbg-1) !important;
 }
 div[role="tooltip"] div[data-testid="flowbite-tooltip-arrow"] {
   background: var(--fzbg-1) !important;
+}
+.main .content-child {
+  border-top-left-radius: 15px;
 }

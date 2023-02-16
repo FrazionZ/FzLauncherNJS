@@ -1,6 +1,10 @@
 import React from "react";
 import { Badge } from "flowbite-react";
-import { FaArrowCircleRight, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+import {
+  FaArrowCircleRight,
+  FaCheckCircle,
+  FaTimesCircle,
+} from "react-icons/fa";
 import Infos from "./profile/Infos";
 import Apparence from "./profile/Apparence";
 import Router from "../../components/Router";
@@ -17,10 +21,16 @@ export default class Profile extends React.Component {
     super(props);
     this.sidebar = props.sidebar;
     this.session = JSON.parse(sessionStorage.getItem("user"));
-    this.auth = new Auth()
+    this.auth = new Auth();
     this.subpages = [
       {
-        component: <Infos session={this.session} />,
+        component: (
+          <Infos
+            session={this.session}
+            sidebar={this.sidebar}
+            parentClass={this}
+          />
+        ),
         name: "Infos",
         url: "/infos",
         title: "Informations",
@@ -43,9 +53,8 @@ export default class Profile extends React.Component {
       },
     ];
     this.appRouter = props.appRouter;
-    this.fzVariable = new FzVariable()
-    this.logout = this.logout.bind(this)
-    this.changePage = this.changePage.bind(this)
+    this.fzVariable = new FzVariable();
+    this.changePage = this.changePage.bind(this);
   }
 
   async componentDidMount() {
@@ -63,64 +72,61 @@ export default class Profile extends React.Component {
     this.router.showPage("/infos");
   }
 
-  async logout() {
-    this.auth.logout(this.session.access_token).then(() => {
-      sessionStorage.removeItem('user')
-      this.fzVariable.store.delete('session')
-      this.appRouter.showPage('/login')
-      FzToast.success('Vous avez bien été déconnecté de votre session !')
-    })
-  }
-
   async changePage(instance) {
-    document.querySelector(".profile .menu li.item.active").classList.remove("active");
+    document
+      .querySelector(".profile .menu li.item.active")
+      .classList.remove("active");
     instance.target.parentNode.classList.add("active");
     this.router.showPage(instance.target.getAttribute("dhref"));
   }
 
   render() {
     return (
-      <div className="profile px-24 py-20">
-        <div className="flex flex-col gap-30">
-          <div className="flex justify-between">
-            <div className="avatar">
-              <img className="rounded-lg" src={this.state.avatar} alt="avatar" />
-              <div className="datas">
-                <span className="text-3xl">{this.session.username}</span>
-                <div className="fast-infos">
-                  <Badge
-                    color="info"
-                    className={`badge w-fit`}
-                    size="sm"
-                    style={{ backgroundColor: this.session.role.color }}
-                  >
-                    {this.session.role.name}
-                  </Badge>
-                  <Badge
-                    color="info"
-                    className={`badge w-fit`}
-                    size="sm"
-                    style={{ backgroundColor: "var(--color-2)" }}
-                  >
-                    {this.session.TwoFA && <FaCheckCircle />}
-                    {!this.session.TwoFA && <FaTimesCircle />}
-                    <span>2FA</span>
-                  </Badge>
-                </div>
+      <div className="profile">
+        <div className="head-infos">
+          <div className="avatar">
+            <img className="rounded-lg" src={this.state.avatar} alt="avatar" />
+            <div className="datas">
+              <span className="text-3xl">{this.session.username}</span>
+              <div className="fast-infos">
+                <Badge
+                  color="info"
+                  className={`badge w-fit`}
+                  size="sm"
+                  style={{ backgroundColor: this.session.role.color }}
+                >
+                  {this.session.role.name}
+                </Badge>
+                <Badge
+                  color="info"
+                  className={`badge w-fit`}
+                  size="sm"
+                  style={{ backgroundColor: "var(--color-2)" }}
+                >
+                  {this.session.TwoFA && <FaCheckCircle />}
+                  {!this.session.TwoFA && <FaTimesCircle />}
+                  <span>2FA</span>
+                </Badge>
               </div>
             </div>
-            <button className="btn icon danger" onClick={ this.logout }><FaArrowCircleRight /></button>
           </div>
-          <div className="ui top attached tabular nav nav-pills mb-3 menu">
-            {this.subpages.map((item, key) => (
-              <li key={key} className={`item ${item.active ? "active" : ""}`} data-tab={item.name}>
-                <a onClick={this.changePage} dhref={item.url}>
-                  {item.title}
-                </a>
-              </li>
-            ))}
+          <div className="content-general">
+            <div className="flex justify-between"></div>
+            <div className="ui top attached tabular nav nav-pills mb-3 menu">
+              {this.subpages.map((item, key) => (
+                <li
+                  key={key}
+                  className={`item ${item.active ? "active" : ""}`}
+                  data-tab={item.name}
+                >
+                  <a onClick={this.changePage} dhref={item.url}>
+                    {item.title}
+                  </a>
+                </li>
+              ))}
+            </div>
+            <div className="subpages pb-[4rem]"></div>
           </div>
-          <div className="subpages pb-[4rem]"></div>
         </div>
       </div>
     );

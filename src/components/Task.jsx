@@ -27,8 +27,8 @@ export default class Task {
     this.aexist = false;
 
     
-    this.title = "Ceci est un titre";
-    this.subtitle = "Ceci est un subtitre";
+    this.title = "";
+    this.subtitle = "";
   }
 
   constUpdate(opts) {
@@ -38,7 +38,7 @@ export default class Task {
     this.installerfilename = opts.installerfilename;
     this.fupdate = opts.update !== undefined ? opts.update : true;
     this.prefix = opts.prefix;
-
+ 
     this.fileZipDepend = opts.fileZipDepend;
     this.dirServer = opts.dirServer;
 

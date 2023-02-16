@@ -2,6 +2,7 @@ import React from 'react'
 import { FiMaximize } from 'react-icons/fi'
 import { FaWindowMinimize, FaTimes } from 'react-icons/fa'
 import logo from '../assets/img/dark/icons/top_fz.svg'
+import FzToast from './FzToast'
 
 class Header extends React.Component {
   toggleReduceApp() {
@@ -13,7 +14,12 @@ class Header extends React.Component {
   }
 
   closeApp() {
-    window.ipcRenderer.send('closeApp')
+    if(sessionStorage.getItem('gameLaunched') == "true"){
+      window.ipcRenderer.send('reduceApp')
+      window.ipcRenderer.send('hideApp')
+      window.ipcRenderer.send('notification', { title: "FrazionZ", body: "Une instance est ouverte, le launcher s'est donc minimisé dans la barre d'outils." })
+    }else
+      window.ipcRenderer.send('closeApp')
   }
 
   render() {

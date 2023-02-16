@@ -27,7 +27,9 @@ class Pnotes extends React.Component {
         this.setState({ allContracts: [], loading: true, error: false });
         try {
             let branch = fzVariable.store.get(fzVariable.keyStoreServerOptions('branch'));
-            axios.get(`https://api.frazionz.net/faction/pnotes/all/server_downloader/${branch}_${this.ServerObj.name}`).then((response) => {
+            let urlPnotes = `https://api.frazionz.net/faction/pnotes/all/server_downloader/${branch}_${this.ServerObj.name}`
+            axios.get(urlPnotes).then((response) => {
+                console.log(urlPnotes, response)
                 this.setState({ response: response.data, loading: false, error: false, });
                 return;
             }).catch((err) => {
@@ -86,7 +88,7 @@ class Pnotes extends React.Component {
                                         }
                                     </h3>
                                     <time className="block mb-2 text-sm font-normal leading-none text-gray-400 dark:text-gray-500">
-                                        Released on  { moment(item.created_at).local("fr").tz("Europe/Paris").format('MMMM Do YYYY') }
+                                        Publié le { fzVariable.replaceMonth(moment(item.created_at).local("fr").tz("Europe/Paris").format('D MMMM YYYY'))}
                                     </time>
                                     <div className="mb-4 text-base font-normal text-gray-500 dark:text-gray-400">
                                         <div className="flex flex-col gap-1">

@@ -30,7 +30,7 @@ class RpackDetails extends React.Component {
     render() {
         return (
             <>
-                <button id="rpack__view" onClick={this.openModal} className="btn">
+                <button id="rpack__view" disabled={true} onClick={this.openModal} className="btn">
                     <FaEye />
                 </button>
                 <Transition appear show={this.state.isOpen} as={Fragment}>

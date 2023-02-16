@@ -8,25 +8,36 @@ import axios from 'axios'
 const imageToBase64 = require("image-to-base64");
 import ReactSkinview3d from "react-skinview3d";
 import FzImportationSkinDialog from "../../../components/FzImportationSkinDialog";
-import { FaTrashAlt } from "react-icons/fa";
 import FzEditSkinDialog from "../../../components/FzEditSkinDialog";
-import FzEditorSkinPicture from '../../../components/FzEditorSkinPicture'
+import { FaTrashAlt } from "react-icons/fa";
+import Router from "../../../components/Router";
+import Brush from '../../../assets/img/icons/brush.svg'
 
 export default function Apparence(props) {
+
   let session = props.session;
   let fzVariable = new FzVariable();
-  let capeUrl = `https://api.frazionz.net/capes/display?username=${session.username}`;
   let maximumSkinImport = 24;
   let sidebar = props.sidebar;
   let parentClass = props.parentClass;
   let skinDefault = `https://api.frazionz.net/skins/display?username=${session.username}`;
   const [selectedSkin, setSelectedSkin] = useState(null);
   const [skinUrl, setSkinUrl] = useState(skinDefault);
+  const [capeUrl, setCapeUrl] = useState((session.appareance.cape_id > -1) ? `https://api.frazionz.net/capes/display/brut/${session.appareance.cape_id}` : null);
   const [playerObjectRotateY, setPlayerObjectRotateY] = useState(31.7)
   const [disabledEditUpload, setDisabledEditUpload] = useState(true)
+  const [routerAlreadyInit, setRouterAlreadyInit] = useState(false)
+  const [router, setRouter] = useState()
+  const [skinViewer, setSkinViewer] = useState(null)
   const [skinsList, setSkinsList] = useState(require(fzVariable.path.join(
     fzVariable.shelfFzLauncherSkins
   )))
+
+  async function editSkinDialog(){
+    sessionStorage.setItem("selectedSkin", selectedSkin)
+    sessionStorage.setItem("skinsList", JSON.stringify(skinsList))
+    router.showPage('/profile_appareance_editskin', true)
+  }
 
   async function downloadSkinPreview3D(base64, uuidSkin) {
     let urlSkinPreview = `https://auth.frazionz.net/skins/3d.php?user=${base64}&b64=true&bustOnly=true&aa=true&vr=6&hr=10`;
@@ -75,21 +86,29 @@ export default function Apparence(props) {
   }
 
   async function setPreviewSkinSelected(index){
-    if(index == null){
-      setDisabledEditUpload(true)
-      setSelectedSkin(null)
-      setSkinUrl(skinDefault)
-    }else{
-      setDisabledEditUpload(false)
-      setSelectedSkin(index)
-      setPlayerObjectRotateY(31.7)
-      setSkinUrl(`data:image/png;base64,${skinsList[index].base64}`)
-  
-      var file = await fzVariable.dataURLtoFile("data:image/png;base64," + skinsList[index].base64, skinsList[index].id + ".png");
-      let container = new DataTransfer();
-      container.items.add(file);
-      document.querySelector('#skinPreviewApplyInput').files = container.files;
-    }
+    return new Promise(async (resolve, reject) => {
+      if(index == null){
+        setDisabledEditUpload(true)
+        setSelectedSkin(null)
+        setSkinUrl(skinDefault)
+        resolve()
+      }else{
+        setDisabledEditUpload(false)
+        setSelectedSkin(index)
+        setPlayerObjectRotateY(31.7)
+        setSkinUrl(`data:image/png;base64,${skinsList[index].base64}`)
+        if(skinsList[index].cape !== undefined)
+          setCapeUrl(`https://api.frazionz.net/capes/display/brut/${skinsList[index].cape}`)
+        else
+          if(skinViewer !== null)
+            skinViewer.viewer.resetCape()
+        var file = await fzVariable.dataURLtoFile("data:image/png;base64," + skinsList[index].base64, skinsList[index].id + ".png");
+        let container = new DataTransfer();
+        container.items.add(file);
+        document.querySelector('#skinPreviewApplyInput').files = container.files;
+        resolve()
+      }
+    })
   }
 
   async function addSkinFromMojang(event, inputUsername) {
@@ -98,7 +117,7 @@ export default function Apparence(props) {
       FzToast.processToast("Recherche et ajout du skin via Mojang..", () => {
         return new Promise(async (resolve, reject) => {
           let searchUserMojang = inputUsername
-          if (inputUsername == "") return reject('Veuillez indiquer un pseudo.')
+          if (searchUserMojang.value == "") return reject({ message: 'Veuillez indiquer un pseudo.' })
           let valueUsername = searchUserMojang.value.replaceAll('\'', '')
           await axios.get("https://api.minetools.eu/uuid/" + valueUsername).then(async (response) => {
             var uuid = response.data.id;
@@ -248,7 +267,7 @@ export default function Apparence(props) {
     })
   }
 
-  async function uploadSkin() {
+  async function uploadSkin(index) {
     try {
       if(selectedSkin == null) return;
       setDisabledEditUpload(true)
@@ -259,6 +278,7 @@ export default function Apparence(props) {
           var form_data = new FormData()
           form_data.append('skin', file_data);
           form_data.append('type', skin.model);
+          form_data.append('capeID', (skin.cape !== undefined) ? skin.cape : -1);
           form_data.append('access_token', session.access_token);
           await axios.post('https://frazionz.net/api/skin-api/skins/update', form_data, {
             headers: {
@@ -266,6 +286,9 @@ export default function Apparence(props) {
             }
           }).then((response) => {
             if (response.data.status) {
+              let session = JSON.parse(sessionStorage.getItem('user'))
+              session.appareance.cape_id = (fzVariable.store.has('capeIDSelect')) ? fzVariable.store.get('capeIDSelect') : session.appareance.cape_id
+              sessionStorage.setItem('user', JSON.stringify(session))
               sidebar.setState({ avatar: `https://auth.frazionz.net/skins/face.php?${Math.random().toString(36)}&u=${session.id}` })
               parentClass.setState({ avatar: `https://auth.frazionz.net/skins/face.php?${Math.random().toString(36)}&u=${session.id}` })
               return resolve("Votre skin a bien été upload !")
@@ -305,14 +328,18 @@ export default function Apparence(props) {
 
   async function saveSkin(data){
     let indexSkin = skinsList.findIndex((skin) => skin.id == data.id)
-    return new Promise((resolve, reject) => {
+    return new Promise(async (resolve, reject) => {
       skinsList[indexSkin].name = data.name
       skinsList[indexSkin].model = data.model
+      if(data.capeIDSelect > -1){
+        skinsList[indexSkin].cape = data.capeIDSelect
+        setCapeUrl(`https://api.frazionz.net/capes/display/brut/${data.capeIDSelect}`)
+      }
       fzVariable.fs.writeFileSync(fzVariable.shelfFzLauncherSkins, JSON.stringify(skinsList))
       setSkinsList([])
-      setPreviewSkinSelected(null)
-      setTimeout(() => {
+      setTimeout(async () => {
         setSkinsList(skinsList)
+        await setPreviewSkinSelected(indexSkin)
         FzToast.success('Le skin a bien été mis à jour !')
         resolve()
       }, 90)
@@ -321,27 +348,41 @@ export default function Apparence(props) {
 
   let fcp = { addSkinFromMojang, addSkinFromFile, uploadFileToLauncher, saveSkin }
 
+
+  async function initRouterAlreadyInit(){
+    let router = new Router({
+      domParent: document.querySelector('.main.connected .content-child'),
+      multipleSubDom: true,
+      keySubDom: 'sidepage',
+    })
+    router.then((router) => {
+      router.setPages([
+        {
+          component: <FzEditSkinDialog sideRouter={ sidebar.router } parentRouter={ router } fcp={fcp} />,
+          name: 'Profile_Appareance_EditSkin',
+          url: '/profile_appareance_editskin'
+        }
+      ])
+      setRouterAlreadyInit(true)
+      setRouter(router)
+    })
+  }
+
+  if(!routerAlreadyInit) initRouterAlreadyInit()
+
   return (
     <>
       <div className="apparence">
-        <div className="head">
-          <div className="titles">
-            <h2 className="text-white text-3xl">Bibliothèque des skins</h2>
-            <h2 className="text-xl text-inactive">Skins ({skinsList.length}/{maximumSkinImport})</h2>
-          </div>
-          <div className="actions">
-            <FzImportationSkinDialog fcp={fcp} />
-          </div>
-        </div>
-        <div className="flex align-center apparence">
+        <div className="flex align-center gap-20 justify-between apparence">
           <div className="skinPreview">
               <ReactSkinview3d
                 id="skin"
                 skinUrl={`${skinUrl}`}
-                capeUrl={`${capeUrl}`}
+                capeUrl={`${(capeUrl !== null) ? capeUrl : null}`}
                 height="345"
                 width="318"
                 onReady={(ready) => {
+                  setSkinViewer(ready)
                   ready.viewer.playerObject.rotation.y = playerObjectRotateY;
                   ready.viewer.controls.enableRotate = true;
                   ready.viewer.controls.enableZoom = false;
@@ -352,29 +393,40 @@ export default function Apparence(props) {
                 {selectedSkin !== null &&
                   <div className="flex gap-10">
                     <button onClick={ deleteSkinPreview } disabled={disabledEditUpload} className="btn icon danger"><FaTrashAlt /></button>
-                    <FzEditSkinDialog fcp={fcp} dataSkin={skinsList[selectedSkin]} />
+                    <button onClick={ editSkinDialog } className="btn icon"><img src={Brush} alt="" /></button>
                     <button onClick={ uploadSkin } disabled={disabledEditUpload} className="btn w-full">Appliquer</button>
                   </div>
                 }
           </div>
-          <div className="library">
-            {skinsList.map((skin, i) => {
-              let skinPreviewPath = fzVariable.path.join(
-                fzVariable.dirFzLauncherSkins,
-                skin.id + ".png"
-              );
-              return (
-                <div key={i} onClick={ () => { setPreviewSkinSelected(i) }} className={`card skin ${(selectedSkin == i) ? "active" : ""}`}>
-                  <div className="card-body">
-                    <img src={skinPreviewPath} alt="" />
-                    <div className="datas">
-                      <span className="name">{skin.name}</span>
-                      <span className="model">{fzVariable.firstUCase(skin.model)}</span>
+          <div className="skins gap-20 w-full">
+            <div className="head">
+              <div className="titles">
+                <h2 className="text-white text-3xl">Bibliothèque des skins</h2>
+                <h2 className="text-xl text-inactive">Skins ({skinsList.length}/{maximumSkinImport})</h2>
+              </div>
+              <div className="actions">
+                <FzImportationSkinDialog fcp={fcp} />
+              </div>
+            </div>
+            <div className="library">
+              {skinsList.map((skin, i) => {
+                let skinPreviewPath = fzVariable.path.join(
+                  fzVariable.dirFzLauncherSkins,
+                  skin.id + ".png"
+                );
+                return (
+                  <div key={i} onClick={ () => { setPreviewSkinSelected(i) }} className={`card skin ${(selectedSkin == i) ? "active" : ""}`}>
+                    <div className="card-body">
+                      <img src={skinPreviewPath} alt="" />
+                      <div className="datas">
+                        <span className="name">{skin.name}</span>
+                        <span className="model">{fzVariable.firstUCase(skin.model)}</span>
+                      </div>
                     </div>
                   </div>
-                </div>
-              )
-            })}
+                )
+              })}
+            </div>
           </div>
         </div>
       </div>

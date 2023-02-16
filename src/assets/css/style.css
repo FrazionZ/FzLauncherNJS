@@ -118,7 +118,7 @@ main {
     color: var(--text);
     height: calc(100vh - 10.9em);
 }
-.login .head h2,h3 {
+.login .head h2, .login .head h3 {
     margin: 0;
     text-align: center;
     color: var(--text);

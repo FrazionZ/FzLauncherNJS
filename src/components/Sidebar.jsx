@@ -6,13 +6,15 @@ import Task from '../components/Task'
 
 import Server from '../views/connected/Server'
 import Tasks from '../views/connected/Tasks'
+import Wiki from '../views/connected/Wiki'
 import Settings from '../views/connected/Settings'
 import Profile from '../views/connected/Profile'
-
+import FzCGUV from './FzCGUV'
 import Router from './Router'
 
 import Config from '../assets/img/icons/config.svg'
 import FzVariable from './FzVariable'
+import FzEditSkinDialog from './FzEditSkinDialog'
 
 let user
 
@@ -38,7 +40,6 @@ const AddTask = async (taskObj) => {
 let functionParse = {
   AddTask: AddTask
 }
-let router
 let tasks = []
 
 export default class Sidebar extends React.Component {
@@ -52,40 +53,51 @@ export default class Sidebar extends React.Component {
     this.appRouter = props.appRouter
     user = JSON.parse(sessionStorage.getItem('user'))
     this.fzVariable = new FzVariable()
+    this.navClick = this.navClick.bind(this)
   }
 
   async componentDidMount() {
     this.setState({ avatar: `https://auth.frazionz.net/skins/face.php?${Math.random().toString(36)}&u=${user.id}` })
     let sidebar = this;
-    router = await new Router({
+    this.router = await new Router({
       domParent: document.querySelector('.main.connected .content-child'),
       multipleSubDom: true,
       keySubDom: 'sidepage'
     })
-    router.setPages([
+    this.router.setPages([
       {
-        component: <Server sidebar={sidebar} sideRouter={router} functionParse={functionParse} idServer="0" />,
+        component: <Server sidebar={sidebar} sideRouter={this.router} functionParse={functionParse} idServer="0" />,
         name: 'Server',
         url: '/server'
       },
       {
-        component: <Tasks sidebar={sidebar} sideRouter={router} taskList={tasks} functionParse={functionParse} />,
+        component: <Tasks sidebar={sidebar} sideRouter={this.router} taskList={tasks} functionParse={functionParse} />,
         name: 'Tasks',
         url: '/tasks'
       },
       {
-        component: <Settings sidebar={sidebar} appRouter={this.appRouter} sideRouter={router} functionParse={functionParse} />,
+        component: <Wiki sidebar={sidebar} sideRouter={this.router} taskList={tasks} functionParse={functionParse} />,
+        name: 'Wiki',
+        url: '/wiki'
+      },
+      {
+        component: <Settings sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={functionParse} />,
         name: 'Settings',
         url: '/settings'
       },
       {
-        component: <Profile sidebar={sidebar} appRouter={this.appRouter} sideRouter={router} functionParse={functionParse} />,
+        component: <Profile sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={functionParse} />,
         name: 'Profile',
         url: '/profile'
+      },
+      {
+        component: <FzCGUV sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={functionParse} />,
+        name: 'CGUV',
+        url: '/cguv'
       }
     ])
-    router.showPage('/server')
-    router.preRenderPage('/tasks')
+    this.router.showPage('/server')
+    this.router.preRenderPage('/tasks')
   }
 
   navClick(instanceButton) {
@@ -93,7 +105,7 @@ export default class Sidebar extends React.Component {
     instanceButton.target.classList.add('active')
 
     let href = instanceButton.target.getAttribute('data-href')
-    router.showPage(href)
+    this.router.showPage(href)
   }
 
   render() {
@@ -125,6 +137,15 @@ export default class Sidebar extends React.Component {
               <li onClick={this.navClick} data-href="/tasks" className="parent-menu-link">
                 <a className="menu-link">
                   <i className="bx bx-food-menu" style={{ fontSize: '36px' }}></i>
+                  <span>{this.fzVariable.lang('sidebar.navs.task')}</span>{' '}
+                  <span className="badge bg-secondary dl downloads__countDl">0</span>
+                </a>
+              </li>
+            </Tooltip>
+            <Tooltip content={this.fzVariable.lang('sidebar.navs.wiki')} placement="right">
+              <li onClick={this.navClick} data-href="/wiki" className="parent-menu-link">
+                <a className="menu-link">
+                  <i className='bx bxs-book-bookmark' style={{ fontSize: '36px' }}></i>
                   <span>{this.fzVariable.lang('sidebar.navs.task')}</span>{' '}
                   <span className="badge bg-secondary dl downloads__countDl">0</span>
                 </a>

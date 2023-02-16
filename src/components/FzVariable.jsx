@@ -22,6 +22,12 @@ class FzVariable {
     this.dirFzLauncherDatas = path.join(this.dirFzLauncherRoot, 'Launcher')
     if (!this.fs.existsSync(this.dirFzLauncherDatas)) this.fs.mkdirSync(this.dirFzLauncherDatas)
 
+    this.dirFzLauncherCapes = path.join(this.dirFzLauncherDatas, 'capes')
+    if (!this.fs.existsSync(this.dirFzLauncherCapes)) this.fs.mkdirSync(this.dirFzLauncherCapes)
+
+    this.shelfFzLauncherCapes = path.join(this.dirFzLauncherDatas, 'capes.json')
+    if (!this.fs.existsSync(this.shelfFzLauncherCapes)) this.fs.writeFileSync(this.shelfFzLauncherCapes, "[]", () => { })
+
     this.shelfFzLauncherSkins = path.join(this.dirFzLauncherDatas, 'skins.json')
     if (!this.fs.existsSync(this.shelfFzLauncherSkins)) this.fs.writeFileSync(this.shelfFzLauncherSkins, "[]", () => { })
 
@@ -112,6 +118,11 @@ class FzVariable {
 
       return new File([u8arr], filename, { type: mime });
     }
+    this.checkFileExists = async(file) => {
+      return fs.promises.access(file, fs.constants.F_OK)
+               .then(() => true)
+               .catch(() => false)
+    }
     this.downloadImage = async(url, filepath) => {
       return new Promise((resolve, reject) => {
         const request = require('request')
@@ -137,6 +148,20 @@ class FzVariable {
     }
     this.firstUCase = (str) => {
       return str.charAt(0).toUpperCase() + str.slice(1);
+    }
+    this.replaceMonth = (str) => {
+      return str.replaceAll('January', 'Janvier')
+      .replaceAll('February', 'Février')
+      .replaceAll('March', 'Mars')
+      .replaceAll('April', 'Avril')
+      .replaceAll('May', 'Mai')
+      .replaceAll('June', 'Juin')
+      .replaceAll('July', 'Julliet')
+      .replaceAll('August', 'Août')
+      .replaceAll('September', 'Septembre')
+      .replaceAll('October', 'Octobre')
+      .replaceAll('November', 'Novembre')
+      .replaceAll('December', 'Décembre')
     }
   }
 

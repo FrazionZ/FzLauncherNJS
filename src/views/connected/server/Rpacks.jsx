@@ -40,6 +40,7 @@ class Rpacks extends React.Component {
         response: [],
         error: false,
         loading: false,
+        disabledActionGame: sessionStorage.getItem('gameLaunched') == "true"
     };
 
     determineRpackState = (id) => {
@@ -66,9 +67,17 @@ class Rpacks extends React.Component {
         if(!fzVariable.fs.existsSync(this.resourcePackPath))
             fzVariable.fs.mkdirSync(this.resourcePackPath)
         this.handleClickRpack = this.handleClickRpack.bind(this);
+
+        document.addEventListener('server_config_disabledActionGame', (event) => {
+            let serverObjEvent = event.detail.serverObj;
+            if (serverObjEvent.id == this.ServerObj.id) {
+              this.setState({ disabledActionGame: event.detail.disabled })
+            }
+        })
     }
 
     async handleClickRpack(button){
+        if(sessionStorage.getItem('gameLaunched') == "true") return FzToast.error(fzVariable.lang('server.instance.open.error'));
         let buttonTarget = button.currentTarget;
         if(buttonTarget.disabled) return;
         buttonTarget.disabled = true;
@@ -219,7 +228,7 @@ class Rpacks extends React.Component {
                                             </div>
                                             <div className="column flex direct-column gap-15 align-end">
                                                 <RpackDetails rpack={ rpack } />
-                                                <button id="rpack__action" onClick={ this.handleClickRpack } id-pack={ rpack.id } state-pack={ rpack.state.id } className="btn">
+                                                <button id="rpack__action" disabled={ this.state.disabledActionGame } onClick={ this.handleClickRpack } id-pack={ rpack.id } state-pack={ rpack.state.id } className="btn">
                                                     { rpack.state.icon }
                                                 </button>
                                             </div>

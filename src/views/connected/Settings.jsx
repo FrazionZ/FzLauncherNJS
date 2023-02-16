@@ -17,20 +17,32 @@ import FzLangListBox from '../../components/FzLangListbox'
 
 class Settings extends React.Component {
 
-  
+  fzVariable = new FzVariable(this.props)
+
   state = {
-    langCurrent: null,
+    branch: null,
+    ram: 0,
+    disabledActionGame: false,
     config_checkbox: [
       {
         key: "launcher__sentry",
-        value: true
+        value: this.fzVariable.store.get("launcher__sentry", true),
+        view: {
+          title: this.fzVariable.lang('settings.sentry.title'),
+          subtitle: this.fzVariable.lang('settings.sentry.subtitle')
+        }
       },
       {
         key: "launcher__drpc",
-        value: true
+        value: this.fzVariable.store.get("launcher__drpc", true),
+        view: {
+          title: "Discord RPC",
+          subtitle: "Afficher le statut du Launcher sur votre compte Discord"
+        }
       },
     ]
   }
+  
   langCurrent = null
   lglist = window.lang.langs
 
@@ -38,8 +50,7 @@ class Settings extends React.Component {
     super(props)
     this.appRouter = this.props.appRouter;
     this.sideRouter = this.props.sideRouter;
-    this.fzVariable = new FzVariable();
-    this.setCheckBoxSettings = this.setCheckBoxSettings.bind(this)
+    this.setCheckbox = this.setCheckbox.bind(this)
   }
 
   async componentDidMount() {
@@ -56,42 +67,22 @@ class Settings extends React.Component {
   }
 
 
-
-  setCheckBoxSettingsValue(key) {
-    return new Promise(async (resolve, reject) => {
-      let checked = (elem) => elem.key == key
-      let index = this.state.config_checkbox.findIndex(checked);
-      let newValue = ((this.getCheckBoxSettingsValue(key).value) ? false : true);
-      let indexFor = 0;
-      for await (const elem of this.state.config_checkbox) {
-        if (elem.key == key)
-          this.state.config_checkbox[indexFor].value = newValue
-        indexFor++;
-      }
-      this.setState({ config_checkbox: this.state.config_checkbox })
-      resolve(newValue)
-    })
-  }
-
-  setCheckBoxSettings(event) {
-    event.preventDefault();
-    if (event.currentTarget !== undefined) {
-      let dataId = event.currentTarget.querySelector('button[role="switch"]').getAttribute('data-id');
-      this.setCheckBoxSettingsValue(dataId).then((newValue) => {
-        this.fzVariable.store.set(dataId, newValue);
-      })
-    }
-  }
-
-
   openExternal(hyperlink) {
     console.log(hyperlink)
     //shell.openExternal(hyperlink.getAttribute('data-link'))
   }
 
-  getCheckBoxSettingsValue(key) {
-    let config = this.state.config_checkbox.find(elem => elem.key == key);
-    return this.fzVariable.store.get(config.keey, config.value);
+  
+  async setCheckbox(event){
+    event.preventDefault()
+    let dataID = event.currentTarget.getAttribute('data-id')
+    let indexCheckBox = this.state.config_checkbox.findIndex(elem => elem.key == dataID)
+    let checkBox = this.state.config_checkbox.find(elem => elem.key == dataID)
+    let oldValue = checkBox.value
+    let newValue = (oldValue === true) ? false : true
+    this.state.config_checkbox[indexCheckBox].value = newValue
+    this.setState({ config_checkbox: this.state.config_checkbox })
+    this.fzVariable.store.set(dataID, newValue)
   }
 
   render() {
@@ -116,52 +107,30 @@ class Settings extends React.Component {
               </div>
             </div>
           </div>
-          <div className="card checkbox_config" onClick={this.setCheckBoxSettings}>
-            <div className="card-body flex gap-20 justif-between direct-column">
-              <div className="config-item">
-                <div className="column flex direct-column justif-center">
-                  <h2 className="label__config reset-mp">{this.fzVariable.lang('settings.sentry.title')}</h2>
-                  <h2 className="expl__config reset-mp">{this.fzVariable.lang('settings.sentry.subtitle')}</h2>
-                </div>
-                <div className="flex align-center gap-20">
-                  <Switch
-                      data-id="launcher__sentry"
-                      checked={this.getCheckBoxSettingsValue("launcher__sentry").value}
-                      className={`${this.getCheckBoxSettingsValue("launcher__sentry").value ? '' : 'bg-[var(--fzbg-3)]'
-                        } relative inline-flex h-6 w-11 items-center rounded-full`}
-                    >
-                      <span
-                        className={`${this.getCheckBoxSettingsValue("launcher__sentry").value ? 'translate-x-6' : 'translate-x-1'
-                          } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                      />
-                  </Switch>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div className="card checkbox_config" onClick={this.setCheckBoxSettings}>
-            <div className="card-body flex gap-20 justif-between direct-column">
-              <div className="config-item">
-                <div className="column flex direct-column justif-center">
-                  <h2 className="label__config reset-mp">Discord RPC</h2>
-                  <h2 className="expl__config reset-mp">Afficher le statut du Launcher sur votre compte Discord</h2>
-                </div>
-                <div className="flex align-center gap-20">
-                  <Switch
-                      data-id="launcher__drpc"
-                      checked={this.getCheckBoxSettingsValue("launcher__drpc").value}
-                      className={`${this.getCheckBoxSettingsValue("launcher__drpc").value ? '' : 'bg-[var(--fzbg-3)]'
-                        } relative inline-flex h-6 w-11 items-center rounded-full`}
-                    >
-                      <span
-                        className={`${this.getCheckBoxSettingsValue("launcher__drpc").value ? 'translate-x-6' : 'translate-x-1'
-                          } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                      />
-                  </Switch>
+          {this.state.config_checkbox.map((checkbox, i) =>
+              <div key={i} data-id={checkbox.key} className="card checkbox_config" onClick={ this.setCheckbox }>
+                <div className="card-body flex gap-20 justif-between direct-column">
+                  <div className="config-item">
+                    <div className="column flex direct-column justif-center">
+                      <h2 className="label__config reset-mp">{ checkbox.view.title }</h2>
+                      <h2 className="expl__config reset-mp">{ checkbox.view.subtitle }</h2>
+                    </div>
+                    <div className="flex align-center gap-20">
+                      <Switch
+                          checked={checkbox.value}
+                          className={`${checkbox.value ? '' : 'bg-[var(--fzbg-3)]'
+                              } relative inline-flex h-6 w-11 items-center rounded-full`}
+                          >
+                          <span
+                            className={`${checkbox.value ? 'translate-x-6' : 'translate-x-1'
+                                } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                            />
+                      </Switch>
+                    </div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+          )}
           <div className="card">
             <div className="card-body flex gap-20 justif-between direct-column">
               <div className="config-item">
@@ -217,7 +186,7 @@ class Settings extends React.Component {
         <div className="credits">
           <span>Réalisé par <a href="#" onClick={() => { shell.openExternal('https://twitter.com/SunshineDev62') }} >SunshineDev</a> - Non affilié à Mojang AB</span>
           <span>
-            © 2022 FrazionZ. Tous droits réservés - <a href="#">Conditions Générales</a>
+            © 2022 FrazionZ. Tous droits réservés - <a href="#" onClick={ () => { this.sideRouter.showPage('/cguv') } }>Conditions Générales</a>
           </span>
         </div>
       </div>

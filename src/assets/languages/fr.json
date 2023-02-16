@@ -29,6 +29,7 @@
         "sidebar.navs.states": "États",
         "sidebar.navs.store": "Boutique",
         "sidebar.navs.task": "Tâches",
+        "sidebar.navs.wiki": "Wiki",
         "sidebar.navs.settings": "Paramètres",
         "states.title": "États de nos services",
         "task.title": "Tâches",
@@ -105,6 +106,7 @@
         "server.config.viewdir.title": "Voir le dossier de jeu",
         "server.config.viewdir.subtitle": "Ouvre le dossier de jeu",
         "server.config.viewdir.action": "Voir",
+        "server.instance.open.error": "Une instance est ouverte, impossible d'exécuter une action sur cette section.",
         "aupdate.title": "Mise à jour disponible"
     }
 }

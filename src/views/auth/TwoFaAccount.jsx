@@ -59,7 +59,7 @@ export default function TwoFaAccount(props) {
           id="buttonLoginAuth"
           disabled={disabledForm}
           className="btn w-fit"
-          onClick={handleClick}
+          onClick={() => { handleClick(result) }}
         >
           <RiLoader4Fill className="icon animate-spin hidden" />
           Vérifier le code

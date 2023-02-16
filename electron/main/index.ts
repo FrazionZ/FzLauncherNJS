@@ -72,6 +72,7 @@ async function createWindow() {
       webSecurity: false,
       nodeIntegration: true,
       contextIsolation: false,
+      webviewTag: true
     },
   });
 
