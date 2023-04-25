@@ -5,7 +5,7 @@
         "assetIndex":"1.12",
         "version":"1.12.2",
         "jarFileMain":"client.jar",
-        "expl_server":"FrazionZ Faction est un serveur Faction avec quelques nouveautés ! Découvrez-le dès maintenant en rejoignant la communautée via Discord ou directement sur le serveur ! Nous vous attendons avec impatiente !",
+        "expl_server":"FrazionZ Faction est un serveur Faction avec quelques nouveautés ! Découvrez-le dès maintenant en rejoignant la communautée via Discord ou directement sur le serveur ! Nous vous attendons avec impatience !",
         "urlLogo":"../renderer/src/assets/img/icons/icon.png",
         "defaultBranch":"releases",
         "serverAddress":"play.frazionz.net:25565",

@@ -13,6 +13,8 @@ export default class Wiki extends React.Component {
     componentDidMount(){
         document.querySelector('webview').addEventListener('dom-ready', function(e) {
             this.webviewDom = e.target
+            document.querySelector('.loader').remove()
+            e.target.style.display = "flex"
         })
         document.querySelector('webview').addEventListener('will-navigate', function(e) {
             console.log(typeof e.url, e.url)
@@ -26,7 +28,13 @@ export default class Wiki extends React.Component {
 
     render(){
         return (
-            <webview src="https://wiki.frazionz.net" style={{  height: "calc(100vh - 80px)" }} />
-        )
+            <>
+                <div className="flex justify-center items-center gap-6 loader" style={{  height: "calc(100vh - 80px)" }}>
+                    <div className="loader-3"></div>
+                    <span className="text-2xl">Chargement du Wiki</span>
+                </div>
+                <webview src="https://wiki.frazionz.net" style={{ display: "none", height: "calc(100vh - 80px)" }} />
+            </>
+        )  
     }
 }

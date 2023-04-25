@@ -96,7 +96,7 @@ async function createWindow() {
 
   const clientId = discordRPC.appId
 
-  if(store.get('launcher__drpc', true)) discordClient.login({ clientId });
+  //if(store.get('launcher__drpc', true)) discordClient.login({ clientId });
 
   remoteMain.initialize();
   remoteMain.enable(win.webContents);

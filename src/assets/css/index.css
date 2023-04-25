@@ -289,7 +289,8 @@ button[role="switch"][aria-checked="true"] span {
 }
 .btn:disabled {
   cursor: default;
-  opacity: 0.5;
+  background:var(--fzbg-2);
+  color: var(--text-inactive) !important;
 }
 .btn:not([disabled]):hover {
   opacity: 0.8;
@@ -613,6 +614,10 @@ ul[role="listbox"] li[aria-selected="true"]{
 }
 .card {
   color: white;;
+}
+.card .btn:disabled{
+  background:var(--fzbg-3)!important;
+  color:var(--text-inactive) !important;
 }
 .apparence .library {
   display: grid;

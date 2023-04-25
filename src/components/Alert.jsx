@@ -50,7 +50,7 @@ class Alert extends React.Component {
 
   render() {
     return (
-      <div className={`alert ${this.props.state}`} id={this.id}>
+      <div className={`alert ${this.props.state} w-full`} id={this.id}>
         <div className="flex justify-between align-center w-full">
           <div className="flex justify-between align-center w-full">
             <div className="flex gap-[24px]">

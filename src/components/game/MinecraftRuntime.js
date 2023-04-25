@@ -48,6 +48,7 @@ class MinecraftRuntime {
     })
     launcher.on('error', async (error) => {
       console.log(error)
+      console.log('bitch')
     })
   }
 

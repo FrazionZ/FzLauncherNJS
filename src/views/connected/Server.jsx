@@ -643,6 +643,7 @@ class Server extends React.Component {
                 }
 
                 sessionStorage.setItem('gameLaunched', true)
+                
 
                 var processJavaLaunch = () => {
                     instance.gameLaunched = true;

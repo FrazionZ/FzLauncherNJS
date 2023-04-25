@@ -16,7 +16,8 @@ export default class FzEditSkinDialog extends React.Component {
     capeURL: null,
     typeSkin: "steve",
     capeSelected: null,
-    downloadedCape: []
+    downloadedCape: [],
+    modelSkin: JSON.parse(sessionStorage.getItem("user")).isSlim ? "slim" :  "default"
   };
 
   constructor(props) {
@@ -123,6 +124,7 @@ export default class FzEditSkinDialog extends React.Component {
   }
 
   async setTypeSkin(skinType) {
+    this.setState({ modelSkin: (skinType == "alex") ? "default" : "slim" })
     this.setState({ typeSkin: skinType })
   }
 
@@ -249,10 +251,14 @@ export default class FzEditSkinDialog extends React.Component {
                   id="skin"
                   skinUrl={`data:image/png;base64,${this.state.skinCurrent.base64}`}
                   capeUrl={this.state.capeURL}
+                  options={{
+                    model: this.state.modelSkin
+                  }}
                   height="345"
                   width="318"
                   onReady={(ready) => {
                     ready.viewer.playerObject.rotation.y = -3.5;
+                    ready.viewer.playerObject.skin.model = this.state.modelSkin
                     ready.viewer.controls.enableRotate = true;
                     ready.viewer.controls.enableZoom = false;
                     ready.viewer.controls.enablePan = false;

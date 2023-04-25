@@ -29,6 +29,7 @@ export default function Apparence(props) {
   const [routerAlreadyInit, setRouterAlreadyInit] = useState(false)
   const [router, setRouter] = useState()
   const [skinViewer, setSkinViewer] = useState(null)
+  const [modelSkin, setModelSkin] = useState((session.isSlim) ? "slim" : "default")
   const [skinsList, setSkinsList] = useState(require(fzVariable.path.join(
     fzVariable.shelfFzLauncherSkins
   )))
@@ -381,6 +382,9 @@ export default function Apparence(props) {
                 capeUrl={`${(capeUrl !== null) ? capeUrl : null}`}
                 height="345"
                 width="318"
+                options={{
+                  model: modelSkin
+                }}
                 onReady={(ready) => {
                   setSkinViewer(ready)
                   ready.viewer.playerObject.rotation.y = playerObjectRotateY;

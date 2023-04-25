@@ -9,10 +9,12 @@ moment.locale('fr')
 
 export default function Infos(props) {
     
-  let session = props.session;
-  let fzVariable = new FzVariable()
+  const session = props.session;
+  const fzVariable = new FzVariable()
 
-  
+  let emailFormat = session.email.split('@'); 
+  emailFormat = emailFormat[0].substr(0,3)+'*******@'+emailFormat[1];
+
   async function logout() {
     if(sessionStorage.getItem('gameLaunched') == "true") return FzToast.error(fzVariable.lang('server.instance.open.error'));
     props.parentClass.auth.logout(props.session.access_token).then(() => {
@@ -29,7 +31,7 @@ export default function Infos(props) {
         <div className="card-body">
           <div className="flex align-center gap-5">
             <span className="text-xl font-bold">Adresse Mail</span>
-            <span className="text-xl font-light">{session.email}</span>
+            <span className="text-xl font-light">{emailFormat}</span>
           </div>
         </div>
       </div>

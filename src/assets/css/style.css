@@ -2004,7 +2004,7 @@ input[type="range"]::-webkit-slider-thumb {
 .progress .indicator {
     height: 12px;
     width: 0%;
-    background: var(--color-2);
+    background: var(--gradient);
     border-radius: 50px;
 }
 .progress-bar {

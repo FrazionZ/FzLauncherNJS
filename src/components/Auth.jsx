@@ -13,7 +13,7 @@ class Auth {
     this.fzVariable = new FzVariable()
   }
 
-  async addAccount(email, password, intfa, twofa) {
+  async addAccount(email, password, intfa, typetfa, twofa) {
     return new Promise(async (resolve, reject) => {
       /* DETERMINE OS */
       var opsys = process.platform
@@ -28,10 +28,11 @@ class Auth {
         }
         var user = undefined
         if (!twofa) user = await this.authenticator.auth(email, password, opsys, 'fzlauncher')
-        else user = await this.authenticator.authWith2FA(email, password, opsys, 'fzlauncher', intfa)
+        else user = await this.authenticator.authWith2FA(email, password, opsys, 'fzlauncher', intfa, typetfa)
 
         this.fzVariable.store.set('lastEmail', email)
 
+        console.log(user)
         if (user.status !== undefined) {
           if (user.status == 'error') {
             return reject({ msg: this.fzVariable.lang('logging.result.credentials'), twofa: false })
