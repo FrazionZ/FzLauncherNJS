@@ -92,7 +92,9 @@ class Updater extends React.Component {
     if (!fzVariable.fs.existsSync(fzVariable.path.join(fzVariable.dirFzLauncherDatas, 'runtime'))) {
       fzVariable.fs.mkdirSync(fzVariable.path.join(fzVariable.dirFzLauncherDatas, 'runtime'))
       this.router.showPage('/runtime')
-    } else this.router.showPage('/login')
+    } else {
+      this.router.showPage('/login')
+    }
   }
 
   render() {

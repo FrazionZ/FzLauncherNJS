@@ -25,7 +25,7 @@ export default class Task {
 
     this.timer = 0;
     this.aexist = false;
-
+    this.lastTask = opts.lastTask;
     
     this.title = "";
     this.subtitle = "";
@@ -41,6 +41,7 @@ export default class Task {
  
     this.fileZipDepend = opts.fileZipDepend;
     this.dirServer = opts.dirServer;
+    this.lastTask = opts.lastTask;
 
     this.timer = 0;
     this.aexist = true;
@@ -73,6 +74,7 @@ export default class Task {
               console.log("DomTask Exist (Update Task group)");
             }
           }
+          document.querySelector('.taskOverlay').classList.remove('hidden')
         }
       }
       return new Promise((resolve, reject) => {
@@ -228,8 +230,15 @@ export default class Task {
           domTask.querySelector("#downloadbar").parentNode.style.display = "block";
           domTask.querySelector(".percentage").innerHTML = state.percentage+"%";
           domTask.querySelector("#downloadbar").style.width = state.percentage + "%";
-          
+          let taskOverlay = document.querySelector('.taskOverlay')
+          taskOverlay.querySelector('.title').innerHTML = title;
+          taskOverlay.querySelector('.subtitle').innerHTML = subtitle;
+          taskOverlay.querySelector("#downloadbar").style.width = state.percentage + "%";
+
+          const customEvent = new CustomEvent('task__updated', { detail: { title: title, subtitle: subtitle, state: { percentage: state.percentage } } });
+          document.dispatchEvent(customEvent)
         }
+
       }
     }
   }
@@ -241,9 +250,16 @@ export default class Task {
     );
     if (domTask !== null || domTask !== undefined) {
       domTask.querySelector(".title").innerHTML = this.prefix;
-      domTask.querySelector(".subtitle").innerHTML = `Terminé, (Temps: ${timeFinish})`;
+      domTask.querySelector(".subtitle").innerHTML = `${(this.lastTask) ? `Terminé, (Temps: ${timeFinish})` : 'En attente'}`
       domTask.querySelector(".percentage").parentNode.style.display = "none";
       domTask.querySelector("#downloadbar").parentNode.style.display = "none";
+
+      //RESET TASK OVERLAY
+      let taskOverlay = document.querySelector('.taskOverlay');
+      if(this.lastTask) taskOverlay.classList.add('hidden')
+      taskOverlay.querySelector(".title").innerHTML = "Récupération des informations";
+      taskOverlay.querySelector(".subtitle").innerHTML = "Traitement de la tâche en cours...";
+      taskOverlay.querySelector("#downloadbar").style.width = "0%";
     }
   }
 
@@ -251,7 +267,7 @@ export default class Task {
     return (
       <div className="card dl-items" id={task.uuidDl}>
         <div className="card-body flex gap-15 direct-column justif-between">
-          <div className="left flex gap-30 align-center">
+          <div className="left flex gap-10 align-center">
             <div className="icon" style={{ textAlign: "center" }}>
               <span className="text-3xl percentage">0%</span>
             </div>

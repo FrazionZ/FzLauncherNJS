@@ -47,11 +47,6 @@ class App extends React.Component {
           url: '/login'
         },
         {
-          component: <Login appRouter={this.router} functionParse={functionParse} />,
-          name: 'Login',
-          url: '/login'
-        },
-        {
           component: <LayoutConnect appRouter={this.router} functionParse={functionParse} />,
           name: 'Connected',
           url: '/connected'
@@ -65,7 +60,7 @@ class App extends React.Component {
   render() {
     return (
       <div className="App">
-        <ToastContainer />
+        <ToastContainer position="top-right" />
         <div className="layout">
           <Header />
           <div className="main"></div>

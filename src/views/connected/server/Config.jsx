@@ -153,9 +153,12 @@ class Config extends React.Component {
     let excludesFiles = [
       "resourcepacks",
       "saves",
+      "screenshots",
       "shaderpacks",
       "options.txt",
       "optionsof.txt",
+      "mods.txt",
+      "mods"
     ];
     let instance = this
     this.fzVariable.fs.readdir(this.ServerObj.dirServer, function (err, files) {
@@ -163,17 +166,13 @@ class Config extends React.Component {
       if (err) resolveGlobal(false);
       var rmOrUnlinkLoop = new Promise((resolve, reject) => {
         files.forEach(function (fileOrDir, index, array) {
-          var hasDelete = true;
-          excludesFiles.forEach((excludesFile) => {
-            if (excludesFile == fileOrDir) hasDelete = false;
-          });
-          if (hasDelete) {
-            var statFile = this.fzVariable.fs.lstatSync(
-              this.fzVariable.path.join(instance.ServerObj.dirServer, fileOrDir)
+          if (!excludesFiles.includes(fileOrDir)) {
+            var statFile = instance.fzVariable.fs.lstatSync(
+              instance.fzVariable.path.join(instance.ServerObj.dirServer, fileOrDir)
             );
             if (statFile.isDirectory()) {
-              this.fzVariable.fs.rm(
-                this.fzVariable.path.join(instance.ServerObj.dirServer, fileOrDir), {
+              instance.fzVariable.fs.rm(
+                instance.fzVariable.path.join(instance.ServerObj.dirServer, fileOrDir), {
                 recursive: true,
                 force: true
               },
@@ -182,8 +181,8 @@ class Config extends React.Component {
                 }
               );
             } else if (statFile.isFile()) {
-              this.fzVariable.fs.unlink(
-                this.fzVariable.path.join(instance.ServerObj.dirServer, fileOrDir),
+              instance.fzVariable.fs.unlink(
+                instance.fzVariable.path.join(instance.ServerObj.dirServer, fileOrDir),
                 (err) => {
                   if (index === array.length - 1) resolve();
                 }

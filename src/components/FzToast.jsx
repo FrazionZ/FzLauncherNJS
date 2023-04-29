@@ -7,7 +7,7 @@ import BubbleWarning from '../assets/img/icons/bubble_warning.svg'
 
 const options = (state) => {
   let options = {
-    position: toast.POSITION.BOTTOM_RIGHT,
+    position: toast.POSITION.TOP_CENTER,
     theme: 'dark',
     icon: () => {
       switch (state) {

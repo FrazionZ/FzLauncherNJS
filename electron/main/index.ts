@@ -167,8 +167,17 @@ async function createWindow() {
     BrowserWindow.getFocusedWindow().minimize();
   });
 
-  ipcMain.on("maximizeApp", () => {
+  ipcMain.on("maximizeApp", (e, args) => {
     win.isMaximized() ? win.unmaximize() : win.maximize();
+  });
+
+  ipcMain.on("unMaximizeApp", (e, args) => {
+    win.isMaximized() ? win.unmaximize() : () => {};
+    win.setMaximizable(false)
+  });
+
+  ipcMain.on("allowMaximizeApp", (e, args) => {
+    win.setMaximizable(true)
   });
 
   ipcMain.on("finishDownloadUpdate", () => {

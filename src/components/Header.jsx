@@ -6,11 +6,12 @@ import FzToast from './FzToast'
 
 class Header extends React.Component {
   toggleReduceApp() {
-    window.ipcRenderer.send('reduceApp')
+      window.ipcRenderer.send('reduceApp')
   }
 
   toggleMaximizeApp() {
-    window.ipcRenderer.send('maximizeApp')
+    if(sessionStorage.getItem('disallowMaximizeApp') !== "true")
+      window.ipcRenderer.send('maximizeApp')
   }
 
   closeApp() {

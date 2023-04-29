@@ -1,6 +1,6 @@
 {
   "name": "fzlauncher",
-  "version": "1.4.2",
+  "version": "1.4.4",
   "main": "dist-electron/main/index.js",
   "description": "FrazionZ Launcher",
   "author": "FrazionZ",
@@ -54,6 +54,7 @@
     "@headlessui/tailwindcss": "^0.1.2",
     "@heroicons/react": "^2.0.13",
     "@sentry/electron": "^4.2.0",
+    "async-await-queue": "^2.1.4",
     "axios": "^1.2.3",
     "azuriom-auth": "^1.0.1",
     "byte-size": "^8.1.0",
@@ -74,6 +75,7 @@
     "react-google-recaptcha": "^2.1.0",
     "react-hook-form": "^7.42.1",
     "react-icons": "^4.7.1",
+    "react-modal": "^3.16.1",
     "react-router-dom": "^6.6.2",
     "react-skinview3d": "^5.0.0",
     "react-slideshow-image": "^4.1.1",

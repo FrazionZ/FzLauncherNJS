@@ -8,7 +8,6 @@ import ServerConfig from '../../../server_config.json'
 import logo from '../../assets/img/icons/icon.png'
 import Router from '../../components/Router';
 import { FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
-import Alert from '../../components/Alert'
 const os = require('os');
 
 
@@ -90,6 +89,7 @@ class Server extends React.Component {
     constructor(props) {
         super(props)
         this.sideRouter = props.sideRouter
+        this.taskQueue = props.taskQueue
         ServerObj = ServerConfig[props.idServer]
         ServerIcon = ServerObj.urlLogo
         fp = props.functionParse;
@@ -130,11 +130,11 @@ class Server extends React.Component {
         })
         this.router.setPages(this.subpages(ServerObj, this.sideRouter, this.router))
 
-        if(this.routerForce !== null)
+        if (this.routerForce !== null)
             this.router.showPage(this.routerForce)
         else
             this.router.showPage('/news')
-        
+
         sessionStorage.removeItem('routerForce')
 
 
@@ -416,12 +416,13 @@ class Server extends React.Component {
         var uuidDl = uuidv4()
         var startLinkDL = function (index) {
             console.log(links[index])
-            fp.AddTask({
+            fp.AddTaskInQueue({
                 type: 0,
                 uuidDl: uuidDl,
                 installerfileURL: links[index].dlink,
                 installerfilename: fzVariable.path.join(instance.dirServer, links[index].dirInstall, links[index].name),
-                prefix: ServerObj.name
+                prefix: ServerObj.name,
+                lastTask: false
             }).then((result) => {
                 if (!(index + 1 == links.length))
                     startLinkDL(index + 1)
@@ -434,12 +435,13 @@ class Server extends React.Component {
                     })
 
                     if (fileZipDepend !== undefined) {
-                        fp.AddTask({
+                        fp.AddTaskInQueue({
                             type: 1,
                             uuidDl: uuidDl,
                             prefix: ServerObj.name,
                             fileZipDepend: fileZipDepend,
                             dirServer: instance.dirServer,
+                            lastTask: true
                         }).then((result) => {
                             instance.prepareToLaunch(links, fileZipDepend);
                         }).catch((err) => console.log(err))
@@ -643,7 +645,7 @@ class Server extends React.Component {
                 }
 
                 sessionStorage.setItem('gameLaunched', true)
-                
+
 
                 var processJavaLaunch = () => {
                     instance.gameLaunched = true;
@@ -740,95 +742,98 @@ class Server extends React.Component {
 
     render() {
         return (
-            <div className="server index reset-mp">
-                <div className="head pl-40 pr-40 pt-40">
-                    <div className="subhead">
-                        <div className="flex pd-30 gap-30">
-                            <div className="infos">
-                                <div className="flex align-center gap-4">
-                                    <div className="server__logo">
-                                        <img src={logo} width="64" height="64" alt="logo_server" />
-                                    </div>
-                                    <h2 className="reset-mp dark server__title">{ServerObj.name}</h2>
+            <>
+                <div className="server index reset-mp">
+                    <div className="head pl-40 pr-40 pt-40">
+                        <div className="subhead">
+                            <div className="flex pd-30 gap-30">
+                                <div className="infos">
+                                    <div className="flex align-center gap-4">
+                                        <div className="server__logo">
+                                            <img src={logo} width="64" height="64" alt="logo_server" />
+                                        </div>
+                                        <h2 className="reset-mp dark server__title">{ServerObj.name}</h2>
 
-                                    <div className="state">
-                                        {this.state.mcInfosBanner.finish === false &&
-                                            (
-                                                <>
-                                                    <div className="indicator">
-                                                        <FaClock className='text-[20px]' />
-                                                    </div>
-                                                    <div className="label">
-                                                        <span>Recherche des infos..</span>
-                                                    </div>
-                                                </>
-                                            )
-                                        }
-                                        {this.state.mcInfosBanner.finish === true && this.state.mcInfosBanner.online === true &&
-                                            (
-                                                <>
-                                                    <div className="indicator online">
-                                                        <FaCheckCircle className='text-[#2f9b41] text-[20px]' />
-                                                    </div>
-                                                    <div className="label">
-                                                        <span>En ligne, {this.state.mcInfosBanner.players} joueurs</span>
-                                                    </div>
-                                                </>
-                                            )
-                                        }
-                                        {this.state.mcInfosBanner.finish === true && this.state.mcInfosBanner.online === false &&
-                                            (
+                                        <div className="state">
+                                            {this.state.mcInfosBanner.finish === false &&
+                                                (
+                                                    <>
+                                                        <div className="indicator">
+                                                            <FaClock className='text-[20px]' />
+                                                        </div>
+                                                        <div className="label">
+                                                            <span>Recherche des infos..</span>
+                                                        </div>
+                                                    </>
+                                                )
+                                            }
+                                            {this.state.mcInfosBanner.finish === true && this.state.mcInfosBanner.online === true &&
+                                                (
+                                                    <>
+                                                        <div className="indicator online">
+                                                            <FaCheckCircle className='text-[#2f9b41] text-[20px]' />
+                                                        </div>
+                                                        <div className="label">
+                                                            <span>En ligne, {this.state.mcInfosBanner.players} joueurs</span>
+                                                        </div>
+                                                    </>
+                                                )
+                                            }
+                                            {this.state.mcInfosBanner.finish === true && this.state.mcInfosBanner.online === false &&
+                                                (
 
-                                                <>
-                                                    <div className="indicator">
-                                                        <FaTimesCircle className='text-[#b13232] text-[20px]' />
-                                                    </div>
-                                                    <div className="label">
-                                                        <span>Hors ligne</span>
-                                                    </div>
-                                                </>
-                                            )
-                                        }
+                                                    <>
+                                                        <div className="indicator">
+                                                            <FaTimesCircle className='text-[#b13232] text-[20px]' />
+                                                        </div>
+                                                        <div className="label">
+                                                            <span>Hors ligne</span>
+                                                        </div>
+                                                    </>
+                                                )
+                                            }
+                                        </div>
                                     </div>
+                                    <h4 className="server__description mt-10">{ServerObj.expl_server}</h4>
                                 </div>
-                                <h4 className="server__description mt-10">{ServerObj.expl_server}</h4>
                             </div>
-                        </div>
-                        <div className="flex justif-center">
-                            <div
-                                className="alert black-3 serverUnavailble"
-                                style={{
-                                    borderRadius: '8px',
-                                    position: 'relative',
-                                    bottom: '6px',
-                                    display: 'none',
-                                    width: '50%',
-                                    textAlign: 'center'
-                                }}
-                            >
-                                <i className="fa-solid fa-triangle-exclamation fcolor-2 mr-10"></i>{' '}
-                                {fzVariable.lang('server.play.unavailable')}
+                            <div className="flex justif-center">
+                                <div
+                                    className="alert black-3 serverUnavailble"
+                                    style={{
+                                        borderRadius: '8px',
+                                        position: 'relative',
+                                        bottom: '6px',
+                                        display: 'none',
+                                        width: '50%',
+                                        textAlign: 'center'
+                                    }}
+                                >
+                                    <i className="fa-solid fa-triangle-exclamation fcolor-2 mr-10"></i>{' '}
+                                    {fzVariable.lang('server.play.unavailable')}
+                                </div>
                             </div>
-                        </div>
-                        <div className="flex justify-center">
-                            <SuperButton id="btnDLGFirst" className="" onClick={this.bdlgOnClick} text={fzVariable.lang('general.pwait')} />
-                        </div>
+                            <div className="flex justify-center">
+                                <SuperButton id="btnDLGFirst" className="" onClick={this.bdlgOnClick} text={fzVariable.lang('general.pwait')} />
+                            </div>
 
-                        <div className="ui top attached tabular nav nav-pills mb-3 menu">
-                            {this.subpages(ServerObj).map((item, key) => (
-                                <li key={key} className={`item ${(item.active) ? "active" : ""}`} data-tab={item.name}>
-                                    <a onClick={this.changePage} dhref={item.url}>{item.title}</a>
-                                </li>
-                            ))}
+                            <div className="ui top attached tabular nav nav-pills mb-3 menu">
+                                {this.subpages(ServerObj).map((item, key) => (
+                                    <li key={key} className={`item ${(item.active) ? "active" : ""}`} data-tab={item.name}>
+                                        <a onClick={this.changePage} dhref={item.url}>{item.title}</a>
+                                    </li>
+                                ))}
+                            </div>
                         </div>
                     </div>
+                    <div className="modals">
+                        <CrashGame dirServer={this.dirServer} />
+                    </div>
+                    <div className="subpages px-5 pb-[4rem]">
+                    </div>
                 </div>
-                <div className="modals">
-                    <CrashGame dirServer={this.dirServer} />
-                </div>
-                <div className="subpages px-5 pb-[4rem]">
-                </div>
-            </div>
+            </>
+
         )
     }
 }

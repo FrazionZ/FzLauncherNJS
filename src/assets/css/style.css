@@ -1696,17 +1696,68 @@ a.social:hover svg linearGradient stop:last-child {
 }
 .taskOverlay {
     position: absolute;
-    z-index: 99;
-    bottom: 9.5rem;
-    left: 100px;
-    background: var(--fzbg-4);
-    padding: 1rem 1rem;
-    transition: 0.2s all ease-in-out;
-    border-radius: 1rem;
+    background: var(--fzbg-2);
+    width: 35%;
+    right: 20px;
+    bottom: 20px;
+    color: white;
+    border-radius: 8px;
+    padding: 14px;
+    box-shadow: 1px 1px 120px black;
+    transition: all 0.2s ease-in-out;
+}
+.taskOverlay.minified {
+    width: 90px;
+    height: 90px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+}
+.taskOverlay .minicon {
     display: none;
 }
-.taskOverlay.show {
+.taskOverlay.minified .minicon {
     display: block;
+}
+.taskOverlay.minified .icon {
+    display: none;
+}
+.taskOverlay.minified .dl-items .title, .taskOverlay.minified .dl-items .subtitle {
+    display: none;
+}
+.taskOverlay.minified .dl-items {
+    width: 100%;
+}
+.taskOverlay .dl-items {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+.taskOverlay .dl-items .title {
+    font-size: 16px;
+}
+.taskOverlay .dl-items .subtitle {
+    font-size: 12px;
+}
+.taskOverlay .dl-items .title, .taskOverlay .dl-items .title .subtitle {
+    width: 80%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+.taskOverlay .progress {
+    height: 6px;
+}
+.taskOverlay .progress .indicator {
+    height: 6px;
+}
+.taskOverlay .minimize {
+    position: absolute;
+    top: 12px;
+    width: fit-content;
+    padding: 3px;
+    right: 12px;
 }
 /*
 .download {

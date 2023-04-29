@@ -162,12 +162,13 @@ class Rpacks extends React.Component {
             }
             
             var uuidDl = uuidv4();
-            fp.AddTask({
+            fp.AddTaskInQueue({
                 type: 0,
                 uuidDl: uuidDl,
                 installerfileURL: "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip",
                 installerfilename: rpack.pathFile,
-                prefix: "Resources Pack"
+                prefix: "Resources Pack",
+                lastTask: true
             }).then((result) => {
                 FzToast.success('Le pack a bien été '+((isUpdate) ? "mis à jour" : "téléchargé"))
                 return resolve(result);

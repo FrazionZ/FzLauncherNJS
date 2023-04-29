@@ -2,7 +2,6 @@ import React from 'react'
 import { Tooltip } from 'flowbite-react'
 import ServerConfig from '../../server_config.json'
 import logo from '../assets/img/icons/icon.png'
-import Task from '../components/Task'
 
 import Server from '../views/connected/Server'
 import Tasks from '../views/connected/Tasks'
@@ -14,33 +13,12 @@ import Router from './Router'
 
 import Config from '../assets/img/icons/config.svg'
 import FzVariable from './FzVariable'
-import FzEditSkinDialog from './FzEditSkinDialog'
 
 let user
 
 const sidebarMinimize = () => {
   document.querySelector('.sidebar').classList.toggle('minimize')
 }
-
-const GetTask = async (uuidDl) => {
-  for await (const task of tasks) {
-    if (uuidDl == task.uuidDl) return task
-  }
-}
-
-const AddTask = async (taskObj) => {
-  let ntask = await GetTask(taskObj.uuidDl)
-  if (ntask == undefined || ntask == null) {
-    ntask = new Task(taskObj)
-    tasks.push(ntask)
-  } else ntask.constUpdate(taskObj)
-  return ntask.start()
-}
-
-let functionParse = {
-  AddTask: AddTask
-}
-let tasks = []
 
 export default class Sidebar extends React.Component {
 
@@ -54,6 +32,10 @@ export default class Sidebar extends React.Component {
     user = JSON.parse(sessionStorage.getItem('user'))
     this.fzVariable = new FzVariable()
     this.navClick = this.navClick.bind(this)
+    this.tasks = props.tasks
+    this.functionParse = {
+      AddTaskInQueue: props.fp.AddTaskInQueue
+    }
   }
 
   async componentDidMount() {
@@ -66,32 +48,32 @@ export default class Sidebar extends React.Component {
     })
     this.router.setPages([
       {
-        component: <Server sidebar={sidebar} sideRouter={this.router} functionParse={functionParse} idServer="0" />,
+        component: <Server sidebar={sidebar} taskQueue={this.taskQueue} sideRouter={this.router} functionParse={this.functionParse} idServer="0" />,
         name: 'Server',
         url: '/server'
       },
       {
-        component: <Tasks sidebar={sidebar} sideRouter={this.router} taskList={tasks} functionParse={functionParse} />,
+        component: <Tasks sidebar={sidebar} sideRouter={this.router} taskList={this.tasks} functionParse={this.functionParse} />,
         name: 'Tasks',
         url: '/tasks'
       },
       {
-        component: <Wiki sidebar={sidebar} sideRouter={this.router} taskList={tasks} functionParse={functionParse} />,
+        component: <Wiki sidebar={sidebar} sideRouter={this.router} taskList={this.tasks} functionParse={this.functionParse} />,
         name: 'Wiki',
         url: '/wiki'
       },
       {
-        component: <Settings sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={functionParse} />,
+        component: <Settings sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,
         name: 'Settings',
         url: '/settings'
       },
       {
-        component: <Profile sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={functionParse} />,
+        component: <Profile sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,
         name: 'Profile',
         url: '/profile'
       },
       {
-        component: <FzCGUV sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={functionParse} />,
+        component: <FzCGUV sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,
         name: 'CGUV',
         url: '/cguv'
       }
@@ -101,12 +83,24 @@ export default class Sidebar extends React.Component {
   }
 
   navClick(instanceButton) {
+    if(document.querySelector('.featuresDiscovery.open') !== null) return;
     document.querySelector('.sidebar .parent-menu-link.active').classList.remove('active')
     instanceButton.target.classList.add('active')
 
     let href = instanceButton.target.getAttribute('data-href')
     this.router.showPage(href)
   }
+
+  /*
+            <Tooltip content={this.fzVariable.lang('sidebar.navs.task')} placement="right">
+              <li onClick={this.navClick} data-href="/tasks" className="parent-menu-link">
+                <a className="menu-link">
+                  <i className="bx bx-food-menu" style={{ fontSize: '36px' }}></i>
+                  <span>{this.fzVariable.lang('sidebar.navs.task')}</span>{' '}
+                  <span className="badge bg-secondary dl downloads__countDl">0</span>
+                </a>
+              </li>
+            </Tooltip>*/
 
   render() {
     return (
@@ -133,12 +127,10 @@ export default class Sidebar extends React.Component {
             })}
           </div>
           <div id="navs">
-            <Tooltip content={this.fzVariable.lang('sidebar.navs.task')} placement="right">
+           <Tooltip content={this.fzVariable.lang('sidebar.navs.task')} placement="right">
               <li onClick={this.navClick} data-href="/tasks" className="parent-menu-link">
                 <a className="menu-link">
                   <i className="bx bx-food-menu" style={{ fontSize: '36px' }}></i>
-                  <span>{this.fzVariable.lang('sidebar.navs.task')}</span>{' '}
-                  <span className="badge bg-secondary dl downloads__countDl">0</span>
                 </a>
               </li>
             </Tooltip>
@@ -146,8 +138,6 @@ export default class Sidebar extends React.Component {
               <li onClick={this.navClick} data-href="/wiki" className="parent-menu-link">
                 <a className="menu-link">
                   <i className='bx bxs-book-bookmark' style={{ fontSize: '36px' }}></i>
-                  <span>{this.fzVariable.lang('sidebar.navs.task')}</span>{' '}
-                  <span className="badge bg-secondary dl downloads__countDl">0</span>
                 </a>
               </li>
             </Tooltip>
@@ -169,25 +159,6 @@ export default class Sidebar extends React.Component {
                 </a>
               </li>
             </Tooltip>
-          </div>
-        </div>
-        <div className="taskOverlay">
-          <span className="nothing">Aucun téléchargements en cours</span>
-          <div className="card dl-items black-4 hide" id="uuidDl">
-            <div className="card-body flex gap-15 direct-column justif-between">
-              <div className="left flex gap-30 align-center">
-                <div className="icon">
-                  <span className="percent">0%</span>
-                </div>
-                <div className="infos flex direct-column w-100">
-                  <div className="title  w-100">Chargement des données</div>
-                  <div className="subtitle  w-100">veuillez patienter</div>
-                </div>
-              </div>
-              <div className="progress  w-100">
-                <div className="indicator" id="downloadbar" style={{ width: '0%' }}></div>
-              </div>
-            </div>
           </div>
         </div>
       </div>
