@@ -38,6 +38,14 @@ class Config extends React.Component {
         }
       },
       {
+        key: "config__server_clean_auto_cache",
+        value: this.fzVariable.store.get(this.fzVariable.keyStoreServerOptions("config__server_clean_auto_cache"), false),
+        view: {
+          title: this.fzVariable.lang("server.config.auto_cache.title"),
+          subtitle: this.fzVariable.lang("server.config.auto_cache.subtitle")
+        }
+      },
+      {
         key: "config__server_display_fullscreen",
         value: this.fzVariable.store.get(this.fzVariable.keyStoreServerOptions("config__server_display_fullscreen"), false),
         view: {
@@ -196,8 +204,7 @@ class Config extends React.Component {
     event.disabled = true;
     let errorsList = [];
     let dirs = [
-      this.fzVariable.path.join(this.ServerObj.dirServer, "assets/frazionz/skins"),
-      this.fzVariable.path.join(this.ServerObj.dirServer, "assets/frazionz/capes")
+      this.fzVariable.path.join(this.ServerObj.dirServer, "assets/frazionz/cache")
     ]
     for await (const dir of dirs) {
       this.fzVariable.fs.rmSync(dir, {
