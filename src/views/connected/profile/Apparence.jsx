@@ -281,7 +281,7 @@ export default function Apparence(props) {
           form_data.append('type', skin.model);
           form_data.append('capeID', (skin.cape !== undefined) ? skin.cape : -1);
           form_data.append('access_token', session.access_token);
-          await axios.post('https://frazionz.net/api/skin-api/skins/update', form_data, {
+          await axios.post('https://frazionz.net/api/skins/update', form_data, {
             headers: {
               'Content-Type': 'multipart/form-data'
             }

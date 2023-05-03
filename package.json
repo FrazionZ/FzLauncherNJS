@@ -1,6 +1,6 @@
 {
   "name": "fzlauncher",
-  "version": "1.4.4",
+  "version": "1.4.7",
   "main": "dist-electron/main/index.js",
   "description": "FrazionZ Launcher",
   "author": "FrazionZ",

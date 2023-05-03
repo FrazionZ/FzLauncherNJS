@@ -1,4 +1,5 @@
 const { Client } = require('minecraft-launcher-core')
+const { Notification } = require('electron')
 let launcher
 class MinecraftRuntime {
   constructor(funcMain, ipcMain, mainWindow) {
@@ -28,6 +29,11 @@ class MinecraftRuntime {
     }).catch((err) => {
       console.log(err)
     })
+    
+    new Notification({
+      title: "FrazionZ",
+      body: "Une instance est ouverte, le launcher s'est donc minimisé dans la barre d'outil",
+    }).show();
 
     console.log('[FzLauncher] Launching instance runtime with ' + this.opts.overrides.minecraftJar)
 

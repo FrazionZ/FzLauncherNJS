@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain } from "electron";
+import { app, BrowserWindow, shell, ipcMain, Notification, nativeImage, Tray, Menu } from "electron";
 import { release } from "node:os";
 import { join } from "node:path";
 import * as Sentry from "@sentry/electron";
@@ -119,6 +119,18 @@ async function createWindow() {
     win.loadFile(indexHtml);
   }
 
+  const icon = nativeImage.createFromPath(join(process.env.PUBLIC, "favicon.ico"))
+  let tray = new Tray(icon)
+
+  const contextMenu = Menu.buildFromTemplate([
+    { label: 'Ouvrir le Launcher', type: 'normal', click: () => { win.show() } },
+    { label: 'Minimiser le Launcher', type: 'normal', click: () => { win.hide() } },
+    { label: 'Fermer le Launcher', type: 'normal', click: () => { closeApp() } }
+  ])
+
+  tray.setToolTip('FrazionZ Launcher')
+  tray.setContextMenu(contextMenu)
+
   setTimeout(async () => {
     remoteMain.enable(win.webContents);
   }, 1000);
@@ -184,6 +196,13 @@ async function createWindow() {
     app.exit();
     process.exit();
   });
+
+  ipcMain.on("notification", (e, args) => {
+    new Notification({
+      title: args.title,
+      body: args.body,
+    }).show();
+  })
 
   win.show();
 }
