@@ -596,12 +596,6 @@ class Server extends React.Component {
                 var dirServerNatives = fzVariable.path.join(instance.dirServer, "natives");
                 var dirServerLibs = fzVariable.path.join(instance.dirServer, "libs");
 
-                if (fzVariable.store.get(fzVariable.keyStoreServerOptions('config__server_clean_auto_cache'), true)) {
-                    fzVariable.fs.rm(fzVariable.path.join(dirServerAssets, "frazionz/cache"), { recursive: true, force: true }, (err => {
-                        if (err) return console.log(err);
-                    }));
-                }
-
                 const StringBuilder = require("string-builder");
                 const sbLibs = new StringBuilder();
 

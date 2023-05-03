@@ -38,14 +38,6 @@ class Config extends React.Component {
         }
       },
       {
-        key: "config__server_clean_auto_cache",
-        value: this.fzVariable.store.get(this.fzVariable.keyStoreServerOptions("config__server_clean_auto_cache"), true),
-        view: {
-          title: this.fzVariable.lang("server.config.auto_cache.title"),
-          subtitle: this.fzVariable.lang("server.config.auto_cache.subtitle")
-        }
-      },
-      {
         key: "config__server_display_fullscreen",
         value: this.fzVariable.store.get(this.fzVariable.keyStoreServerOptions("config__server_display_fullscreen"), false),
         view: {
