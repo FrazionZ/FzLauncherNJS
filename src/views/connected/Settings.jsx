@@ -1,19 +1,14 @@
 import React from 'react'
 import FzPackage from '../../../package.json'
-const { shell, ipcRenderer } = require('electron')
-import Discord from '../../assets/img/icons/network/discord'
-import Insta from '../../assets/img/icons/network/insta'
-import Tiktok from '../../assets/img/icons/network/tiktok'
-import Twitter from '../../assets/img/icons/network/twitter'
-import Youtube from '../../assets/img/icons/network/youtube'
 import { Switch } from '@headlessui/react'
-
+import { shell } from 'electron'
 const Store = require('electron-store')
 const store = new Store()
 
 
 import FzVariable from '../../components/FzVariable'
 import FzLangListBox from '../../components/FzLangListbox'
+import FzFooter from '../../components/FzFooter'
 
 class Settings extends React.Component {
 
@@ -144,6 +139,15 @@ class Settings extends React.Component {
               </div>
               <div className="config-item">
                 <div className="column flex direct-column justif-center">
+                  <h2 className="label__config reset-mp">Licences des librairies</h2>
+                  <h2 className="expl__config reset-mp">Liste comprenant les dépendances utilisées par FzLauncher</h2>
+                </div>
+                <div className="flex align-center gap-20">
+                  <a className="btn config__launcher_pnotes" onClick={() => { this.sideRouter.showPage('/license') }}>{this.fzVariable.lang('settings.licenses.action')}</a>
+                </div>
+              </div>
+              <div className="config-item">
+                <div className="column flex direct-column justif-center">
                   <h2 className="label__config reset-mp">Node</h2>
                   <h2 className="expl__config reset-mp">{process.versions.node}</h2>
                 </div>
@@ -163,32 +167,7 @@ class Settings extends React.Component {
             </div>
           </div>
         </div>
-        <br />
-        <br />
-        <br />
-        <div className="flex gap-15 justif-center">
-          <a onClick={() => { shell.openExternal('https://discord.gg/sSf7NCs8Ap') }} className="social flex justify-center items-center">
-            <Discord />
-          </a>
-          <a onClick={() => { shell.openExternal('https://www.instagram.com/frazionz/') }} className="social flex justify-center items-center">
-            <Insta />
-          </a>
-          <a onClick={() => { shell.openExternal('https://twitter.com/frazionz/') }} className="social flex justify-center items-center">
-            <Twitter />
-          </a>
-          <a onClick={() => { shell.openExternal('https://www.tiktok.com/@frazionz') }} className="social flex justify-center items-center">
-            <Tiktok />
-          </a>
-          <a onClick={() => { shell.openExternal('https://www.youtube.com/@frazionz533') }} className="social flex justify-center items-center">
-            <Youtube />
-          </a>
-        </div>
-        <div className="credits">
-          <span>Réalisé par <a href="#" onClick={() => { shell.openExternal('https://twitter.com/SunshineDev62') }} >SunshineDev</a> - Non affilié à Mojang AB</span>
-          <span>
-            © 2022 FrazionZ. Tous droits réservés - <a href="#" onClick={ () => { this.sideRouter.showPage('/cguv') } }>Conditions Générales</a>
-          </span>
-        </div>
+        <FzFooter sideRouter={this.sideRouter} />
       </div>
     )
   }

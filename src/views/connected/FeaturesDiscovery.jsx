@@ -22,11 +22,6 @@ export default function FeaturesDiscovery() {
             domElem: '.sidebar #navs li[data-href="/tasks"]'
         },
         {
-            title: "Wiki de FrazionZ",
-            subtitle: "Vous pouvez retrouver le wiki via ce launcher ! Si votre jeu est ouvert, vous pouvez le réouvrir grâce au menu contextuel de votre système d'exploitation",
-            domElem: '.sidebar #navs li[data-href="/wiki"]'
-        },
-        {
             title: "Paramètres Launcher",
             subtitle: "Via cette page, vous pouvez gérer la configuration de votre launcher, comme la langue, Discord RPC ou encore voir certaines infos liées à FrazionZ",
             domElem: '.sidebar #navs li[data-href="/settings"]'

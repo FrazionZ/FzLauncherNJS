@@ -48,6 +48,7 @@
         "settings.darkmode.title": "DarkMode",
         "settings.darkmode.subtitle": "Enable/Disable the dark mode on the launcher",
         "settings.pnotes.action": "See the Patch Notes",
+        "settings.licenses.action": "See the licenses",
         "server.tabs.news": "News",
         "server.tabs.pnotes": "Patch Notes",
         "server.tabs.rpacks": "Resources Packs",

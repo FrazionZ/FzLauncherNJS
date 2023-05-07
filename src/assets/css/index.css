@@ -741,6 +741,38 @@ ul[role="listbox"] li[aria-selected="true"]{
   opacity: 1;
   display: block;
 }
+.licenses {
+  padding: 3rem 6rem;
+  color: white;
+}
+.licenses .head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.licenses .head span {
+  font-size: 1.5rem;
+}
+.licenses webview {
+  height: 100%;
+  border-radius: 8px;
+}
+.licenses span {
+  color: white;
+}
+.licenses h1 {
+  font-size: 2rem;
+}
+.licenses h2 {
+  font-size: 1.5rem;
+}
+.licenses h3 {
+  font-size: 1.3rem;
+}
+.licenses a {
+  color: var(--color-2);
+}
+
 .cguv {
   padding: 3rem 6rem;
   height: calc(100vh - 80px);

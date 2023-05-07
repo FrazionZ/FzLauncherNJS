@@ -54,7 +54,6 @@ class Router {
               page.root = ReactDOM.createRoot(domChild)
             }else {
               domChild = this.domParent.querySelector('.'+page.name)
-              console.log(page)
             }
             page.domChild = domChild
           } else {

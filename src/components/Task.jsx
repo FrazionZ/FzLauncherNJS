@@ -1,9 +1,6 @@
 import ReactDOM from "react-dom/client";
-import CircularProgress from "./CircularProgress";
 import FzVariable from "./FzVariable";
 import React from 'react'
-import { CircularProgressbar } from 'react-circular-progressbar';
-import 'react-circular-progressbar/dist/styles.css';
 const EventEmitter = require("events");
 
 let fzVariable = new FzVariable();
@@ -70,9 +67,7 @@ export default class Task {
             let domTask = document.querySelector(
               '.downloads .listDls .dl-items[id="' + instance.uuidDl + '"]'
             );
-            if (domTask !== null || domTask !== undefined) {
-              console.log("DomTask Exist (Update Task group)");
-            }
+            if (domTask !== null || domTask !== undefined) { }
           }
           document.querySelector('.taskOverlay').classList.remove('hidden')
         }

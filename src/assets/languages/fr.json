@@ -50,6 +50,7 @@
         "settings.darkmode.title": "Mode sombre",
         "settings.darkmode.subtitle": "Activer/Désactiver le mode sombre sur le launcher",
         "settings.pnotes.action": "Voir le patch notes",
+        "settings.licenses.action": "Voir les licences",
         "server.state.error": "Le serveur semble indisponible pour le moment",
         "server.tabs.news": "Actualités",
         "server.tabs.pnotes": "Patch Notes",

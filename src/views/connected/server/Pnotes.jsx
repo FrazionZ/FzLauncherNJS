@@ -3,6 +3,7 @@ import FzVariable from '../../../components/FzVariable';
 const axios = require('axios').default;
 import moment from 'moment-timezone'
 import 'moment/locale/fr'  // without this line it didn't work
+import Alert from '../../../components/Alert';
 moment.locale('fr')
 let fzVariable;
 
@@ -62,7 +63,7 @@ class Pnotes extends React.Component {
         }
 
         if (error) {
-            return <div className="error">Something went wrong</div>;
+            return <Alert className="w-fit" state="error" message="Indisponible pour le moment." />;
         }
 
         if (typeof response == undefined) return <div>ça charge chef</div>;

@@ -165,7 +165,7 @@ class Rpacks extends React.Component {
             fp.AddTaskInQueue({
                 type: 0,
                 uuidDl: uuidDl,
-                installerfileURL: "https://frazionz.net/storage/rpacks/"+rpack.uid+"/pack.zip",
+                installerfileURL: "https://cdn.frazionz.net/rpacks/"+rpack.uid+"/pack.zip",
                 installerfilename: rpack.pathFile,
                 prefix: "Resources Pack",
                 lastTask: true
@@ -220,7 +220,7 @@ class Rpacks extends React.Component {
                                     <div className="card-body">
                                         <div className="flex gap-30">
                                             <div className="column">
-                                                <img src={`https://frazionz.net/storage/rpacks/${ rpack.uid }/icon.png`} id="rpack__icon" className="icon" alt="rpack" />
+                                                <img src={`https://cdn.frazionz.net/rpacks/${ rpack.uid }/icon.png`} id="rpack__icon" className="icon" alt="rpack" />
                                             </div>
                                             <div className="column flex direct-column justif-around w-100">
                                                 <div id="rpack__name">{ rpack.name }</div>

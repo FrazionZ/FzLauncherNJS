@@ -87,9 +87,6 @@ class Config extends React.Component {
         this.setState({ disabledActionGame: event.detail.disabled })
       }
     })
-
-    
-    console.log(this.state.config_checkbox)
   }
 
 

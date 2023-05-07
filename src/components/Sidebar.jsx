@@ -9,6 +9,7 @@ import Wiki from '../views/connected/Wiki'
 import Settings from '../views/connected/Settings'
 import Profile from '../views/connected/Profile'
 import FzCGUV from './FzCGUV'
+import FzLicense from './FzLicense'
 import Router from './Router'
 
 import Config from '../assets/img/icons/config.svg'
@@ -76,6 +77,11 @@ export default class Sidebar extends React.Component {
         component: <FzCGUV sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,
         name: 'CGUV',
         url: '/cguv'
+      },
+      {
+        component: <FzLicense sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,
+        name: 'License',
+        url: '/license'
       }
     ])
     this.router.showPage('/server')
@@ -131,13 +137,6 @@ export default class Sidebar extends React.Component {
               <li onClick={this.navClick} data-href="/tasks" className="parent-menu-link">
                 <a className="menu-link">
                   <i className="bx bx-food-menu" style={{ fontSize: '36px' }}></i>
-                </a>
-              </li>
-            </Tooltip>
-            <Tooltip content={this.fzVariable.lang('sidebar.navs.wiki')} placement="right">
-              <li onClick={this.navClick} data-href="/wiki" className="parent-menu-link">
-                <a className="menu-link">
-                  <i className='bx bxs-book-bookmark' style={{ fontSize: '36px' }}></i>
                 </a>
               </li>
             </Tooltip>
