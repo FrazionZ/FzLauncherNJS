@@ -13,12 +13,12 @@ export default function FeaturesDiscovery() {
         },
         {
             title: "Les serveurs de jeu Minecraft",
-            subtitle: "Notre launcher peut accueillir plusieurs serveurs. Le menu à gauche avec les logos représentes les diffèrents serveurs disponibles sur le Launcher ;)",
+            subtitle: "Notre launcher peut accueillir plusieurs serveurs. Le menu à gauche avec les logos représente les différents serveurs disponibles sur le Launcher ;)",
             domElem: '.sidebar #servers #nav_server_0'
         },
         {
             title: "Gestionnaire des tâches",
-            subtitle: "Dans cet onglet, vous pouvez voir les tâches effectuer par le Launcher. Comme les téléchargements des resources packs ou des jeux !",
+            subtitle: "Dans cet onglet, vous pouvez voir les tâches effectuées par le Launcher. Comme les téléchargements des resources packs ou des jeux !",
             domElem: '.sidebar #navs li[data-href="/tasks"]'
         },
         {
@@ -28,7 +28,7 @@ export default function FeaturesDiscovery() {
         },
         {
             title: "Votre profil",
-            subtitle: "Accédez à votre profil et gérer votre apparence de A à Z. Changez votre skin ou votre cape n'a jamais été aussi simple !",
+            subtitle: "Accédez à votre profil et gérez votre apparence de A à Z. Changez votre skin ou votre cape n'a jamais été aussi simple !",
             domElem: '.sidebar #navs li[data-href="/profile"]'
         }
     ]

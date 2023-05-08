@@ -384,7 +384,7 @@ class Server extends React.Component {
             })
         });
         await getLinksRepos.then((links) => {
-            this.installOrRepareOrUpdate(links);
+            this.installOrRepareOrUpdate(links, false);
         });
     }
 
@@ -411,7 +411,7 @@ class Server extends React.Component {
         })
     }
 
-    async installOrRepareOrUpdate(links) {
+    async installOrRepareOrUpdate(links, lastTask) {
         var instance = this
         var uuidDl = uuidv4()
         var startLinkDL = function (index) {
@@ -422,7 +422,7 @@ class Server extends React.Component {
                 installerfileURL: links[index].dlink,
                 installerfilename: fzVariable.path.join(instance.dirServer, links[index].dirInstall, links[index].name),
                 prefix: ServerObj.name,
-                lastTask: false
+                lastTask: lastTask
             }).then((result) => {
                 if (!(index + 1 == links.length))
                     startLinkDL(index + 1)
@@ -472,13 +472,14 @@ class Server extends React.Component {
                     categorie: repo.repos.categorie.name,
                     branch: github.target_commitish,
                     version: github.tag_name,
-                    dlink: github.browser_download_url
+                    dlink: github.browser_download_url,
+                    lastTask: true
                 })
                 if (index === array.length - 1) resolve()
             })
         })
         updatePromise.then(async () => {
-            await this.installOrRepareOrUpdate(links)
+            await this.installOrRepareOrUpdate(links, true)
         })
     }
 

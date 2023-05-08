@@ -97,7 +97,7 @@ class Config extends React.Component {
     this.range_ram_indicator = document.querySelector('.range_ram_indicator');
 
     var percent = (this.gb / 16) * 100 - 5;
-    this.ramAllocateInput.style.background = "linear-gradient(to right, var(--color-1) 0%, var(--color-1) " + percent + "%, var(--fzbg-1) " + percent + "%, var(--fzbg-1) 100%)"
+    this.ramAllocateInput.style.background = "linear-gradient(to right, #F7A92F 0%, #F16B1F " + percent + "%, var(--fzbg-1) " + percent + "%, var(--fzbg-1) 100%)"
 
     if (this.fzVariable.store.has(this.fzVariable.keyStoreServerOptions("config__server_display_size"))) {
       let size = this.fzVariable.store.get(this.fzVariable.keyStoreServerOptions("config__server_display_size")).split(":");
@@ -118,7 +118,7 @@ class Config extends React.Component {
     this.gb = this.fzVariable.listRamAllocate().list[e.target.value].gb;
     this.range_ram_indicator.innerHTML = `${this.gb} Go`;
     var percent = (this.gb / 16) * 100 - 5;
-    e.target.style.background = "linear-gradient(to right, var(--color-1) 0%, var(--color-1) " + percent + "%, var(--fzbg-1) " + percent + "%, var(--fzbg-1) 100%)"
+    e.target.style.background = "linear-gradient(to right, #F7A92F 0%, #F16B1F " + percent + "%, var(--fzbg-1) " + percent + "%, var(--fzbg-1) 100%)"
     this.fzVariable.store.set(
       this.fzVariable.keyStoreServerOptions("ramIndex"),
       parseInt(e.target.value)
@@ -254,7 +254,7 @@ class Config extends React.Component {
                     max={15}
                     id="ramAllocateInput"
                     onMouseUp={(e) => {
-                      FzToast.success(fzVariable.lang("server.config.ram.saved"))
+                      FzToast.success(this.fzVariable.lang("server.config.ram.saved"))
                     }}
                     onChange={(e) => {
                       this.setRamAllocate(e)
@@ -325,7 +325,6 @@ class Config extends React.Component {
                 </div>
               </div>
             </div>
-            
             {this.state.config_checkbox.map((checkbox, i) =>
               <div key={i} data-id={checkbox.key} className="card checkbox_config" onClick={ this.setCheckbox }>
                 <div className="card-body flex gap-20 justif-between direct-column">
