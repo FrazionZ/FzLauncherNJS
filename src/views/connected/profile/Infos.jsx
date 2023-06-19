@@ -31,7 +31,7 @@ export default function Infos(props) {
         <div className="card-body">
           <div className="flex align-center gap-5">
             <span className="text-xl font-bold">Adresse Mail</span>
-            <span className="text-xl font-light">{emailFormat}</span>
+            <span className="text-xl font-light"></span>
           </div>
         </div>
       </div>

@@ -741,7 +741,7 @@ ul[role="listbox"] li[aria-selected="true"]{
   opacity: 1;
   display: block;
 }
-.licenses {
+.modal_fullpage {
   padding: 3rem 6rem;
   color: white;
 }
@@ -760,17 +760,20 @@ ul[role="listbox"] li[aria-selected="true"]{
 .licenses span {
   color: white;
 }
-.licenses h1 {
+.modal_fullpage h1 {
   font-size: 2rem;
 }
-.licenses h2 {
+.modal_fullpage h2 {
   font-size: 1.5rem;
 }
-.licenses h3 {
+.modal_fullpage h3 {
   font-size: 1.3rem;
 }
-.licenses a {
+.modal_fullpage a {
   color: var(--color-2);
+}
+.modal_fullpage a.inactive {
+  color: var(--text-inactive);
 }
 
 .cguv {

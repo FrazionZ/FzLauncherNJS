@@ -10,6 +10,7 @@ import { useState } from 'react'
 import { Queue } from 'async-await-queue'
 import FeaturesDiscovery from '../../views/connected/FeaturesDiscovery'
 import FzVariable from '../../components/FzVariable'
+import FzToast from '../../components/FzToast'
 
 export default function Layout(props) {
 
@@ -18,6 +19,7 @@ export default function Layout(props) {
   const fzVariable = new FzVariable()
 
   const [minified, setMinified] = useState(false)
+  const [hawkEasterEgg, setHawkEasterEgg] = useState(false)
 
   function toggleMinified() {
     setMinified(!minified)
@@ -58,6 +60,20 @@ export default function Layout(props) {
   }
 
   const fp = {AddTaskInQueue: AddTaskInQueue, GetListTaskQueue: GetListTaskQueue}
+
+  document.addEventListener("keydown", (e) => {
+    if(e.ctrlKey && e.which == 72){
+      if(!hawkEasterEgg){
+        setHawkEasterEgg(true)
+        FzToast.info('Hawkins est un rat mais aussi, il faut retenir, une seul chose..')
+        setTimeout(() => {
+          FzToast.info('#TOUS_LES_JOURS_FUCK_HAWKINS.')
+          setHawkEasterEgg(false)
+        }, 3000)
+      }
+    }
+  })
+
   return (
     <div className="body">
       <Sidebar appRouter={appRouter} fp={fp} tasks={tasks} />

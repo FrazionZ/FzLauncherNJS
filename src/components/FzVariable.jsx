@@ -11,10 +11,9 @@ class FzVariable {
     this.fs = fs
     let appData
     if (process.platform == 'linux' || process.platform == 'darwin') {
-      console.log('THIS IS PLATFORM LINUX OR MAC')
       appData = process.env.HOME
     } else if (process.platform == 'win32') {
-      appData = process.env['APPDATA'] + '\\.FrazionzLauncher'
+      appData = this.store.get('launcher__dirapp_path', process.env['APPDATA'] + '\\.FrazionzLauncher')
     }
     this.dirFzLauncherRoot = path.join(appData)
     if (!this.fs.existsSync(this.dirFzLauncherRoot)) this.fs.mkdirSync(this.dirFzLauncherRoot)

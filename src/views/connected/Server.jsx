@@ -5,7 +5,7 @@ import SuperButton from '../../components/SuperButton'
 const { v4: uuidv4 } = require('uuid')
 const axios = require('axios').default
 import ServerConfig from '../../../server_config.json'
-import logo from '../../assets/img/icons/icon.png'
+import logo from '../../assets/img/icons/fz_logo.svg'
 import Router from '../../components/Router';
 import { FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
 const os = require('os');

@@ -11,6 +11,8 @@ import LayoutConnect from './views/connected/Layout'
 import Login from './views/Login'
 import Updater from './views/Updater'
 import Router from './components/Router'
+import DirApp from './views/DirApp'
+import DirAppCopy from './views/DirAppCopy'
 import Runtime from './views/Runtime'
 
 const functionParse = {
@@ -35,6 +37,16 @@ class App extends React.Component {
           component: <Updater appRouter={this.router} functionParse={functionParse} />,
           name: 'Updater',
           url: '/updater'
+        },
+        {
+          component: <DirApp appRouter={this.router} functionParse={functionParse} />,
+          name: 'Choose Dir App',
+          url: '/dirapp'
+        },
+        {
+          component: <DirAppCopy appRouter={this.router} functionParse={functionParse} />,
+          name: 'Choose Dir App',
+          url: '/dirapp/copy'
         },
         {
           component: <Runtime appRouter={this.router} functionParse={functionParse} />,

@@ -432,6 +432,11 @@ label {
     flex-direction: column;
     gap: 8px;
 }
+.sidebar.hidden_protect, .main.connected.hidden_protect {
+    position: relative;
+    left: -90px;
+    width: 107.5% !important;
+}
 .sidebar .parent-menu-link {
     justify-content: flex-start;
     list-style: none;

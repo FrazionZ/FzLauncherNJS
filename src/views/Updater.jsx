@@ -89,12 +89,21 @@ class Updater extends React.Component {
   }
 
   finishDownload() {
-    if (!fzVariable.fs.existsSync(fzVariable.path.join(fzVariable.dirFzLauncherDatas, 'runtime'))) {
-      fzVariable.fs.mkdirSync(fzVariable.path.join(fzVariable.dirFzLauncherDatas, 'runtime'))
-      this.router.showPage('/runtime')
-    } else {
-      this.router.showPage('/login')
+    const defaultDirAppWindows = process.env['APPDATA'] + '\\.FrazionzLauncher'
+    fzVariable.fs.cop
+    if (!fzVariable.store.has('launcher__dirapp_path')){
+      if(!fzVariable.fs.existsSync(defaultDirAppWindows)){
+        this.router.showPage('/dirapp')
+      }else{
+        fzVariable.store.set('launcher__dirapp_path', defaultDirAppWindows)
+      }
     }
+    
+    if (!fzVariable.fs.existsSync(fzVariable.path.join(fzVariable.dirFzLauncherDatas, 'runtime'))) {
+      fzVariable.fs.mkdirSync(fzVariable.path.join(fzVariable.dirFzLauncherDatas  , 'runtime'))
+      this.router.showPage('/runtime')
+    } else
+      this.router.showPage('/login')
   }
 
   render() {

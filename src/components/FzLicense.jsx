@@ -64,7 +64,7 @@ export default class FzCGUV extends React.Component {
     render() {
         return (
             <>
-                <div className="licenses flex flex-col gap-[1.5rem] py-16 mb-6 h-full">
+                <div className="licenses modal_fullpage flex flex-col gap-[1.5rem] py-16 mb-6 h-full">
                     <div className="column w-full">
                         <div className="head justify-between">
                             <h1>Licences tiers</h1>

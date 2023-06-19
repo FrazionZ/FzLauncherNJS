@@ -19,10 +19,11 @@ export default function PasswordForget(props) {
         return new Promise((resolve, reject) => {
             if (email == '') return reject({ msg: parentClass.fzVariable.lang('logging.result.empty'), twofa: false })
             axios
-            .post('https://frazionz.net/api/frazionz/resetpwd', {
+            .post('https://dev.frazionz.net/api/resetpwd', {
                 email: email
             })
             .then((response) => {
+                console.log(response)
                 parentClass.router.showPage('/addAccount')
                 resolve(response.data)
             })

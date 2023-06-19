@@ -1,13 +1,14 @@
 import React from 'react'
 import { Tooltip } from 'flowbite-react'
 import ServerConfig from '../../server_config.json'
-import logo from '../assets/img/icons/icon.png'
+import logo from '../assets/img/icons/fz_logo.svg'
 
 import Server from '../views/connected/Server'
 import Tasks from '../views/connected/Tasks'
 import Wiki from '../views/connected/Wiki'
 import Settings from '../views/connected/Settings'
 import Profile from '../views/connected/Profile'
+import DirAppChanger from './DirAppChanger'
 import FzCGUV from './FzCGUV'
 import FzLicense from './FzLicense'
 import Router from './Router'
@@ -72,6 +73,11 @@ export default class Sidebar extends React.Component {
         component: <Profile sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,
         name: 'Profile',
         url: '/profile'
+      },
+      {
+        component: <DirAppChanger sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,
+        name: 'DirApp',
+        url: '/dirapp_changer'
       },
       {
         component: <FzCGUV sidebar={sidebar} appRouter={this.appRouter} sideRouter={this.router} functionParse={this.functionParse} />,

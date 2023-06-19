@@ -1,4 +1,4 @@
-import { app, BrowserWindow, shell, ipcMain, Notification, nativeImage, Tray, Menu } from "electron";
+import { app, BrowserWindow, shell, ipcMain, dialog, Notification, nativeImage, Tray, Menu } from "electron";
 import { release } from "node:os";
 import { join } from "node:path";
 import * as Sentry from "@sentry/electron";
@@ -170,6 +170,14 @@ async function createWindow() {
     closeApp();
   });
 
+  ipcMain.on('indexApp', () => {
+    if (process.env.VITE_DEV_SERVER_URL) {
+      win.loadURL(url);
+    } else {
+      win.loadFile(indexHtml);
+    }
+  })
+
   ipcMain.on("relaunchApp", () => {
     app.relaunch();
     app.exit();
@@ -202,6 +210,12 @@ async function createWindow() {
       title: args.title,
       body: args.body,
     }).show();
+  })
+
+  ipcMain.on("openDir", (e, args) => {
+    dialog.showOpenDialog({properties: ['openDirectory']}).then(result=>{
+      e.sender.send('openDirResult', result.filePaths)
+    })
   })
 
   win.show();

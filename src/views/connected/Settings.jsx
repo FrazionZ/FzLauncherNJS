@@ -2,6 +2,7 @@ import React from 'react'
 import FzPackage from '../../../package.json'
 import { Switch } from '@headlessui/react'
 import { shell } from 'electron'
+import FzToast from '../../components/FzToast'
 const Store = require('electron-store')
 const store = new Store()
 
@@ -37,7 +38,7 @@ class Settings extends React.Component {
       },
     ]
   }
-  
+
   langCurrent = null
   lglist = window.lang.langs
 
@@ -67,8 +68,8 @@ class Settings extends React.Component {
     //shell.openExternal(hyperlink.getAttribute('data-link'))
   }
 
-  
-  async setCheckbox(event){
+
+  async setCheckbox(event) {
     event.preventDefault()
     let dataID = event.currentTarget.getAttribute('data-id')
     let indexCheckBox = this.state.config_checkbox.findIndex(elem => elem.key == dataID)
@@ -78,6 +79,10 @@ class Settings extends React.Component {
     this.state.config_checkbox[indexCheckBox].value = newValue
     this.setState({ config_checkbox: this.state.config_checkbox })
     this.fzVariable.store.set(dataID, newValue)
+  }
+
+  checkInstanceOpen() {
+    return sessionStorage.getItem('gameLaunched') == "true"
   }
 
   render() {
@@ -95,37 +100,47 @@ class Settings extends React.Component {
                 <div className="flex align-center gap-20">
                   {this.state.langCurrent !== null &&
                     <>
-                      <FzLangListBox appRouter={ this.appRouter } sideRouter={ this.sideRouter } currentLang={this.state.langCurrent} lglist={this.lglist} />
+                      <FzLangListBox appRouter={this.appRouter} sideRouter={this.sideRouter} currentLang={this.state.langCurrent} lglist={this.lglist} />
                     </>
                   }
                 </div>
               </div>
-            </div>
-          </div>
-          {this.state.config_checkbox.map((checkbox, i) =>
-              <div key={i} data-id={checkbox.key} className="card checkbox_config" onClick={ this.setCheckbox }>
-                <div className="card-body flex gap-20 justif-between direct-column">
-                  <div className="config-item">
-                    <div className="column flex direct-column justif-center">
-                      <h2 className="label__config reset-mp">{ checkbox.view.title }</h2>
-                      <h2 className="expl__config reset-mp">{ checkbox.view.subtitle }</h2>
-                    </div>
-                    <div className="flex align-center gap-20">
-                      <Switch
-                          checked={checkbox.value}
-                          className={`${checkbox.value ? '' : 'bg-[var(--fzbg-3)]'
-                              } relative inline-flex h-6 w-11 items-center rounded-full`}
-                          >
-                          <span
-                            className={`${checkbox.value ? 'translate-x-6' : 'translate-x-1'
-                                } inline-block h-4 w-4 transform rounded-full bg-white transition`}
-                            />
-                      </Switch>
-                    </div>
+              {this.state.config_checkbox.map((checkbox, i) =>
+                <div key={i} data-id={checkbox.key} onClick={this.setCheckbox} className="config-item checkbox_config">
+                  <div className="column flex direct-column justif-center">
+                    <h2 className="label__config reset-mp">{checkbox.view.title}</h2>
+                    <h2 className="expl__config reset-mp">{checkbox.view.subtitle}</h2>
+                  </div>
+                  <div className="flex align-center gap-20">
+                    <Switch
+                      checked={checkbox.value}
+                      className={`${checkbox.value ? '' : 'bg-[var(--fzbg-3)]'
+                        } relative inline-flex h-6 w-11 items-center rounded-full`}
+                    >
+                      <span
+                        className={`${checkbox.value ? 'translate-x-6' : 'translate-x-1'
+                          } inline-block h-4 w-4 transform rounded-full bg-white transition`}
+                      />
+                    </Switch>
                   </div>
                 </div>
-              </div>
-          )}
+              )}
+              {process.platform == 'win32' &&
+                <div className="config-item">
+                  <div className="column flex direct-column justif-center">
+                    <h2 className="label__config reset-mp">{this.fzVariable.lang('settings.dirapp.title')}</h2>
+                    <h2 className="expl__config reset-mp">{this.fzVariable.store.get('launcher__dirapp_path', "N/A")}</h2>
+                  </div>
+                  <div className="flex align-center gap-20">
+                    <a className="btn config__launcher_pnotes" onClick={() => { if(sessionStorage.getItem('gameLaunched') !== "true") { this.sideRouter.showPage('/dirapp_changer') } else { FzToast.error('Impossible de changer le dossier, une instance de jeu est ouverte.') }}}>{this.fzVariable.lang('settings.dirapp.action')}</a>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+        <h2 className="pt-30 pb-10 underline">Informations</h2>
+        <div className="flex flex-col gap-20">
           <div className="card">
             <div className="card-body flex gap-20 justif-between direct-column">
               <div className="config-item">
@@ -134,7 +149,7 @@ class Settings extends React.Component {
                   <h2 className="expl__config reset-mp">{FzPackage.version}</h2>
                 </div>
                 <div className="flex align-center gap-20">
-                  <a className="btn config__launcher_pnotes" onClick={() => {shell.openExternal('https://frazionz.net/launcher')}}>{this.fzVariable.lang('settings.pnotes.action')}</a>
+                  <a className="btn config__launcher_pnotes" onClick={() => { shell.openExternal('https://frazionz.net/launcher') }}>{this.fzVariable.lang('settings.pnotes.action')}</a>
                 </div>
               </div>
               <div className="config-item">
