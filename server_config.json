@@ -7,7 +7,7 @@
         "jarFileMain":"client.jar",
         "expl_server":"FrazionZ Faction est un serveur Faction avec quelques nouveautés ! Découvrez-le dès maintenant en rejoignant la communautée via Discord ou directement sur le serveur ! Nous vous attendons avec impatience !",
         "urlLogo":"../renderer/src/assets/img/icons/fz_logo.svg",
-        "defaultBranch":"releases",
+        "defaultBranch":"release",
         "serverAddress":"play.frazionz.net:25565",
         "classMain": "fz.frazionz.LaunchClient",
         "github": [
@@ -27,13 +27,13 @@
                 ]
             },
             {
-                "branch": "releases",
+                "branch": "release",
                 "title": "Releases",
                 "description": "Versions les plus stables",
                 "categories": [
                     {
                         "name": "client",
-                        "dir": "versions\\releases"
+                        "dir": "versions\\release"
                     },
                     {
                         "name": "depend",

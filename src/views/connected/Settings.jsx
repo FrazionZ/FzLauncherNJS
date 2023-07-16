@@ -36,6 +36,15 @@ class Settings extends React.Component {
           subtitle: "Afficher le statut du Launcher sur votre compte Discord"
         }
       },
+      {
+        key: "launcher__devmode",
+        value: this.fzVariable.store.get("launcher__devmode", false),
+        callback: () => { FzToast.info("Vous devez redémarrer le launcher pour appliquer ce changement") },
+        view: {
+          title: this.fzVariable.lang('settings.devmode.title'),
+          subtitle: this.fzVariable.lang('settings.devmode.subtitle')
+        }
+      },
     ]
   }
 
@@ -76,6 +85,7 @@ class Settings extends React.Component {
     let checkBox = this.state.config_checkbox.find(elem => elem.key == dataID)
     let oldValue = checkBox.value
     let newValue = (oldValue === true) ? false : true
+    this.state.config_checkbox[indexCheckBox]?.callback()
     this.state.config_checkbox[indexCheckBox].value = newValue
     this.setState({ config_checkbox: this.state.config_checkbox })
     this.fzVariable.store.set(dataID, newValue)
@@ -132,7 +142,7 @@ class Settings extends React.Component {
                     <h2 className="expl__config reset-mp">{this.fzVariable.store.get('launcher__dirapp_path', "N/A")}</h2>
                   </div>
                   <div className="flex align-center gap-20">
-                    <a className="btn config__launcher_pnotes" onClick={() => { if(sessionStorage.getItem('gameLaunched') !== "true") { this.sideRouter.showPage('/dirapp_changer') } else { FzToast.error('Impossible de changer le dossier, une instance de jeu est ouverte.') }}}>{this.fzVariable.lang('settings.dirapp.action')}</a>
+                    <a className="btn config__launcher_pnotes" onClick={() => { if (sessionStorage.getItem('gameLaunched') !== "true") { this.sideRouter.showPage('/dirapp_changer') } else { FzToast.error('Impossible de changer le dossier, une instance de jeu est ouverte.') } }}>{this.fzVariable.lang('settings.dirapp.action')}</a>
                   </div>
                 </div>
               }

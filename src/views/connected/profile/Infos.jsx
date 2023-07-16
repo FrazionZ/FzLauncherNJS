@@ -2,10 +2,13 @@ import React from "react";
 import FzToast from "../../../components/FzToast";
 import { HiOutlineLogout } from 'react-icons/hi'
 import FzVariable from "../../../components/FzVariable";
-
+import * as minecraftAuth from "minecraft-auth";
+import { BsMicrosoft } from 'react-icons/bs'
 import moment from 'moment-timezone'
 import 'moment/locale/fr'  // without this line it didn't work
 moment.locale('fr')
+
+const MicrosoftAuth = minecraftAuth.MicrosoftAuth;
 
 export default function Infos(props) {
     
@@ -24,7 +27,7 @@ export default function Infos(props) {
       FzToast.success('Vous avez bien été déconnecté de votre session !')
     })
   }
-
+  
   return (
     <div className="column w-full flex flex-col justify-center items-end gap-5">
       <div className="card w-full">

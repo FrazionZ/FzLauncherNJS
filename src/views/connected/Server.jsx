@@ -6,6 +6,7 @@ const { v4: uuidv4 } = require('uuid')
 const axios = require('axios').default
 import ServerConfig from '../../../server_config.json'
 import logo from '../../assets/img/icons/fz_logo.svg'
+import oldLogo from '../../assets/img/oldfz.png'
 import Router from '../../components/Router';
 import { FaClock, FaCheckCircle, FaTimesCircle } from 'react-icons/fa'
 const os = require('os');
@@ -27,6 +28,7 @@ import Pnotes from './server/Pnotes';
 import Rpacks from './server/Rpacks';
 import Screens from './server/Screens';
 import Config from './server/Config';
+import FzToast from '../../components/FzToast'
 
 class Server extends React.Component {
 
@@ -77,6 +79,7 @@ class Server extends React.Component {
     }
 
     state = {
+        easterOldLogo: false,
         mcInfosBanner: {
             finish: false,
             online: false,
@@ -96,6 +99,9 @@ class Server extends React.Component {
         user = JSON.parse(sessionStorage.getItem('user'));
 
         fzVariable = new FzVariable({ serverObj: ServerObj });
+
+        
+
         this.dirServer = fzVariable.path.join(fzVariable.dirFzLauncherServer, ServerObj.name)
         ServerObj.dirServer = this.dirServer;
         this.changePage = this.changePage.bind(this)
@@ -103,6 +109,12 @@ class Server extends React.Component {
         this.reinitServer = this.reinitServer.bind(this)
         instance = this;
 
+        document.addEventListener("keydown", (e) => {
+            if(e.ctrlKey && e.shiftKey && e.which == 70){
+                FzToast.info('La nostalgie, c\'est si beau...')
+                this.setState({ oldLogo: true })
+            }
+        })
     }
 
     async setActionPlayText(string) {
@@ -209,6 +221,23 @@ class Server extends React.Component {
     async loadBranch() {
         if (!fzVariable.store.has(fzVariable.keyStoreServerOptions('branch')))
             fzVariable.store.set(fzVariable.keyStoreServerOptions('branch'), ServerObj.defaultBranch)
+        
+        //PATCH FOR BRANCH (V1.4.96)
+        if(fzVariable.store.get(fzVariable.keyStoreServerOptions('branch')) == "releases") {
+            fzVariable.store.set(fzVariable.keyStoreServerOptions('branch'), "release")
+            const dirRename = fzVariable.path.join(this.dirServer, "/versions/releases")
+            const newDirRelease = fzVariable.path.join(this.dirServer, "/versions/release")
+            if(fzVariable.fs.existsSync(dirRename)) {
+                if(!fzVariable.fs.existsSync(newDirRelease)) fzVariable.fs.mkdirSync(newDirRelease)
+                fzVariable.fs.cp(fzVariable.path.join(dirRename, ServerObj.jarFileMain), fzVariable.path.join(newDirRelease, ServerObj.jarFileMain), (err) => {
+                    if(err) {
+                        FzToast.error(err)
+                        return;
+                    }
+                    fzVariable.fs.rmSync(dirRename, { recursive: true, force: true })
+                })
+            }
+        }
 
         this.repoServer = []
         this.branch = fzVariable.store.get(fzVariable.keyStoreServerOptions('branch'))
@@ -748,7 +777,7 @@ class Server extends React.Component {
                                 <div className="infos">
                                     <div className="flex align-center gap-4">
                                         <div className="server__logo">
-                                            <img src={logo} width="64" height="64" alt="logo_server" />
+                                            <img src={this.state.oldLogo ? oldLogo : logo} width={this.state.oldLogo ? "200" : "64"} height={this.state.oldLogo ? "200" : "64"} alt="logo_server" />
                                         </div>
                                         <h2 className="reset-mp dark server__title">{ServerObj.name}</h2>
 

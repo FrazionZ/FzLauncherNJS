@@ -9,7 +9,9 @@ import axios from 'axios'
 import FzVariable from '../components/FzVariable'
 import Router from '../components/Router'
 
+import SelectProfile from './auth/SelectProfile'
 import AddAccount from './auth/AddAccount'
+import FzAccount from './auth/type/FzAccount'
 import PasswordForget from './auth/PasswordForget'
 import TwoFaAccount from './auth/TwoFaAccount'
 import VerifyAccount from './auth/VerifyAccount'
@@ -27,6 +29,7 @@ class Login extends React.Component {
   state = {
     title: " - ",
     allowBackHL: false,
+    showLogo: true,
   }
 
   constructor(props) {
@@ -47,6 +50,12 @@ class Login extends React.Component {
   setAllowBackHL(bool) {
     this.setState({ allowBackHL: bool })
   }
+
+  
+  setShowLogo(bool) {
+    this.setState({ showLogo: bool })
+  }
+
 
   disableForm() {
     document.querySelector('input[name="email"]').setAttribute('disabled', true)
@@ -71,25 +80,37 @@ class Login extends React.Component {
     })
     this.router.setPages([
       {
-        "component": <AddAccount parentClass={this} allowBackHL={false} />,
+        "component": <SelectProfile parentClass={this} allowBackHL={false} showLogo={false} />,
+        "name": "SelectProfile",
+        "url": "/selectProfile",
+        "root": undefined
+      },
+      {
+        "component": <AddAccount parentClass={this} allowBackHL={false} showLogo={true} />,
         "name": "AddAccount",
         "url": "/addAccount",
         "root": undefined
       },
       {
-        "component": <PasswordForget parentClass={this} allowBackHL={true} />,
+        "component": <FzAccount parentClass={this} allowBackHL={true} showLogo={true} />,
+        "name": "FzAccount",
+        "url": "/fzAccount",
+        "root": undefined
+      },
+      {
+        "component": <PasswordForget parentClass={this} allowBackHL={true} showLogo={true} />,
         "name": "PasswordForget",
         "url": "/passwordForget",
         "root": undefined
       },
       {
-        "component": <TwoFaAccount parentClass={this} allowBackHL={true} />,
+        "component": <TwoFaAccount parentClass={this} allowBackHL={true} showLogo={true} />,
         "name": "TwoFaAccount",
         "url": "/twoFaAccount",
         "root": undefined
       },
       {
-        "component": <VerifyAccount parentClass={this} appRouter={this.appRouter} allowBackHL={false} />,
+        "component": <VerifyAccount parentClass={this} appRouter={this.appRouter} allowBackHL={false} showLogo={true} />,
         "name": "VerifyAccount",
         "url": "/verifyAccount",
         "root": undefined
@@ -99,7 +120,7 @@ class Login extends React.Component {
       if (store.has('session')){
         this.router.showPage('/verifyAccount');
       }else{
-        this.router.showPage('/addAccount')
+        this.router.showPage('/selectProfile')
       }
     }catch(e){
       console.log(e)
@@ -215,7 +236,9 @@ class Login extends React.Component {
           {this.state.allowBackHL &&
             <a className='text-4xl' onClick={() => { this.router.showPage('/addAccount') }}><FaArrowLeft /></a>
           }
-          <img src={logo} alt="frazionz" />
+          {this.state.showLogo && 
+            <img src={logo} alt="frazionz" />
+          }
           <h2 className="text-center text-3xl font-bold tracking-tight text-white">
             {this.state.title}
           </h2>

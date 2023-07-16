@@ -29,6 +29,9 @@ class FzVariable {
 
     this.shelfFzLauncherSkins = path.join(this.dirFzLauncherDatas, 'skins.json')
     if (!this.fs.existsSync(this.shelfFzLauncherSkins)) this.fs.writeFileSync(this.shelfFzLauncherSkins, "[]", () => { })
+    
+    this.shelfFzLauncherProfiles = path.join(this.dirFzLauncherDatas, 'profiles.json')
+    if (!this.fs.existsSync(this.shelfFzLauncherProfiles)) this.fs.writeFileSync(this.shelfFzLauncherProfiles, "[]", () => { })
 
     this.dirFzLauncherSkins = path.join(this.dirFzLauncherDatas, 'skins')
     if (!this.fs.existsSync(this.dirFzLauncherSkins)) this.fs.mkdirSync(this.dirFzLauncherSkins)

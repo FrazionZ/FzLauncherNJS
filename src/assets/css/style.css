@@ -639,12 +639,6 @@ nav .menu .image-text img {
 .main.connected{
     background: url('../img/wallpaper.png');
     background-size: cover;
-    background-repeat: no-repeat;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-around;
-    align-items: flex-start;
-    width: 100%;
 }
 .btn.btn-default{
     color: var(--text)

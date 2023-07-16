@@ -68,7 +68,7 @@ async function createWindow() {
     icon: join(process.env.PUBLIC, "favicon.ico"),
     webPreferences: {
       preload,
-      devTools: (process.env.VITE_DEV_SERVER_URL) ? true : false,
+      devTools: (process.env.VITE_DEV_SERVER_URL || store.get('launcher__devmode', false)) ? true : false,
       webSecurity: false,
       nodeIntegration: true,
       contextIsolation: false,

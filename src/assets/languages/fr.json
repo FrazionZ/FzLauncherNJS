@@ -47,6 +47,8 @@
         "settings.devtools.subtitle": "Ouvrir la fenêtre DevTools Electron (Pour les experts uniquement)",
         "settings.dirapp.title": "Dossier du launcher",
         "settings.dirapp.action": "Changer",
+        "settings.devmode.title": "Mode développeur",
+        "settings.devmode.subtitle": "Activer le mode développeur pour accéder à la console de débogue",
         "settings.darkmode.title": "Mode sombre",
         "settings.darkmode.subtitle": "Activer/Désactiver le mode sombre sur le launcher",
         "settings.pnotes.action": "Voir le patch notes",

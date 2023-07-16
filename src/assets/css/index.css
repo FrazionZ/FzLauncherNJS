@@ -285,6 +285,10 @@ button[role="switch"][aria-checked="true"] span {
   font-size: 30px;
   color: #311903;
 }
+.btn.icon.tiny {
+  font-size: 16px;
+  padding: 12px 12px;
+}
 .btn.icon img {
   width: 68px;
 }
