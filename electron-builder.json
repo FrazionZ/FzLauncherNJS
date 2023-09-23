@@ -1,6 +1,3 @@
-/**
- * @see https://www.electron.build/configuration/configuration
- */
 {
   "productName": "FrazionZ Launcher",
   "appId": "FrazionZ Launcher",

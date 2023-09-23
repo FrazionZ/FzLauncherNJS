@@ -12,7 +12,8 @@ const MicrosoftAuth = minecraftAuth.MicrosoftAuth;
 
 export default function Infos(props) {
     
-  const session = props.session;
+  const session = props.session.fzProfile;
+  console.log(session)
   const fzVariable = new FzVariable()
 
   let emailFormat = session.email.split('@'); 
@@ -34,7 +35,7 @@ export default function Infos(props) {
         <div className="card-body">
           <div className="flex align-center gap-5">
             <span className="text-xl font-bold">Adresse Mail</span>
-            <span className="text-xl font-light"></span>
+            <span className="text-xl font-light">{session.email}</span>
           </div>
         </div>
       </div>

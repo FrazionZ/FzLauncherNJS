@@ -86,7 +86,7 @@ class Login extends React.Component {
         "root": undefined
       },
       {
-        "component": <AddAccount parentClass={this} allowBackHL={false} showLogo={true} />,
+        "component": <AddAccount parentClass={this} allowBackHL={false} appRouter={this.appRouter} showLogo={true} />,
         "name": "AddAccount",
         "url": "/addAccount",
         "root": undefined
@@ -117,11 +117,12 @@ class Login extends React.Component {
       },
     ])
     try {
-      if (store.has('session')){
+      this.router.showPage('/addAccount')
+      /*if (store.has('session')){
         this.router.showPage('/verifyAccount');
       }else{
-        this.router.showPage('/selectProfile')
-      }
+        this.router.showPage('/fzAccount')
+      }*/
     }catch(e){
       console.log(e)
     }

@@ -1,4 +1,4 @@
-const Authenticator = require('azuriom-auth').Authenticator;
+//const Authenticator = require('azuriom-auth').Authenticator;
 
 const Store = require('electron-store')
 
@@ -9,7 +9,7 @@ import FzVariable from './FzVariable';
 class Auth {
   constructor() {
     this.urlApi = 'https://auth.frazionz.net'
-    this.authenticator = new Authenticator(this.urlApi)
+    //this.authenticator = new Authenticator(this.urlApi)
     this.fzVariable = new FzVariable()
   }
 

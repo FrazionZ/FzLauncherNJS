@@ -96,7 +96,7 @@ class Server extends React.Component {
         ServerObj = ServerConfig[props.idServer]
         ServerIcon = ServerObj.urlLogo
         fp = props.functionParse;
-        user = JSON.parse(sessionStorage.getItem('user'));
+        user = JSON.parse(sessionStorage.getItem('mcProfile'));
 
         fzVariable = new FzVariable({ serverObj: ServerObj });
 
@@ -679,9 +679,9 @@ class Server extends React.Component {
                     let opts = {
                         clientPackage: null,
                         authorization: {
-                            access_token: user.access_token,
-                            uuid: user.uuid,
-                            name: user.username,
+                            access_token: user.profile.mcResponse.access_token,
+                            uuid: user.profile.mcProfile.id,
+                            name: user.profile.mcProfile.name,
                             user_properties: '{}',
                         },
                         version: {

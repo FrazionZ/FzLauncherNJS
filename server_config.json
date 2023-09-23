@@ -9,7 +9,7 @@
         "urlLogo":"../renderer/src/assets/img/icons/fz_logo.svg",
         "defaultBranch":"release",
         "serverAddress":"play.frazionz.net:25565",
-        "classMain": "fz.frazionz.LaunchClient",
+        "classMain": "net.minecraft.client.main.Main",
         "github": [
             {
                 "branch": "beta",

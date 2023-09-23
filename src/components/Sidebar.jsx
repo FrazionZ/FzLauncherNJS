@@ -31,7 +31,7 @@ export default class Sidebar extends React.Component {
   constructor(props) {
     super(props)
     this.appRouter = props.appRouter
-    user = JSON.parse(sessionStorage.getItem('user'))
+    user = JSON.parse(sessionStorage.getItem('mcProfile'))
     this.fzVariable = new FzVariable()
     this.navClick = this.navClick.bind(this)
     this.tasks = props.tasks
@@ -41,7 +41,7 @@ export default class Sidebar extends React.Component {
   }
 
   async componentDidMount() {
-    this.setState({ avatar: `https://auth.frazionz.net/skins/face.php?${Math.random().toString(36)}&u=${user.id}` })
+    this.setState({ avatar: `https://minotar.net/helm/${user.profile.mcProfile.id}/600.png` })
     let sidebar = this;
     this.router = await new Router({
       domParent: document.querySelector('.main.connected .content-child'),
@@ -103,6 +103,7 @@ export default class Sidebar extends React.Component {
     this.router.showPage(href)
   }
 
+
   /*
             <Tooltip content={this.fzVariable.lang('sidebar.navs.task')} placement="right">
               <li onClick={this.navClick} data-href="/tasks" className="parent-menu-link">
@@ -154,12 +155,12 @@ export default class Sidebar extends React.Component {
                 </a>
               </li>
             </Tooltip>
-            <Tooltip content={user.username} placement="right">
+            <Tooltip content={user.profile.mcProfile.name} placement="right">
               <li onClick={this.navClick} data-href="/profile" className="parent-menu-link">
                 <a className="menu-link">
                   <img id="nav_menu_avatar" width="36" height="36" className="avatar nav animate__infinite  animate__wobble" src={(this.state.avatar !== null) ? this.state.avatar : ""} />
                   <div className="text nav-text profile__data flex align-center gap-2">
-                    <span>{user.username}</span>
+                    <span>{user.profile.mcProfile.name}</span>
                   </div>
                 </a>
               </li>

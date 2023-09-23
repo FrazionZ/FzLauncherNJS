@@ -9,6 +9,7 @@ lerna-debug.log*
 
 node_modules
 build
+backup
 dist
 dist-ssr
 dist-electron

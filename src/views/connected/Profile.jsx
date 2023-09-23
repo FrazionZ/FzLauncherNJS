@@ -20,13 +20,14 @@ export default class Profile extends React.Component {
   constructor(props) {
     super(props);
     this.sidebar = props.sidebar;
-    this.session = JSON.parse(sessionStorage.getItem("user"));
+    this.session = JSON.parse(sessionStorage.getItem("mcProfile"));
+    this.fzProfile = JSON.parse(sessionStorage.getItem("fzProfile"));
     this.auth = new Auth();
     this.subpages = [
       {
         component: (
           <Infos
-            session={this.session}
+            session={this.fzProfile}
             sidebar={this.sidebar}
             parentClass={this}
           />
@@ -36,21 +37,7 @@ export default class Profile extends React.Component {
         title: "Informations",
         active: true,
         root: undefined,
-      },
-      {
-        component: (
-          <Apparence
-            session={this.session}
-            sidebar={this.sidebar}
-            parentClass={this}
-          />
-        ),
-        name: "Apparence",
-        url: "/apparence",
-        title: "Apparence",
-        active: false,
-        root: undefined,
-      },
+      }
     ];
     this.appRouter = props.appRouter;
     this.fzVariable = new FzVariable();
@@ -59,9 +46,7 @@ export default class Profile extends React.Component {
 
   async componentDidMount() {
     this.setState({
-      avatar: `https://auth.frazionz.net/skins/face.php?${Math.random().toString(
-        36
-      )}&u=${this.session.id}`,
+      avatar: `https://minotar.net/helm/${this.session.profile.mcProfile.id}/64.png`
     });
     this.router = await new Router({
       domParent: document.querySelector(".profile .subpages"),
@@ -87,16 +72,8 @@ export default class Profile extends React.Component {
           <div className="avatar">
             <img className="rounded-lg" src={this.state.avatar} alt="avatar" />
             <div className="datas">
-              <span className="text-3xl">{this.session.username}</span>
+              <span className="text-3xl">{this.session.profile.mcProfile.name}</span>
               <div className="fast-infos">
-                <Badge
-                  color="info"
-                  className={`badge w-fit`}
-                  size="sm"
-                  style={{ backgroundColor: this.session.role.color }}
-                >
-                  {this.session.role.name}
-                </Badge>
                 <Badge
                   color="info"
                   className={`badge w-fit`}

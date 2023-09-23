@@ -94,7 +94,7 @@ class Router {
     } else if (this.root !== null) this.root.render(tpage.component)
   }
 
-  async reloadRenderPage(url, forceShowPage) {
+  async reloadRenderPage(url) {
     return new Promise(async (resolve, reject) => {
       let tpage = await this.getPage(url)
       if (tpage == undefined)

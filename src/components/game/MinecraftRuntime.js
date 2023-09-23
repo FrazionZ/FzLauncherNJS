@@ -25,6 +25,7 @@ class MinecraftRuntime {
     var instance = this
 
     await launcher.launch(this.opts).then((opts) => {
+      console.log(opts)
       
     }).catch((err) => {
       console.log(err)
